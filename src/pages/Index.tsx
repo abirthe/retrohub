@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import heroBg from '@/assets/hero-bg.jpg';
 import ProductCard from '@/components/ProductCard';
 import ShopHeader from '@/components/ShopHeader';
-import { mockProducts } from '@/data/mockData';
-import type { ProductCategory } from '@/types/shop';
+import { useProducts } from '@/hooks/useProducts';
+import type { ProductCategory } from '@/lib/shopApi';
+import heroBg from '@/assets/hero-bg.jpg';
 
 const categories: { label: string; value: ProductCategory | 'all' }[] = [
   { label: 'All', value: 'all' },
@@ -18,9 +18,12 @@ const categories: { label: string; value: ProductCategory | 'all' }[] = [
 const Index = () => {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<ProductCategory | 'all'>('all');
+  const { data: products, isLoading } = useProducts();
 
-  const filtered = mockProducts.filter((p) => {
-    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.platform.toLowerCase().includes(search.toLowerCase());
+  const filtered = (products || []).filter((p) => {
+    const matchesSearch =
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      (p.platform?.toLowerCase().includes(search.toLowerCase()) ?? false);
     const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
@@ -78,12 +81,18 @@ const Index = () => {
 
       {/* Products */}
       <section className="container pb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-        {filtered.length === 0 && (
+        {isLoading ? (
+          <div className="text-center py-20 text-muted-foreground">
+            <p className="font-display tracking-wider animate-pulse">Loading products...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filtered.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+        {!isLoading && filtered.length === 0 && (
           <div className="text-center py-20 text-muted-foreground">
             <p className="font-display tracking-wider">No products found</p>
           </div>
