@@ -70,17 +70,8 @@ const Checkout = () => {
       // Create orders for each item with stock validation
       for (const item of items) {
         for (let i = 0; i < item.quantity; i++) {
-          try {
-            const order = await createOrder(item.product.id, Number(item.product.sale_price), customerInput);
-            createdOrderIds.push(order.id);
-          } catch (error: any) {
-            // If stock validation fails, track it
-            if (error.message?.includes('out of stock') || error.message?.includes('stock')) {
-              failedOrders.push(item.product.title);
-            } else {
-              throw error; // Re-throw other errors
-            }
-          }
+          const order = await createOrder(item.product.id, Number(item.product.sale_price), customerInput);
+          createdOrderIds.push(order.id);
         }
       }
 
