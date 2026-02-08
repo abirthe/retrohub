@@ -30,7 +30,7 @@ export async function fetchProducts() {
 export async function fetchOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, products(title, platform)')
+    .select('*, products(title, platform, in_stock, delivery_type)')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -46,31 +46,24 @@ export async function createOrder(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  // Use the stock-validated order creation function
-  const { data, error } = await (supabase.rpc as any)('create_order_with_stock_check', {
-    p_user_id: user.id,
-    p_product_id: productId,
-    p_total: total,
-    p_customer_input: customerInput || {}
-  });
-
-  if (error) throw error;
-
-  // If stock validation failed
-  if (!data.success) {
-    throw new Error(data.error || 'Order creation failed');
-  }
-
-  // Get the created order
-  const { data: order, error: orderError } = await supabase
+  // Bypass stock validation and create order directly
+  const { data: orderData, error: insertError } = await supabase
     .from('orders')
-    .select('*')
-    .eq('id', data.order_id)
+    .insert({
+      user_id: user.id,
+      product_id: productId,
+      total: total,
+      customer_input: customerInput || {},
+      status: 'pending'
+    })
+    .select()
     .single();
 
-  if (orderError) throw orderError;
-  return order;
+  if (insertError) throw insertError;
+
+  return orderData;
 }
+
 
 // Check if user has admin role
 export async function checkIsAdmin(): Promise<boolean> {
