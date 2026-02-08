@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import ShopHeader from '@/components/ShopHeader';
-import { Gamepad2 } from 'lucide-react';
+import { Gamepad2, ArrowRight } from 'lucide-react';
+import heroBg from '@/assets/hero-bg.jpg';
 
 const Auth = () => {
   const { signIn, signUp } = useAuth();
@@ -54,97 +55,127 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <ShopHeader />
-      <div className="container flex items-center justify-center py-16">
-        <Card className="w-full max-w-md bg-card border-border/50">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full gradient-primary">
-              <Gamepad2 className="h-6 w-6 text-primary-foreground" />
+    <div className="min-h-screen bg-background relative flex flex-col">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/95 to-background" />
+      </div>
+
+      <div className="relative z-10">
+        <ShopHeader />
+      </div>
+
+      <div className="flex-1 container flex items-center justify-center py-16 relative z-10">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent shadow-2xl shadow-primary/30 mb-6">
+              <Gamepad2 className="h-8 w-8 text-primary-foreground" />
             </div>
-            <CardTitle className="font-display text-xl tracking-wider">Welcome to <span className="text-primary">NEXUSKEYS</span></CardTitle>
-            <CardDescription>Sign in or create an account to continue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 bg-secondary">
-                <TabsTrigger value="login" className="font-display text-xs tracking-wider">Sign In</TabsTrigger>
-                <TabsTrigger value="signup" className="font-display text-xs tracking-wider">Sign Up</TabsTrigger>
-              </TabsList>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-white">
+              Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">RETROHUB</span>
+            </h1>
+            <p className="text-muted-foreground">The premium marketplace for gamers.</p>
+          </div>
 
-              <TabsContent value="login" className="space-y-4 mt-4">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                      className="bg-secondary border-border/50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      required
-                      className="bg-secondary border-border/50"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full gradient-primary font-display tracking-wider" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign In'}
-                  </Button>
-                </form>
-              </TabsContent>
+          <Card className="bg-card/40 backdrop-blur-xl border-white/10 shadow-2xl animate-in fade-in zoom-in-95 duration-500 delay-100">
+            <CardContent className="pt-6">
+              <Tabs defaultValue="login" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-secondary/50 mb-6">
+                  <TabsTrigger value="login" className="font-display text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup" className="font-display text-xs tracking-wider data-[state=active]:bg-accent/20 data-[state=active]:text-accent transition-all">Register</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="signup" className="space-y-4 mt-4">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
-                      required
-                      className="bg-secondary border-border/50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      required
-                      className="bg-secondary border-border/50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      className="bg-secondary border-border/50"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full gradient-primary font-display tracking-wider" disabled={loading}>
-                    {loading ? 'Creating account...' : 'Create Account'}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                <TabsContent value="login" className="space-y-4 focus-visible:outline-none">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">Email</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="hello@example.com"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        required
+                        className="bg-background/50 border-white/10 focus:border-primary/50 transition-all text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="login-password">Password</Label>
+                        <span className="text-[10px] text-primary hover:underline cursor-pointer">Forgot password?</span>
+                      </div>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        required
+                        className="bg-background/50 border-white/10 focus:border-primary/50 transition-all text-white"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full h-11 gradient-primary font-display tracking-wider relative group overflow-hidden" disabled={loading}>
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                      {loading ? 'Signing in...' : 'Sign In'} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="signup" className="space-y-4 focus-visible:outline-none">
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Input
+                        id="signup-name"
+                        placeholder="John Doe"
+                        value={signupName}
+                        onChange={(e) => setSignupName(e.target.value)}
+                        required
+                        className="bg-background/50 border-white/10 focus:border-accent/50 transition-all text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="hello@example.com"
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
+                        required
+                        className="bg-background/50 border-white/10 focus:border-accent/50 transition-all text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="bg-background/50 border-white/10 focus:border-accent/50 transition-all text-white"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full h-11 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wider relative group overflow-hidden" disabled={loading}>
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                      {loading ? 'Creating account...' : 'Create Account'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          <p className="text-center text-xs text-muted-foreground">
+            Protected by reCAPTCHA and subject to the Privacy Policy and Terms of Service.
+            <br />
+            © 2026 RETROHUB. Dev by <span className="text-primary font-semibold">ABIR HOSSAIN</span>
+          </p>
+        </div>
       </div>
     </div>
   );

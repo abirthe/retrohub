@@ -1,7 +1,8 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "retrohub",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "RETROHUB - Game Keys & Top-ups E-commerce Platform. Dev by ABIR HOSSAIN",
   "type": "module",
   "scripts": {
     "dev": "vite",
