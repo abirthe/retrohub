@@ -1,4 +1,6 @@
-import { mockOrders, mockProducts } from '@/data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { fetchOrders } from '@/lib/shopApi';
 import ShopHeader from '@/components/ShopHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,34 +22,50 @@ const statusStyles: Record<string, string> = {
   validated: 'bg-primary/20 text-primary border-primary/30',
 };
 
-const stats = [
-  {
-    label: 'Revenue Today',
-    value: '$169.96',
-    icon: DollarSign,
-    color: 'text-primary',
-  },
-  {
-    label: 'Orders Today',
-    value: '4',
-    icon: Package,
-    color: 'text-accent',
-  },
-  {
-    label: 'Profit Margin',
-    value: '18.2%',
-    icon: TrendingUp,
-    color: 'text-success',
-  },
-  {
-    label: 'Failed Orders',
-    value: '1',
-    icon: AlertTriangle,
-    color: 'text-destructive',
-  },
-];
-
 const AdminDashboard = () => {
+  const { data: orders, isLoading: ordersLoading } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: fetchOrders,
+  });
+
+  const { data: products } = useQuery({
+    queryKey: ['admin-products'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const stats = [
+    {
+      label: 'Revenue Today',
+      value: `$${(orders || []).reduce((sum, o) => sum + Number(o.total), 0).toFixed(2)}`,
+      icon: DollarSign,
+      color: 'text-primary',
+    },
+    {
+      label: 'Orders Today',
+      value: (orders || []).length.toString(),
+      icon: Package,
+      color: 'text-accent',
+    },
+    {
+      label: 'Avg Margin',
+      value: products?.length
+        ? `${((products.reduce((sum, p) => sum + ((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100, 0) / products.length)).toFixed(1)}%`
+        : '0%',
+      icon: TrendingUp,
+      color: 'text-success',
+    },
+    {
+      label: 'Failed Orders',
+      value: (orders || []).filter((o) => o.status === 'failed').length.toString(),
+      icon: AlertTriangle,
+      color: 'text-destructive',
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <ShopHeader />
@@ -81,39 +99,45 @@ const AdminDashboard = () => {
           <div className="p-4 border-b border-border/50 flex items-center justify-between">
             <h2 className="font-display text-sm tracking-wider text-foreground">RECENT ORDERS</h2>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/50 hover:bg-transparent">
-                <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Order</TableHead>
-                <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Product</TableHead>
-                <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Status</TableHead>
-                <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Total</TableHead>
-                <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockOrders.map((order) => (
-                <TableRow key={order.id} className="border-border/50">
-                  <TableCell className="font-mono text-xs text-foreground">{order.id}</TableCell>
-                  <TableCell className="text-sm text-foreground">{order.productTitle}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`text-[10px] ${statusStyles[order.status]}`}>
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-display text-sm text-primary">${order.total.toFixed(2)}</TableCell>
-                  <TableCell>
-                    {order.status === 'failed' && (
-                      <Button size="sm" variant="outline" className="gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
-                        <RefreshCw className="h-3 w-3" />
-                        Retry
-                      </Button>
-                    )}
-                  </TableCell>
+          {ordersLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Loading orders...</div>
+          ) : (orders || []).length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">No orders yet</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-border/50 hover:bg-transparent">
+                  <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Order</TableHead>
+                  <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Product</TableHead>
+                  <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Status</TableHead>
+                  <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Total</TableHead>
+                  <TableHead className="text-muted-foreground font-display text-xs tracking-wider">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {(orders || []).map((order: any) => (
+                  <TableRow key={order.id} className="border-border/50">
+                    <TableCell className="font-mono text-xs text-foreground">{order.id.slice(0, 8)}...</TableCell>
+                    <TableCell className="text-sm text-foreground">{order.products?.title || 'Unknown'}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`text-[10px] ${statusStyles[order.status]}`}>
+                        {order.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-display text-sm text-primary">${Number(order.total).toFixed(2)}</TableCell>
+                    <TableCell>
+                      {order.status === 'failed' && (
+                        <Button size="sm" variant="outline" className="gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
+                          <RefreshCw className="h-3 w-3" />
+                          Retry
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
 
         {/* Inventory overview */}
@@ -133,19 +157,19 @@ const AdminDashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockProducts.map((p) => {
-                const margin = (((p.salePrice - p.costPrice) / p.salePrice) * 100).toFixed(1);
+              {(products || []).map((p) => {
+                const margin = (((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100).toFixed(1);
                 return (
                   <TableRow key={p.id} className="border-border/50">
                     <TableCell className="text-sm text-foreground">{p.title}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-[10px] border-muted-foreground/30 text-muted-foreground">
-                        {p.deliveryType.replace('_', ' ')}
+                        {p.delivery_type.replace('_', ' ')}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-sm text-foreground">{p.inStock}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">${p.costPrice.toFixed(2)}</TableCell>
-                    <TableCell className="text-sm text-primary">${p.salePrice.toFixed(2)}</TableCell>
+                    <TableCell className="font-mono text-sm text-foreground">{p.in_stock}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">${Number(p.cost_price).toFixed(2)}</TableCell>
+                    <TableCell className="text-sm text-primary">${Number(p.sale_price).toFixed(2)}</TableCell>
                     <TableCell className="font-display text-sm text-success">{margin}%</TableCell>
                   </TableRow>
                 );
