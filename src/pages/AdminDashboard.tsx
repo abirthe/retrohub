@@ -382,7 +382,12 @@ const AdminDashboard = () => {
                             </Button>
                           )}
                           {(order.status === 'validated' || order.status === 'pending' || order.status === 'failed') && (
-                            <Button size="sm" onClick={() => openActionDialog('fulfill', order)} className="gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 text-xs font-display tracking-wide">
+                            <Button
+                              size="sm"
+                              onClick={() => openActionDialog('fulfill', order)}
+                              disabled={(order.products?.in_stock || 0) <= 0}
+                              className="gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 text-xs font-display tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                               <Truck className="h-3.5 w-3.5 mr-1.5" /> Fulfill
                             </Button>
                           )}
