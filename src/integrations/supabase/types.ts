@@ -14,16 +14,251 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_logs: {
+        Row: {
+          actor_id: string | null
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string | null
+          event_type: string
+          id: string
+          record_id: string | null
+          table_name: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Relationships: []
+      }
+      inventory_keys: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string | null
+          pin_code: string
+          product_id: string | null
+          serial_number: string | null
+          sold_at: string | null
+          status: Database["public"]["Enums"]["key_status"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          pin_code: string
+          product_id?: string | null
+          serial_number?: string | null
+          sold_at?: string | null
+          status?: Database["public"]["Enums"]["key_status"] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          pin_code?: string
+          product_id?: string | null
+          serial_number?: string | null
+          sold_at?: string | null
+          status?: Database["public"]["Enums"]["key_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_keys_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          cost: number | null
+          created_at: string | null
+          customer_input: Json | null
+          final_output: string | null
+          id: string
+          product_id: string | null
+          profit: number | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          total: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string | null
+          customer_input?: Json | null
+          final_output?: string | null
+          id?: string
+          product_id?: string | null
+          profit?: number | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          total: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string | null
+          customer_input?: Json | null
+          final_output?: string | null
+          id?: string
+          product_id?: string | null
+          profit?: number | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          total?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: Database["public"]["Enums"]["product_category"]
+          cost_price: number
+          created_at: string | null
+          delivery_type: Database["public"]["Enums"]["delivery_type"]
+          description: string | null
+          id: string
+          image_url: string | null
+          in_stock: number | null
+          is_active: boolean | null
+          platform: string | null
+          region: Database["public"]["Enums"]["region_tag"] | null
+          sale_price: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["product_category"]
+          cost_price: number
+          created_at?: string | null
+          delivery_type: Database["public"]["Enums"]["delivery_type"]
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: number | null
+          is_active?: boolean | null
+          platform?: string | null
+          region?: Database["public"]["Enums"]["region_tag"] | null
+          sale_price: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["product_category"]
+          cost_price?: number
+          created_at?: string | null
+          delivery_type?: Database["public"]["Enums"]["delivery_type"]
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: number | null
+          is_active?: boolean | null
+          platform?: string | null
+          region?: Database["public"]["Enums"]["region_tag"] | null
+          sale_price?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      delivery_type: "instant_code" | "api_h2h" | "automation"
+      key_status: "available" | "sold" | "expired"
+      order_status:
+        | "pending"
+        | "validated"
+        | "processing"
+        | "completed"
+        | "failed"
+      product_category: "giftcard" | "topup" | "subscription"
+      region_tag: "GLOBAL" | "US" | "EU" | "ASIA" | "LATAM"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +385,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      delivery_type: ["instant_code", "api_h2h", "automation"],
+      key_status: ["available", "sold", "expired"],
+      order_status: [
+        "pending",
+        "validated",
+        "processing",
+        "completed",
+        "failed",
+      ],
+      product_category: ["giftcard", "topup", "subscription"],
+      region_tag: ["GLOBAL", "US", "EU", "ASIA", "LATAM"],
+    },
   },
 } as const
