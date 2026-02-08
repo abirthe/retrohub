@@ -1,4 +1,4 @@
-import { Product } from '@/types/shop';
+import type { Product } from '@/lib/shopApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Zap, Globe, Bot } from 'lucide-react';
@@ -54,13 +54,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className="flex items-center justify-between">
           <div>
             <span className="font-display text-lg font-bold text-primary">
-              ${product.salePrice.toFixed(2)}
+              ${Number(product.sale_price).toFixed(2)}
             </span>
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-              {deliveryIcon[product.deliveryType]}
-              <span>{deliveryLabel[product.deliveryType]}</span>
+              {deliveryIcon[product.delivery_type]}
+              <span>{deliveryLabel[product.delivery_type]}</span>
               <span className="mx-1">•</span>
-              <span>{product.inStock} in stock</span>
+              <span>{product.in_stock} in stock</span>
             </div>
           </div>
           <Button size="sm" className="gradient-primary font-display text-xs tracking-wider gap-1">
