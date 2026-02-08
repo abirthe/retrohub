@@ -174,7 +174,6 @@ const Checkout = () => {
                               size="icon"
                               className="h-7 w-7 rounded-none hover:bg-white/10"
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              disabled={item.quantity >= item.product.in_stock}
                             >
                               +
                             </Button>

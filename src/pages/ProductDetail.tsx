@@ -189,8 +189,8 @@ const ProductDetail = () => {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     {deliveryIcon[product.delivery_type]}
                     <span className="text-sm border-r border-white/10 pr-3 mr-1">{deliveryLabel[product.delivery_type]}</span>
-                    <span className={cn("text-xs font-mono px-2 py-0.5 rounded", product.in_stock > 0 ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive")}>
-                      {product.in_stock > 0 ? 'IN STOCK' : 'OUT OF STOCK'}
+                    <span className={cn("text-xs font-mono px-2 py-0.5 rounded", product.in_stock > 0 ? "bg-success/20 text-success" : "bg-yellow-500/20 text-yellow-500")}>
+                      {product.in_stock > 0 ? 'IN STOCK' : 'AVAILABLE'}
                     </span>
                   </div>
                 </div>
@@ -204,75 +204,69 @@ const ProductDetail = () => {
 
                 <Separator className="bg-white/5" />
 
-                {product.in_stock > 0 ? (
-                  <div className="space-y-6">
-                    {product.in_stock === 1 && (
-                      <div className="flex items-center gap-2 text-accent text-sm animate-pulse bg-accent/10 p-3 rounded border border-accent/20">
-                        <Zap className="w-4 h-4" />
-                        <span className="font-bold">Hurry! Only 1 left in stock.</span>
-                      </div>
-                    )}
-
-                    <div className="space-y-3">
-                      <Label htmlFor="quantity" className="text-xs uppercase tracking-widest text-muted-foreground">Quantity</Label>
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center rounded-lg border border-white/10 bg-background/50 p-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded hover:bg-white/10"
-                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            disabled={quantity <= 1}
-                          >
-                            -
-                          </Button>
-                          <Input
-                            id="quantity"
-                            type="number"
-                            min="1"
-                            max={product.in_stock}
-                            value={quantity}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value) || 1;
-                              setQuantity(Math.max(1, Math.min(val, product.in_stock)));
-                            }}
-                            className="w-16 text-center border-none bg-transparent h-8 focus-visible:ring-0 font-display"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded hover:bg-white/10"
-                            onClick={() => setQuantity(Math.min(product.in_stock, quantity + 1))}
-                            disabled={quantity >= product.in_stock}
-                          >
-                            +
-                          </Button>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Max: {product.in_stock}
-                        </div>
-                      </div>
+                <div className="space-y-6">
+                  {product.in_stock === 1 && (
+                    <div className="flex items-center gap-2 text-accent text-sm animate-pulse bg-accent/10 p-3 rounded border border-accent/20">
+                      <Zap className="w-4 h-4" />
+                      <span className="font-bold">Hurry! Only 1 left in stock.</span>
                     </div>
+                  )}
 
-                    <div className="space-y-3 pt-2">
-                      <Button
-                        onClick={handleAddToCart}
-                        className="w-full h-14 gradient-primary font-display text-base tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
-                        size="lg"
-                      >
-                        <ShoppingCart className="h-5 w-5" />
-                        {product.in_stock === 1 ? 'Buy Now - Last One!' : 'Add to Cart'}
-                      </Button>
-                      <p className="text-xs text-center text-muted-foreground">
-                        By purchasing, you agree to our Terms of Service.
-                      </p>
+                  <div className="space-y-3">
+                    <Label htmlFor="quantity" className="text-xs uppercase tracking-widest text-muted-foreground">Quantity</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-lg border border-white/10 bg-background/50 p-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded hover:bg-white/10"
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          disabled={quantity <= 1}
+                        >
+                          -
+                        </Button>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          min="1"
+                          value={quantity}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value) || 1;
+                            setQuantity(Math.max(1, val));
+                          }}
+                          className="w-16 text-center border-none bg-transparent h-8 focus-visible:ring-0 font-display"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded hover:bg-white/10"
+                          onClick={() => setQuantity(quantity + 1)}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      {product.in_stock > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Stock: {product.in_stock}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <Button disabled className="w-full h-14 bg-secondary text-muted-foreground border border-white/5" size="lg">
-                    Out of Stock
-                  </Button>
-                )}
+
+                  <div className="space-y-3 pt-2">
+                    <Button
+                      onClick={handleAddToCart}
+                      className="w-full h-14 gradient-primary font-display text-base tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
+                      size="lg"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      {product.in_stock === 1 ? 'Buy Now - Last One!' : 'Add to Cart'}
+                    </Button>
+                    <p className="text-xs text-center text-muted-foreground">
+                      By purchasing, you agree to our Terms of Service.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
