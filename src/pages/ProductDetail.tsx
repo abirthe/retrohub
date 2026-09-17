@@ -22,9 +22,9 @@ const deliveryIcon = {
 };
 
 const deliveryLabel = {
-  instant_code: 'Instant Code Delivery',
-  api_h2h: 'H2H API Integration',
-  automation: 'Automated Fulfillment',
+  instant_code: 'Instant - 30min Delivery',
+  api_h2h: 'Instant - 30min Delivery',
+  automation: 'Instant - 30min Delivery',
 };
 
 const categoryColor: Record<string, string> = {
@@ -124,12 +124,17 @@ const ProductDetail = () => {
           <div className="lg:col-span-7 space-y-6">
             <div className="relative aspect-video lg:aspect-[16/9] bg-secondary/30 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden shadow-2xl relative group">
               {/* Background Effects */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent z-0 opacity-50" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent z-0 opacity-50 pointer-events-none" />
 
-              <span className="font-display text-5xl md:text-8xl font-black text-white/5 tracking-widest select-none transform group-hover:scale-110 transition-transform duration-1000">
-                {product.platform}
-              </span>
+              <img
+                src={product.image_url || `https://image.pollinations.ai/prompt/Cinematic%20epic%20gaming%20banner%20wallpaper%20for%20${encodeURIComponent(product.title)}%20no%20text?width=1920&height=1080&nologo=true`}
+                alt={product.title}
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1920&auto=format&fit=crop';
+                }}
+              />
 
               <div className="absolute top-6 left-6 z-20 flex gap-2">
                 <Badge variant="outline" className={cn("text-xs backdrop-blur-md px-3 py-1", categoryColor[product.category])}>
@@ -145,11 +150,47 @@ const ProductDetail = () => {
             <div className="bg-card/30 backdrop-blur-sm border border-white/5 rounded-xl p-6 space-y-4">
               <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
                 <Star className="w-4 h-4 text-accent" />
-                Description
+                About This Product
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {product.description}
-              </p>
+              <div className="text-muted-foreground leading-relaxed text-sm space-y-4">
+                {product.description ? (
+                  // Split by newlines OR emojis that act as list markers
+                  product.description.split(/(?=\n|✅|📞|⭐|💸|-|\*)/).filter(Boolean).map((line, i) => {
+                    const cleanLine = line.trim();
+                    if (!cleanLine) return null;
+
+                    // If it starts with an emoji or bullet, format as a list item
+                    const isBullet = /^[✅📞⭐💸\-*]/.test(cleanLine);
+                    
+                    if (isBullet) {
+                      // Extract the first character as the icon, and the rest as text
+                      const icon = cleanLine.charAt(0);
+                      const text = cleanLine.slice(1).trim();
+                      
+                      return (
+                        <div key={i} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg border border-white/5 hover:border-primary/20 transition-colors">
+                          <div className="mt-0.5 shrink-0 text-primary">
+                            {icon === '-' || icon === '*' ? <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" /> : <span>{icon}</span>}
+                          </div>
+                          <span className="text-white/80">{text}</span>
+                        </div>
+                      );
+                    }
+                    
+                    if (cleanLine.includes(':')) {
+                      const [key, ...val] = cleanLine.split(':');
+                      return (
+                        <div key={i} className="bg-white/5 p-3 rounded-lg border border-white/5">
+                          <span className="font-semibold text-primary">{key.trim()}:</span> {val.join(':').trim()}
+                        </div>
+                      );
+                    }
+                    return <p key={i} className="text-white/70">{cleanLine}</p>;
+                  })
+                ) : (
+                  <p className="italic text-white/50">Experience the ultimate digital journey with {product.title}. Securely delivered to you instantly.</p>
+                )}
+              </div>
               <Separator className="bg-white/5" />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -162,7 +203,7 @@ const ProductDetail = () => {
                   <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
                     <Zap className="w-4 h-4" />
                   </div>
-                  <span>Instant Delivery</span>
+                  <span>Instant - 30min Delivery</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success">
