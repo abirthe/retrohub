@@ -61,7 +61,7 @@ const AdminDashboard = () => {
   const { data: products } = useQuery({
     queryKey: ['admin-products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('id, title, sale_price, image_url, category, platform, region, in_stock, delivery_type, created_at, is_active, is_featured').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, created_at, is_active').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
