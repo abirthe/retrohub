@@ -1,17 +1,18 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, CreditCard, Send, CheckCircle2, ArrowRight, AlertCircle } from 'lucide-react';
+import { CreditCard, CheckCircle2, ArrowRight } from 'lucide-react';
 import ShopHeader from '@/components/ShopHeader';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { updateOrderTransactionId } from '@/lib/shopApi';
+
+import BkashPayment from '@/components/payment/BkashPayment';
+import BankPayment from '@/components/payment/BankPayment';
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -29,14 +30,6 @@ const Payment = () => {
             // For now, we allow it but show a warning
         }
     }, [orderIds]);
-
-    const handleCopy = (text: string, label: string) => {
-        navigator.clipboard.writeText(text);
-        toast({
-            title: "Copied!",
-            description: `${label} copied to clipboard`,
-        });
-    };
 
     const calculateTotal = () => {
         if (!totalPrice) return 0;
@@ -131,94 +124,11 @@ const Payment = () => {
                                         </TabsList>
 
                                         <TabsContent value="bkash" className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                            <div className="p-6 rounded-lg border border-primary/20 bg-primary/5 relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                    <Send className="w-24 h-24" />
-                                                </div>
-
-                                                <div className="space-y-4 relative z-10">
-                                                    <div>
-                                                        <Label className="text-xs uppercase tracking-widest text-muted-foreground">Number (Send Money)</Label>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <code className="text-2xl font-mono font-bold text-primary tracking-wider">01307692886</code>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white" onClick={() => handleCopy('01307692886', 'Bkash Number')}>
-                                                                <Copy className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-
-                                                    <Separator className="bg-primary/20" />
-
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs uppercase tracking-widest text-muted-foreground">Instructions</Label>
-                                                        <ul className="text-sm space-y-2 text-foreground/90 list-disc list-inside marker:text-primary">
-                                                            <li>Use the <strong>Send Money</strong> option.</li>
-                                                            <li>Please add <span className="text-accent font-bold">1% charge</span> to the total amount.</li>
-                                                            <li>Use your Order ID as reference.</li>
-                                                        </ul>
-                                                    </div>
-
-                                                    <div className="bg-background/40 p-3 rounded border border-white/5 text-xs text-muted-foreground flex gap-2 items-start">
-                                                        <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                                                        <span>After sending, confirm the last 4 digits or take a screenshot for verification.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <BkashPayment />
                                         </TabsContent>
 
                                         <TabsContent value="bank" className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                            <div className="p-6 rounded-lg border border-accent/20 bg-accent/5 relative overflow-hidden group">
-                                                <div className="space-y-4">
-                                                    <div className="grid grid-cols-1 gap-4">
-                                                        <div className="group/item">
-                                                            <Label className="text-xs uppercase tracking-widest text-muted-foreground">Account Number</Label>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <code className="text-lg font-mono font-bold text-accent tracking-wide">1059179090001</code>
-                                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopy('1059179090001', 'Account Number')}>
-                                                                    <Copy className="w-3 h-3" />
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">Account Name</Label>
-                                                                <p className="font-semibold text-foreground/90">ABIR HOSSAIN</p>
-                                                            </div>
-                                                            <div>
-                                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">Bank Name</Label>
-                                                                <p className="font-semibold text-foreground/90">BRAC Bank PLC</p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <Label className="text-xs uppercase tracking-widest text-muted-foreground">Branch Name</Label>
-                                                            <p className="text-sm text-foreground/80">MOGHBAZAR BRANCH</p>
-                                                        </div>
-
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">Routing Number</Label>
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-mono text-sm">060274184</p>
-                                                                    <Button variant="ghost" size="icon" className="h-4 w-4" onClick={() => handleCopy('060274184', 'Routing Number')}>
-                                                                        <Copy className="w-3 h-3" />
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">SWIFT Code</Label>
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-mono text-sm">BRAKBDDH</p>
-                                                                    <Button variant="ghost" size="icon" className="h-4 w-4" onClick={() => handleCopy('BRAKBDDH', 'SWIFT Code')}>
-                                                                        <Copy className="w-3 h-3" />
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <BankPayment />
                                         </TabsContent>
                                     </Tabs>
                                 </CardContent>

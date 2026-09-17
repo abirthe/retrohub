@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,13 +9,11 @@ import {
   cancelOrder,
   refundOrder,
   validateOrder,
-  checkInventoryAvailability
 } from '@/lib/shopApi';
 import { sendOrderCompletionEmail } from '@/lib/emailService';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import ShopHeader from '@/components/ShopHeader';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,56 +39,15 @@ import {
   XCircle,
   Pause,
   RotateCcw,
-  MoreVertical,
   Truck,
-  Search,
-  Users,
-  CreditCard,
-  Copy,
   ExternalLink,
-  Clock,
-  AlertCircle
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const statusStyles: Record<string, { className: string; icon: React.ReactNode; label: string }> = {
-  completed: {
-    className: 'bg-success/20 text-success border-success/30',
-    icon: <CheckCircle2 className="h-3 w-3" />,
-    label: 'Completed'
-  },
-  processing: {
-    className: 'bg-primary/20 text-primary border-primary/30',
-    icon: <Clock className="h-3 w-3 animate-pulse" />,
-    label: 'Processing'
-  },
-  pending: {
-    className: 'bg-accent/20 text-accent border-accent/30',
-    icon: <AlertCircle className="h-3 w-3" />,
-    label: 'Pending'
-  },
-  failed: {
-    className: 'bg-destructive/20 text-destructive border-destructive/30',
-    icon: <XCircle className="h-3 w-3" />,
-    label: 'Failed'
-  },
-  validated: {
-    className: 'bg-primary/20 text-primary border-primary/30',
-    icon: <CheckCircle2 className="h-3 w-3" />,
-    label: 'Validated'
-  },
-  cancelled: {
-    className: 'bg-destructive/20 text-destructive border-destructive/30',
-    icon: <XCircle className="h-3 w-3" />,
-    label: 'Cancelled'
-  },
-  refunded: {
-    className: 'bg-amber-500/20 text-amber-500 border-amber-500/30',
-    icon: <RotateCcw className="h-3 w-3" />,
-    label: 'Refunded'
-  },
-};
+// Subcomponents
+import OrdersTab from '@/components/admin/OrdersTab';
+import InventoryTab from '@/components/admin/InventoryTab';
 
 type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
 
@@ -104,7 +60,6 @@ const AdminDashboard = () => {
   const [actionDialog, setActionDialog] = useState<{ open: boolean; action: string; order: AdminOrder | null }>({ open: false, action: '', order: null });
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!adminLoading) {
@@ -195,15 +150,6 @@ const AdminDashboard = () => {
   const openActionDialog = (action: string, order: AdminOrder) => {
     setActionDialog({ open: true, action, order });
   };
-
-  const filteredOrders = orders?.filter(order => {
-    const customerInput = order.customer_input as Record<string, string> | null;
-    return (
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.products?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (customerInput?.transaction_id?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
-    );
-  });
 
   const stats = [
     {
@@ -313,183 +259,15 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search orders..."
-                  className="pl-10 bg-black/20 border-white/10 focus:border-primary/50"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Badge variant="outline" className="text-xs font-normal bg-secondary/30 text-muted-foreground border-white/5 px-3 py-1">
-                Showing {filteredOrders?.length || 0} orders
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {ordersLoading ? (
-                <div className="text-center py-20 text-muted-foreground animate-pulse">Loading orders...</div>
-              ) : filteredOrders?.length === 0 ? (
-                <div className="text-center py-20 text-muted-foreground border border-dashed border-white/10 rounded-xl bg-card/10">
-                  No orders found.
-                </div>
-              ) : (
-                filteredOrders?.map((order) => {
-                  const customerInput = order.customer_input as Record<string, string> | null;
-                  return (
-                  <Card key={order.id} className="overflow-hidden border-white/5 bg-card/40 backdrop-blur-md hover:border-primary/20 transition-all duration-300 group">
-                    <div className="p-0 flex flex-col md:flex-row">
-                      <div className={cn("w-full md:w-1.5 h-1 md:h-auto",
-                        order.status === 'completed' ? "bg-success" :
-                          order.status === 'failed' ? "bg-destructive" :
-                            order.status === 'validated' ? "bg-primary" : "bg-accent/50"
-                      )} />
-
-                      <div className="p-6 flex-1">
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <Badge variant="outline" className={cn("text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 border-0 gap-1.5", (statusStyles[order.status] || statusStyles.pending).className)}>
-                                {(statusStyles[order.status] || statusStyles.pending).icon}
-                                {(statusStyles[order.status] || statusStyles.pending).label}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground font-mono flex items-center gap-1.5 bg-secondary/30 px-2 py-0.5 rounded border border-white/5">
-                                #{order.id.slice(0, 8)}...
-                                <button onClick={() => {
-                                  navigator.clipboard.writeText(order.id);
-                                  toast({ title: 'Copied', description: 'Order ID copied' });
-                                }} className="hover:text-primary transition-colors">
-                                  <Copy className="h-3 w-3" />
-                                </button>
-                              </span>
-                            </div>
-
-                            <h3 className="font-display font-bold text-lg text-foreground group-hover:text-primary transition-colors">{order.products?.title || 'Unknown Product'}</h3>
-
-                            <div className="flex gap-4 text-xs text-muted-foreground">
-                              <span>{new Date(order.created_at).toLocaleString()}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col md:items-end gap-2">
-                            <div className="text-xl font-bold font-display text-white">
-                              ৳{Number(order.total).toFixed(2)}
-                            </div>
-                            {customerInput?.transaction_id && (
-                              <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
-                                <CreditCard className="h-3 w-3" />
-                                <span className="font-mono tracking-wider">{customerInput.transaction_id}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="mt-6 pt-5 border-t border-white/5 flex flex-wrap gap-3 items-center">
-                          <p className="text-xs text-muted-foreground mr-auto">Actions:</p>
-                          {order.status === 'pending' && (
-                            <Button size="sm" onClick={() => openActionDialog('validate', order)} className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/20 h-8 text-xs font-display tracking-wide">
-                              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Validate
-                            </Button>
-                          )}
-                          {(order.status === 'validated' || order.status === 'pending' || order.status === 'failed') && (
-                            <Button
-                              size="sm"
-                              onClick={() => openActionDialog('fulfill', order)}
-                              disabled={(order.products?.in_stock || 0) <= 0}
-                              className="gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 text-xs font-display tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <Truck className="h-3.5 w-3.5 mr-1.5" /> Fulfill
-                            </Button>
-                          )}
-                          {order.status !== 'completed' && order.status !== 'cancelled' && (
-                            <>
-                              <Button size="sm" variant="ghost" onClick={() => openActionDialog('hold', order)} className="h-8 text-xs text-muted-foreground hover:text-white">
-                                <Pause className="h-3.5 w-3.5 mr-1.5" /> Hold
-                              </Button>
-                              <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 h-8 text-xs" onClick={() => openActionDialog('cancel', order)}>
-                                <XCircle className="h-3.5 w-3.5 mr-1.5" /> Cancel
-                              </Button>
-                            </>
-                          )}
-                          {order.status === 'completed' && (
-                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 h-8 text-xs" onClick={() => openActionDialog('refund', order)}>
-                              <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Refund
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                  );
-                })
-              )}
-            </div>
+            <OrdersTab 
+              orders={orders} 
+              ordersLoading={ordersLoading} 
+              openActionDialog={openActionDialog} 
+            />
           </TabsContent>
 
           <TabsContent value="inventory">
-            <Card className="bg-card/40 backdrop-blur-xl border-white/10 overflow-hidden shadow-xl">
-              <CardHeader className="bg-white/5 border-b border-white/5">
-                <CardTitle className="font-display text-lg tracking-wider">Inventory Status</CardTitle>
-                <CardDescription>Real-time stock levels and margin analysis</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-black/20 text-muted-foreground font-display text-[10px] uppercase tracking-wider">
-                      <tr>
-                        <th className="p-4 font-semibold opacity-70">Product</th>
-                        <th className="p-4 font-semibold opacity-70">Type</th>
-                        <th className="p-4 font-semibold opacity-70">Stock</th>
-                        <th className="p-4 font-semibold opacity-70">Cost</th>
-                        <th className="p-4 font-semibold opacity-70">Price</th>
-                        <th className="p-4 font-semibold opacity-70 text-right">Margin</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {products?.map((p) => {
-                        const margin = (((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100).toFixed(1);
-                        return (
-                          <tr key={p.id} className="hover:bg-white/5 transition-colors group">
-                            <td className="p-4 font-medium text-foreground group-hover:text-primary transition-colors">{p.title}</td>
-                            <td className="p-4">
-                              <Badge variant="outline" className="text-[10px] border-white/10 text-muted-foreground bg-secondary/30">
-                                {p.delivery_type.replace('_', ' ')}
-                              </Badge>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                <span className={cn(
-                                  "w-1.5 h-1.5 rounded-full",
-                                  p.in_stock > 5 ? "bg-success" :
-                                    p.in_stock > 0 ? "bg-warning" : "bg-destructive animate-pulse"
-                                )}></span>
-                                <span className={cn(
-                                  "font-mono font-bold text-xs",
-                                  p.in_stock > 5 ? "text-success" :
-                                    p.in_stock > 0 ? "text-warning" : "text-destructive"
-                                )}>
-                                  {p.in_stock}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="p-4 text-muted-foreground font-mono text-xs opacity-70">৳{Number(p.cost_price).toFixed(2)}</td>
-                            <td className="p-4 font-bold text-white font-mono text-xs">৳{Number(p.sale_price).toFixed(2)}</td>
-                            <td className="p-4 font-display font-bold text-right">
-                              <span className="text-success bg-success/10 px-2 py-1 rounded text-xs border border-success/20">
-                                +{margin}%
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+            <InventoryTab products={products} />
           </TabsContent>
         </Tabs>
 
