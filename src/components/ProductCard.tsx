@@ -18,9 +18,9 @@ const deliveryIcon = {
 };
 
 const deliveryLabel = {
-  instant_code: 'Instant',
-  api_h2h:      'H2H API',
-  automation:   'Auto',
+  instant_code: 'Instant - 30min',
+  api_h2h:      'Instant - 30min',
+  automation:   'Instant - 30min',
 };
 
 interface CategoryMeta {

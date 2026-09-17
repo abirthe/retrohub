@@ -81,8 +81,23 @@ export async function checkIsAdmin(): Promise<boolean> {
 
 // Admin Order Management Functions
 
-// Fulfill order manually (backend verifies inventory)
-export async function fulfillOrder(orderId: string) {
+// Fulfill order manually (backend verifies inventory or handles custom orders)
+export async function fulfillOrder(orderId: string, customOutput?: string) {
+  // Check if it's a custom order
+  const { data: order } = await supabase.from('orders').select('product_id').eq('id', orderId).single();
+  
+  // If no product_id (custom request) OR admin explicitly provided a custom output/key
+  if (!order?.product_id || customOutput) {
+    const { error } = await supabase.from('orders').update({
+      status: 'completed',
+      final_output: customOutput || 'Order fulfilled manually.',
+    }).eq('id', orderId);
+    
+    if (error) return { success: false, error: error.message };
+    return { success: true, message: 'Order fulfilled manually' };
+  }
+
+  // Otherwise, use automated inventory key assignment
   const { data, error } = await supabase.rpc('fulfill_order_manual' as never, {
     p_order_id: orderId
   } as never);

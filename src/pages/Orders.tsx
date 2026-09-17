@@ -188,7 +188,7 @@ const Orders = () => {
                           <TableCell className="pr-6">
                             {order.final_output ? (
                               <div className="text-xs space-y-1.5 animate-in fade-in slide-in-from-left-2 duration-500">
-                                <div className="font-mono text-success break-all bg-success/5 p-2 rounded border border-success/20 select-all selection:bg-success/30">
+                                <div className="font-mono text-success whitespace-pre-wrap bg-success/5 p-2 rounded border border-success/20 select-all selection:bg-success/30 max-h-40 overflow-y-auto">
                                   {order.final_output}
                                 </div>
                                 <p className="text-[10px] text-muted-foreground flex items-center gap-1">

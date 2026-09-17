@@ -42,34 +42,27 @@ A modern, full-stack e-commerce platform for selling digital game keys, gift car
 ## 📦 Project Structure
 
 ```
-code-conduit-express/
+retrohub/
+├── docs/                  # Project documentation & guides
+├── scripts/               # Maintenance, migration, & database seed scripts
 ├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── ui/             # shadcn/ui components
-│   │   ├── ProductCard.tsx # Product card component
-│   │   └── ShopHeader.tsx  # Navigation header
-│   ├── contexts/          # React Context providers
-│   │   └── CartContext.tsx # Shopping cart state management
-│   ├── hooks/             # Custom React hooks
-│   │   ├── useAuth.ts     # Authentication hook
-│   │   └── useProducts.ts # Products data fetching
-│   ├── integrations/      # Third-party integrations
-│   │   └── supabase/      # Supabase client and types
-│   ├── lib/               # Utility functions
-│   │   └── shopApi.ts     # API functions for products/orders
-│   ├── pages/             # Page components
-│   │   ├── Index.tsx      # Home/Shop page
-│   │   ├── ProductDetail.tsx # Product detail page
-│   │   ├── Checkout.tsx   # Checkout page
-│   │   ├── Orders.tsx     # User orders page
-│   │   ├── AdminDashboard.tsx # Admin dashboard
-│   │   ├── Auth.tsx       # Authentication page
-│   │   └── NotFound.tsx   # 404 page
-│   ├── App.tsx            # Main app component with routing
+│   ├── components/        # UI components
+│   │   ├── ui/            # shadcn/ui components
+│   │   ├── admin/         # Admin dashboard subcomponents
+│   │   ├── payment/       # Payment modal & instructions
+│   │   ├── ProductCard.tsx
+│   │   └── ShopHeader.tsx
+│   ├── contexts/          # React Context providers (CartContext)
+│   ├── hooks/             # Custom React hooks (useAuth, useAdmin)
+│   ├── integrations/      # Supabase client and auto-generated types
+│   ├── lib/               # Utility functions, API layers, email helpers
+│   ├── pages/             # Page components (Index, ProductDetail, Checkout, etc.)
+│   ├── App.tsx            # Main app router
 │   └── main.tsx           # Entry point
 ├── supabase/
+│   ├── functions/         # Supabase Edge Functions
 │   └── migrations/        # Database migrations
-└── public/               # Static assets
+└── public/                # Static assets
 ```
 
 ## 🗄️ Database Schema
