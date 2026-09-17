@@ -78,10 +78,11 @@ const Payment = () => {
                 navigate('/orders');
             }, 1500);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Failed to update payment status.";
             toast({
                 title: "Submission Failed",
-                description: error.message || "Failed to update payment status.",
+                description: message,
                 variant: "destructive",
             });
         } finally {

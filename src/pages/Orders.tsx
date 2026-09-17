@@ -141,7 +141,7 @@ const Orders = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map((order: any) => {
+                    {orders.map((order) => {
                       const status = statusStyles[order.status] || statusStyles.pending;
                       const orderDate = new Date(order.created_at).toLocaleDateString(undefined, {
                         year: 'numeric',
