@@ -18,7 +18,7 @@ export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
 export async function fetchProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select('id, title, sale_price, image_url, category, platform, region, in_stock, delivery_type, created_at, is_active, is_featured')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
