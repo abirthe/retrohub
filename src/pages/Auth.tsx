@@ -31,8 +31,9 @@ const Auth = () => {
       await signIn(loginEmail, loginPassword);
       toast({ title: 'Welcome back!', description: 'You have successfully signed in.' });
       navigate('/');
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -47,8 +48,9 @@ const Auth = () => {
         title: 'Check your email',
         description: 'We sent you a confirmation link to verify your account.',
       });
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Signup failed';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }

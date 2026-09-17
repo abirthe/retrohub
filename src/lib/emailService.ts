@@ -40,10 +40,10 @@ export async function sendOrderEmail(payload: EmailPayload) {
 
     const result = await response.json();
     return result;
-  } catch (error: any) {
-    console.error('Failed to send email:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     // Don't throw - email failure shouldn't break order completion
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 
@@ -76,12 +76,12 @@ export async function sendOrderCompletionEmail(orderId: string) {
     }
 
     // Get customer email using RPC function (works for admins)
-    const { data: customerEmail, error: emailError } = await (supabase.rpc as any)('get_user_email', {
-      p_user_id: order.user_id
-    });
+    const { data: customerEmail, error: emailError } = await supabase.rpc(
+      'get_user_email' as never,
+      { p_user_id: order.user_id } as never
+    );
 
     if (emailError || !customerEmail) {
-      console.warn('Could not get customer email:', emailError);
       // Don't fail completely - email is optional
       return { 
         success: false, 
@@ -91,19 +91,20 @@ export async function sendOrderCompletionEmail(orderId: string) {
     }
 
     // Send email
+    const productData = order.products as { title?: string } | null;
     const result = await sendOrderEmail({
       order_id: order.id,
-      recipient: customerEmail,
-      product_title: (order.products as any)?.title || 'Product',
+      recipient: customerEmail as string,
+      product_title: productData?.title || 'Product',
       code: order.final_output,
       order_total: Number(order.total),
     });
 
     return result;
-  } catch (error: any) {
-    console.error('Failed to send order completion email:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     // Don't throw - email failure shouldn't break order fulfillment
-    return { success: false, error: error.message, warning: true };
+    return { success: false, error: message, warning: true };
   }
 }
 

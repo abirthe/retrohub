@@ -83,57 +83,57 @@ export async function checkIsAdmin(): Promise<boolean> {
 
 // Fulfill order manually (backend verifies inventory)
 export async function fulfillOrder(orderId: string) {
-  const { data, error } = await (supabase.rpc as any)('fulfill_order_manual', {
+  const { data, error } = await supabase.rpc('fulfill_order_manual' as never, {
     p_order_id: orderId
-  });
+  } as never);
   if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; message?: string; key_assigned?: boolean };
 }
 
 // Hold order
 export async function holdOrder(orderId: string, reason?: string) {
-  const { data, error } = await (supabase.rpc as any)('hold_order', {
+  const { data, error } = await supabase.rpc('hold_order' as never, {
     p_order_id: orderId,
     p_reason: reason || null
-  });
+  } as never);
   if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; message?: string };
 }
 
 // Cancel order
 export async function cancelOrder(orderId: string, reason?: string) {
-  const { data, error } = await (supabase.rpc as any)('cancel_order', {
+  const { data, error } = await supabase.rpc('cancel_order' as never, {
     p_order_id: orderId,
     p_reason: reason || null
-  });
+  } as never);
   if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; message?: string; key_released?: boolean };
 }
 
 // Refund order
 export async function refundOrder(orderId: string, reason?: string) {
-  const { data, error } = await (supabase.rpc as any)('refund_order', {
+  const { data, error } = await supabase.rpc('refund_order' as never, {
     p_order_id: orderId,
     p_reason: reason || null
-  });
+  } as never);
   if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; message?: string; key_released?: boolean };
 }
 
 // Validate order
 export async function validateOrder(orderId: string) {
-  const { data, error } = await (supabase.rpc as any)('validate_order', {
+  const { data, error } = await supabase.rpc('validate_order' as never, {
     p_order_id: orderId
-  });
+  } as never);
   if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; message?: string };
 }
 
 // Check inventory availability
 export async function checkInventoryAvailability(productId: string) {
-  const { data, error } = await (supabase.rpc as any)('check_inventory_availability', {
+  const { data, error } = await supabase.rpc('check_inventory_availability' as never, {
     p_product_id: productId
-  });
+  } as never);
   if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; product_id?: string; product_title?: string; available_keys?: number; in_stock?: number; has_inventory?: boolean };
 }
@@ -172,7 +172,6 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
 
   const errors = results.filter(r => r.error);
   if (errors.length > 0) {
-    console.error('Failed to update some orders:', errors);
     throw new Error('Failed to update transaction ID for created orders. Please contact support.');
   }
 

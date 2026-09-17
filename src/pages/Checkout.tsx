@@ -91,10 +91,11 @@ const Checkout = () => {
         });
         navigate('/payment', { state: { orderIds: createdOrderIds, totalPrice } });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to place order';
       toast({
         title: 'Error',
-        description: error.message || 'Failed to place order',
+        description: message,
         variant: 'destructive',
       });
     } finally {

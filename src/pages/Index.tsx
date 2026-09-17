@@ -9,7 +9,9 @@ import type { ProductCategory } from '@/lib/shopApi';
 import heroBg from '@/assets/hero-bg.jpg';
 import { cn } from '@/lib/utils';
 
-const categories: { label: string; value: ProductCategory | 'all'; icon: any }[] = [
+import type { LucideIcon } from 'lucide-react';
+
+const categories: { label: string; value: ProductCategory | 'all'; icon: LucideIcon }[] = [
   { label: 'All', value: 'all', icon: Sparkles },
   { label: 'Gift Cards', value: 'giftcard', icon: Gift },
   { label: 'Top-ups', value: 'topup', icon: Zap },

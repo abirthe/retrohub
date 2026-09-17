@@ -86,7 +86,14 @@ const statusStyles: Record<string, { className: string; icon: React.ReactNode; l
     icon: <XCircle className="h-3 w-3" />,
     label: 'Cancelled'
   },
+  refunded: {
+    className: 'bg-amber-500/20 text-amber-500 border-amber-500/30',
+    icon: <RotateCcw className="h-3 w-3" />,
+    label: 'Refunded'
+  },
 };
+
+type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -94,7 +101,7 @@ const AdminDashboard = () => {
   const { isAdmin, loading: adminLoading } = useAdmin();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [actionDialog, setActionDialog] = useState<{ open: boolean; action: string; order: any }>({ open: false, action: '', order: null });
+  const [actionDialog, setActionDialog] = useState<{ open: boolean; action: string; order: AdminOrder | null }>({ open: false, action: '', order: null });
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -134,7 +141,7 @@ const AdminDashboard = () => {
         case 'fulfill':
           result = await fulfillOrder(actionDialog.order.id);
           if (result.success) {
-            const emailResult = await sendOrderCompletionEmail(actionDialog.order.id);
+            await sendOrderCompletionEmail(actionDialog.order.id);
             toast({ title: 'Order Fulfilled', description: 'Product delivered successfully.' });
           } else {
             toast({ title: 'Fulfillment Failed', description: result.error, variant: 'destructive' });
@@ -177,22 +184,26 @@ const AdminDashboard = () => {
       setReason('');
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Operation failed', variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Operation failed';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  const openActionDialog = (action: string, order: any) => {
+  const openActionDialog = (action: string, order: AdminOrder) => {
     setActionDialog({ open: true, action, order });
   };
 
-  const filteredOrders = orders?.filter(order =>
-    order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.products?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (order.customer_input as any)?.transaction_id?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOrders = orders?.filter(order => {
+    const customerInput = order.customer_input as Record<string, string> | null;
+    return (
+      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.products?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (customerInput?.transaction_id?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+    );
+  });
 
   const stats = [
     {
@@ -325,7 +336,9 @@ const AdminDashboard = () => {
                   No orders found.
                 </div>
               ) : (
-                filteredOrders?.map((order: any) => (
+                filteredOrders?.map((order) => {
+                  const customerInput = order.customer_input as Record<string, string> | null;
+                  return (
                   <Card key={order.id} className="overflow-hidden border-white/5 bg-card/40 backdrop-blur-md hover:border-primary/20 transition-all duration-300 group">
                     <div className="p-0 flex flex-col md:flex-row">
                       <div className={cn("w-full md:w-1.5 h-1 md:h-auto",
@@ -365,10 +378,10 @@ const AdminDashboard = () => {
                             <div className="text-xl font-bold font-display text-white">
                               ৳{Number(order.total).toFixed(2)}
                             </div>
-                            {(order.customer_input as any)?.transaction_id && (
+                            {customerInput?.transaction_id && (
                               <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
                                 <CreditCard className="h-3 w-3" />
-                                <span className="font-mono tracking-wider">{(order.customer_input as any).transaction_id}</span>
+                                <span className="font-mono tracking-wider">{customerInput.transaction_id}</span>
                               </div>
                             )}
                           </div>
@@ -410,7 +423,8 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </Card>
-                ))
+                  );
+                })
               )}
             </div>
           </TabsContent>
@@ -510,11 +524,11 @@ const AdminDashboard = () => {
                     <span className="text-muted-foreground">Amount</span>
                     <span className="font-bold text-white">৳{Number(actionDialog.order.total).toFixed(2)}</span>
                   </div>
-                  {(actionDialog.order.customer_input as any)?.transaction_id && (
+                  {(actionDialog.order.customer_input as Record<string, string> | null)?.transaction_id && (
                     <div className="pt-2 mt-2 border-t border-white/5 flex justify-between items-center">
                       <span className="text-muted-foreground">Trx ID</span>
                       <code className="bg-primary/20 text-primary border-primary/30 border px-2 py-0.5 rounded text-xs font-mono">
-                        {(actionDialog.order.customer_input as any).transaction_id}
+                        {(actionDialog.order.customer_input as Record<string, string>).transaction_id}
                       </code>
                     </div>
                   )}
