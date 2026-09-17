@@ -127,14 +127,20 @@ const ProductDetail = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent z-0 opacity-50 pointer-events-none" />
 
-              <img
-                src={product.image_url || `https://image.pollinations.ai/prompt/Cinematic%20epic%20gaming%20banner%20wallpaper%20for%20${encodeURIComponent(product.title)}%20no%20text?width=1920&height=1080&nologo=true`}
-                alt={product.title}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1920&auto=format&fit=crop';
-                }}
-              />
+              {product.image_url ? (
+                <img
+                  src={product.image_url}
+                  alt={product.title}
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <span className="font-display text-5xl md:text-8xl font-black text-white/5 tracking-widest select-none transform group-hover:scale-110 transition-transform duration-1000 z-0">
+                  {product.platform}
+                </span>
+              )}
 
               <div className="absolute top-6 left-6 z-20 flex gap-2">
                 <Badge variant="outline" className={cn("text-xs backdrop-blur-md px-3 py-1", categoryColor[product.category])}>
