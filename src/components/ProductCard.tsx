@@ -93,7 +93,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             src={product.image_url!}
             alt={product.title}
             loading="lazy"
-            className="w-full h-full object-cover object-center opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+            className="w-full h-full object-contain p-2 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = 'none';
             }}
