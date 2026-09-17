@@ -23,7 +23,7 @@ export async function fetchProducts() {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data as Product[];
 }
 
 // Fetch orders from database (admin only)

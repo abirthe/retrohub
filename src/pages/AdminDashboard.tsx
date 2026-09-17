@@ -63,7 +63,7 @@ const AdminDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from('products').select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, created_at, is_active').order('created_at', { ascending: false });
       if (error) throw error;
-      return data;
+      return data as Product[];
     },
     enabled: isAdmin === true,
   });
