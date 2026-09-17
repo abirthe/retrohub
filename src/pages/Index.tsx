@@ -15,20 +15,30 @@ import type { LucideIcon } from 'lucide-react';
 
 interface CategoryDef {
   label: string;
-  value: ProductCategory | 'all';
+  value: string;
   icon: LucideIcon;
   color: string;
+  subcategories?: { label: string; value: string }[];
 }
 
 const categories: CategoryDef[] = [
   { label: 'All',           value: 'all',          icon: Sparkles,  color: 'text-white' },
-  { label: 'PC Games',      value: 'pc_game',      icon: Monitor,   color: 'text-blue-400' },
-  { label: 'Xbox',          value: 'xbox_game',    icon: Gamepad2,  color: 'text-green-400' },
-  { label: 'PlayStation',   value: 'ps_game',      icon: Trophy,    color: 'text-blue-300' },
+  { 
+    label: 'Games',         
+    value: 'games',        
+    icon: Gamepad2,  
+    color: 'text-blue-400',
+    subcategories: [
+      { label: 'All Games', value: 'all_games' },
+      { label: 'PC Games', value: 'pc_game' },
+      { label: 'Xbox', value: 'xbox_game' },
+      { label: 'PlayStation', value: 'ps_game' }
+    ]
+  },
   { label: 'Top-Ups',       value: 'topup',        icon: Zap,       color: 'text-yellow-400' },
   { label: 'Subscriptions', value: 'subscription', icon: Repeat,    color: 'text-purple-400' },
-  { label: 'Software',      value: 'software',     icon: Wrench,    color: 'text-orange-400' },
   { label: 'Gift Cards',    value: 'giftcard',     icon: Gift,      color: 'text-pink-400' },
+  { label: 'Software',      value: 'software',     icon: Wrench,    color: 'text-orange-400' },
 ];
 
 const SORT_OPTIONS = [
@@ -42,18 +52,54 @@ type SortValue = 'newest' | 'price_asc' | 'price_desc' | 'name_asc';
 
 const Index = () => {
   const [search, setSearch]               = useState('');
-  const [activeCategory, setActiveCategory] = useState<ProductCategory | 'all'>('all');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeSubcategory, setActiveSubcategory] = useState<string>('');
   const [sort, setSort]                   = useState<SortValue>('newest');
   const [sortOpen, setSortOpen]           = useState(false);
 
   const { data: products, isLoading } = useProducts();
 
-  const filtered = (products || [])
+  const filteredBaseProducts = (products || [])
+    .filter((p) => {
+      // For Top-Ups, Subscriptions, Gift Cards, and Software, ONLY show the first variant as the "card"
+      // Variants are defined by having a '|' in the title.
+      // E.g., if there are 6 variants of "Valorant VP (Malaysia)", we only want ONE card to represent them all on the home page.
+      if (p.title.includes(' | ')) {
+        // We can just pick one deterministically, e.g. the lowest price one or just by checking if this is the first one in the list for this base title.
+        // Wait, filtering here means we need to deduplicate. It's better to group them below.
+        return true;
+      }
+      return true;
+    });
+
+  // Deduplicate products by base name
+  const groupedProducts = filteredBaseProducts.reduce((acc, curr) => {
+    const baseName = curr.title.split(' | ')[0];
+    if (!acc.find(p => p.title.split(' | ')[0] === baseName)) {
+      acc.push(curr);
+    }
+    return acc;
+  }, [] as typeof products);
+
+  const filtered = (groupedProducts || [])
     .filter((p) => {
       const matchesSearch =
         p.title.toLowerCase().includes(search.toLowerCase()) ||
         (p.platform?.toLowerCase().includes(search.toLowerCase()) ?? false);
-      const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
+        
+      let matchesCategory = false;
+      if (activeCategory === 'all') {
+        matchesCategory = true;
+      } else if (activeCategory === 'games') {
+        if (activeSubcategory && activeSubcategory !== 'all_games') {
+          matchesCategory = p.category === activeSubcategory;
+        } else {
+          matchesCategory = ['pc_game', 'xbox_game', 'ps_game'].includes(p.category);
+        }
+      } else {
+        matchesCategory = p.category === activeCategory;
+      }
+      
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
@@ -72,7 +118,7 @@ const Index = () => {
       <ShopHeader />
 
       {/* Hero */}
-      <section className="relative min-h-[580px] lg:min-h-[660px] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[480px] sm:min-h-[580px] lg:min-h-[660px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src={heroBg}
@@ -84,7 +130,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />
         </div>
 
-        <div className="container relative z-10 text-center space-y-8 max-w-5xl px-4 py-20">
+        <div className="container relative z-10 text-center space-y-6 max-w-5xl px-4 py-14 sm:py-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-700">
             <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
             <span className="text-xs font-display font-medium tracking-[0.2em] text-primary uppercase">
@@ -92,13 +138,13 @@ const Index = () => {
             </span>
           </div>
 
-          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-wider text-white drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.3)] leading-[1.1] animate-in zoom-in-95 duration-700 delay-100 uppercase">
+          <h1 className="font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-wider text-white drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.3)] leading-[1.1] animate-in zoom-in-95 duration-700 delay-100 uppercase">
             Game <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-accent filter drop-shadow-none">Keys</span>{' '}
             <span className="text-primary">&</span>{' '}<br />
             <span className="text-white">Top-Ups</span>
           </h1>
 
-          <p className="text-muted-foreground text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+          <p className="text-muted-foreground text-base md:text-2xl max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
             Instant delivery for game keys, gift cards, in-game currencies and subscriptions.
             <br className="hidden sm:block" />
             <span className="mt-2 inline-block">
@@ -106,12 +152,12 @@ const Index = () => {
             </span>
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
-            <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card/40 backdrop-blur-md border border-white/10 text-sm hover:border-primary/30 transition-colors">
+          <div className="flex flex-wrap justify-center gap-3 pt-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/40 backdrop-blur-md border border-white/10 text-xs sm:text-sm hover:border-primary/30 transition-colors">
               <Zap className="w-4 h-4 text-primary fill-primary/20" />
               <span className="font-semibold text-foreground">24/7 Instant Delivery</span>
             </div>
-            <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card/40 backdrop-blur-md border border-white/10 text-sm hover:border-primary/30 transition-colors">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/40 backdrop-blur-md border border-white/10 text-xs sm:text-sm hover:border-primary/30 transition-colors">
               <ShieldAlert className="w-4 h-4 text-success fill-success/20" />
               <span className="font-semibold text-foreground">100% Secure Payment</span>
             </div>
@@ -120,10 +166,10 @@ const Index = () => {
       </section>
 
       {/* Main Content */}
-      <section className="container relative z-20 -mt-16 space-y-8 pb-20">
+      <section className="container relative z-20 -mt-8 sm:-mt-16 space-y-6 sm:space-y-8 pb-20">
 
         {/* Search & Filter Bar */}
-        <div className="bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl shadow-black/50">
+        <div className="relative z-50 bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl shadow-black/50">
           <div className="flex flex-col gap-4">
 
             {/* Top row: search + sort */}
@@ -140,7 +186,7 @@ const Index = () => {
               </div>
 
               {/* Sort dropdown */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <Button
                   id="sort-button"
                   variant="ghost"
@@ -170,7 +216,7 @@ const Index = () => {
             </div>
 
             {/* Category pills */}
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {categories.map((cat) => {
                 const Icon = cat.icon;
                 const isActive = activeCategory === cat.value;
@@ -179,20 +225,49 @@ const Index = () => {
                     key={cat.value}
                     id={`cat-${cat.value}`}
                     variant="ghost"
-                    onClick={() => setActiveCategory(cat.value)}
+                    onClick={() => {
+                      setActiveCategory(cat.value);
+                      if (cat.value === 'games') {
+                        setActiveSubcategory('all_games');
+                      } else {
+                        setActiveSubcategory('');
+                      }
+                    }}
                     className={cn(
-                      'h-9 px-3.5 rounded-full font-display text-xs tracking-wider transition-all duration-300 border whitespace-nowrap flex-shrink-0',
-                      isActive
-                        ? 'bg-primary/10 text-primary border-primary/30 shadow-[0_0_15px_-5px_rgba(var(--primary-rgb),0.4)]'
-                        : 'bg-background/30 text-muted-foreground border-transparent hover:border-primary/20 hover:bg-background/50'
+                      "rounded-xl gap-2 font-display text-sm tracking-wide whitespace-nowrap px-4 py-6 transition-all duration-300",
+                      isActive 
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
+                        : "bg-white/5 text-muted-foreground border border-white/10 hover:border-primary/50 hover:bg-primary/10 hover:text-white"
                     )}
                   >
-                    <Icon className={cn('w-3.5 h-3.5 mr-1.5', isActive ? 'text-primary' : cat.color)} />
+                    <Icon className={cn("h-4 w-4", isActive ? "text-primary-foreground" : cat.color)} />
                     {cat.label}
                   </Button>
                 );
               })}
             </div>
+
+            {/* Subcategories (only shows if active category has subcategories) */}
+            {categories.find(c => c.value === activeCategory)?.subcategories && (
+              <div className="flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-hide -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                {categories.find(c => c.value === activeCategory)!.subcategories!.map(sub => (
+                  <Button
+                    key={sub.value}
+                    variant={activeSubcategory === sub.value ? 'default' : 'outline'}
+                    size="sm"
+                    className={cn(
+                      "rounded-full text-xs font-display tracking-wider border transition-colors",
+                      activeSubcategory === sub.value 
+                        ? "bg-primary/20 text-primary border-primary hover:bg-primary/30" 
+                        : "bg-transparent text-muted-foreground border-white/10 hover:border-white/30 hover:text-white"
+                    )}
+                    onClick={() => setActiveSubcategory(sub.value)}
+                  >
+                    {sub.label}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -214,7 +289,7 @@ const Index = () => {
               <p className="font-display tracking-wider animate-pulse">Loading amazing deals...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {filtered.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

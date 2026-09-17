@@ -85,7 +85,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <div className={cn('absolute inset-0 bg-gradient-to-b opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none', meta.imgBg, 'to-transparent')} />
 
       {/* Image area */}
-      <div className={cn('relative h-44 overflow-hidden bg-gradient-to-b', meta.imgBg, 'to-card/80')}>
+      <div className={cn('relative h-32 sm:h-44 overflow-hidden bg-gradient-to-b', meta.imgBg, 'to-card/80')}>
         <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent z-10" />
 
         {hasImage ? (
@@ -117,29 +117,29 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-3 relative z-20">
-        <div className="space-y-1">
+      <div className="p-2.5 sm:p-4 space-y-2 sm:space-y-3 relative z-20">
+        <div className="space-y-0.5 sm:space-y-1">
           {product.platform && (
-            <p className="text-[10px] font-display tracking-widest text-muted-foreground/60 uppercase">{product.platform}</p>
+            <p className="text-[9px] sm:text-[10px] font-display tracking-widest text-muted-foreground/60 uppercase">{product.platform}</p>
           )}
-          <h3 className="font-display text-sm font-bold tracking-wide leading-tight line-clamp-2 text-foreground group-hover:text-white transition-colors duration-300">
+          <h3 className="font-display text-xs sm:text-sm font-bold tracking-wide leading-tight line-clamp-2 text-foreground group-hover:text-white transition-colors duration-300">
             {product.title}
           </h3>
           {product.description && (
-            <p className="text-xs text-muted-foreground/70 line-clamp-2 min-h-[2.5em]">{product.description}</p>
+            <p className="hidden sm:block text-xs text-muted-foreground/70 line-clamp-2 min-h-[2.5em]">{product.description}</p>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+        <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/5 gap-2">
           <div>
             <div className="flex items-baseline gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">৳</span>
-              <span className="font-display text-xl font-bold text-white tracking-tight group-hover:text-accent transition-colors">
+              <span className="text-[10px] text-muted-foreground font-medium">৳</span>
+              <span className="font-display text-base sm:text-xl font-bold text-white tracking-tight group-hover:text-accent transition-colors">
                 {Number(product.sale_price).toLocaleString('en-BD')}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
               {deliveryIcon[product.delivery_type]}
               <span className="font-medium">{deliveryLabel[product.delivery_type]}</span>
               <span className="mx-1 opacity-50">|</span>
@@ -152,7 +152,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Button
             size="sm"
             className={cn(
-              'font-display text-xs tracking-wider gap-1.5 transition-all duration-300',
+              'font-display text-[10px] sm:text-xs tracking-wider gap-1 sm:gap-1.5 transition-all duration-300 h-7 sm:h-9 px-2 sm:px-3 shrink-0',
               product.in_stock > 0
                 ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-accent text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/25'
                 : 'bg-secondary text-muted-foreground cursor-not-allowed opacity-60'
@@ -162,11 +162,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
           >
             {product.in_stock > 0 ? (
               <>
-                <ShoppingCart className="h-3.5 w-3.5" />
-                Buy
+                <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span>Buy</span>
               </>
             ) : (
-              'Sold Out'
+              'Sold'
             )}
           </Button>
         </div>

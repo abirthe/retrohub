@@ -7,13 +7,47 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
+      admin_action_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          after_status: Database["public"]["Enums"]["order_status"] | null
+          before_status: Database["public"]["Enums"]["order_status"] | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          order_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          after_status?: Database["public"]["Enums"]["order_status"] | null
+          before_status?: Database["public"]["Enums"]["order_status"] | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          order_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          after_status?: Database["public"]["Enums"]["order_status"] | null
+          before_status?: Database["public"]["Enums"]["order_status"] | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          order_id?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           actor_id: string | null
@@ -47,47 +81,46 @@ export type Database = {
         }
         Relationships: []
       }
-      inventory_keys: {
+      deliveries: {
         Row: {
+          admin_id: string | null
+          cost_paid: number | null
           created_at: string | null
+          delivered_at: string | null
+          delivery_code: string
+          delivery_notes: string | null
           id: string
-          order_id: string | null
-          pin_code: string
-          product_id: string | null
-          serial_number: string | null
-          sold_at: string | null
-          status: Database["public"]["Enums"]["key_status"] | null
+          order_id: string
+          sourced_at: string | null
+          sourced_from: string | null
         }
         Insert: {
+          admin_id?: string | null
+          cost_paid?: number | null
           created_at?: string | null
+          delivered_at?: string | null
+          delivery_code: string
+          delivery_notes?: string | null
           id?: string
-          order_id?: string | null
-          pin_code: string
-          product_id?: string | null
-          serial_number?: string | null
-          sold_at?: string | null
-          status?: Database["public"]["Enums"]["key_status"] | null
+          order_id: string
+          sourced_at?: string | null
+          sourced_from?: string | null
         }
         Update: {
+          admin_id?: string | null
+          cost_paid?: number | null
           created_at?: string | null
+          delivered_at?: string | null
+          delivery_code?: string
+          delivery_notes?: string | null
           id?: string
-          order_id?: string | null
-          pin_code?: string
-          product_id?: string | null
-          serial_number?: string | null
-          sold_at?: string | null
-          status?: Database["public"]["Enums"]["key_status"] | null
+          order_id?: string
+          sourced_at?: string | null
+          sourced_from?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_keys_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_inventory_keys_order"
+            foreignKeyName: "deliveries_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -159,6 +192,8 @@ export type Database = {
           platform: string | null
           region: Database["public"]["Enums"]["region_tag"] | null
           sale_price: number
+          source_platform: string | null
+          source_url: string | null
           title: string
           updated_at: string | null
         }
@@ -175,6 +210,8 @@ export type Database = {
           platform?: string | null
           region?: Database["public"]["Enums"]["region_tag"] | null
           sale_price: number
+          source_platform?: string | null
+          source_url?: string | null
           title: string
           updated_at?: string | null
         }
@@ -191,6 +228,8 @@ export type Database = {
           platform?: string | null
           region?: Database["public"]["Enums"]["region_tag"] | null
           sale_price?: number
+          source_platform?: string | null
+          source_url?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -243,28 +282,82 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_orders_today: {
+        Row: {
+          order_count: number | null
+        }
+        Relationships: []
+      }
+      v_pending_action_count: {
+        Row: {
+          count: number | null
+        }
+        Relationships: []
+      }
+      v_profit_today: {
+        Row: {
+          profit: number | null
+          total_cost: number | null
+          total_revenue: number | null
+        }
+        Relationships: []
+      }
+      v_revenue_today: {
+        Row: {
+          revenue: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      has_role: {
+      cancel_order: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: Json
+      }
+      fulfill_order: {
         Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
+          p_order_id: string
+          p_delivery_code: string
+          p_cost_paid?: number
+          p_sourced_from?: string
+          p_notes?: string
         }
+        Returns: Json
+      }
+      has_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"]; _user_id: string }
         Returns: boolean
       }
-      retry_failed_order: { Args: { p_order_id: string }; Returns: boolean }
-      sync_all_stock: { Args: never; Returns: undefined }
+      hold_order: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: Json
+      }
+      refund_order: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: Json
+      }
+      start_sourcing: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
+      validate_order: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
+      verify_payment: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"
       delivery_type: "instant_code" | "api_h2h" | "automation"
-      key_status: "available" | "sold" | "expired"
       order_status:
         | "pending"
-        | "validated"
-        | "processing"
-        | "completed"
+        | "payment_submitted"
+        | "payment_verified"
+        | "sourcing"
+        | "fulfilled"
         | "failed"
         | "cancelled"
         | "refunded"
@@ -307,7 +400,6 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
@@ -428,47 +520,21 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       delivery_type: ["instant_code", "api_h2h", "automation"],
-      key_status: ["available", "sold", "expired"],
       order_status: [
         "pending",
-        "validated",
-        "processing",
-        "completed",
+        "payment_submitted",
+        "payment_verified",
+        "sourcing",
+        "fulfilled",
         "failed",
         "cancelled",
         "refunded",
       ],
       product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard"],
       region_tag: [
-        "GLOBAL",
-        "US",
-        "EU",
-        "ASIA",
-        "LATAM",
-        "UK",
-        "CA",
-        "MX",
-        "BR",
-        "IN",
-        "CN",
-        "JP",
-        "KR",
-        "AU",
-        "NZ",
-        "ME",
-        "AFRICA",
-        "OCEANIA",
-        "AE",
-        "SA",
-        "ZA",
-        "RU",
-        "TR",
-        "SG",
-        "MY",
-        "TH",
-        "ID",
-        "PH",
-        "VN",
+        "GLOBAL", "US", "EU", "ASIA", "LATAM", "UK", "CA", "MX", "BR", "IN",
+        "CN", "JP", "KR", "AU", "NZ", "ME", "AFRICA", "OCEANIA", "AE", "SA",
+        "ZA", "RU", "TR", "SG", "MY", "TH", "ID", "PH", "VN",
       ],
     },
   },

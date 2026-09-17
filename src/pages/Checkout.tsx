@@ -4,16 +4,12 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { createOrder } from '@/lib/shopApi';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, ArrowLeft, Trash2, CreditCard, CheckCircle2, ShieldCheck, Gamepad2 } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, ShieldCheck } from 'lucide-react';
 import ShopHeader from '@/components/ShopHeader';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import heroBg from '@/assets/hero-bg.jpg';
+import { CheckoutCartItems } from '@/components/checkout/CheckoutCartItems';
+import { CheckoutSummary } from '@/components/checkout/CheckoutSummary';
 
 const Checkout = () => {
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
@@ -64,7 +60,6 @@ const Checkout = () => {
     setLoading(true);
     try {
       const failedOrders: string[] = [];
-
       const createdOrderIds: string[] = [];
 
       // Create orders for each item with stock validation
@@ -112,17 +107,17 @@ const Checkout = () => {
       </div>
 
       <ShopHeader />
-      <div className="container relative z-10 py-12">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container relative z-10 py-6 sm:py-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
-            className="font-display text-xs tracking-wider text-muted-foreground hover:text-white"
+            className="font-display text-xs tracking-wider text-muted-foreground hover:text-white self-start"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
           </Button>
-          <h1 className="font-display text-2xl font-bold tracking-wider text-right">
+          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-wider">
             Checkout
           </h1>
         </div>
@@ -130,127 +125,20 @@ const Checkout = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-card/50 backdrop-blur-md border-white/5 border overflow-hidden">
-              <CardHeader className="bg-white/5 border-b border-white/5">
-                <CardTitle className="font-display text-lg flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5 text-primary" />
-                  Order Items
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-white/5">
-                  {items.map((item) => (
-                    <div key={item.product.id} className="p-6 flex flex-col md:flex-row gap-6 items-start md:items-center hover:bg-white/5 transition-colors">
-                      <div className="w-24 h-24 bg-secondary/50 rounded-lg flex items-center justify-center flex-shrink-0 border border-white/5">
-                        <span className="font-display text-2xl font-black text-muted-foreground/20">
-                          {item.product.platform?.charAt(0)}
-                        </span>
-                      </div>
-
-                      <div className="flex-1 space-y-2">
-                        <h3 className="font-display text-base font-bold text-foreground">{item.product.title}</h3>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{item.product.description}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="flex items-center rounded-md border border-white/10 bg-background/50">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 rounded-none hover:bg-white/10"
-                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            >
-                              -
-                            </Button>
-                            <span className="text-xs font-mono w-8 text-center">{item.quantity}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 rounded-none hover:bg-white/10"
-                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            >
-                              +
-                            </Button>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => removeFromCart(item.product.id)}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="font-display text-xl font-bold text-white tracking-tight">
-                          ৳{(Number(item.product.sale_price) * item.quantity).toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          ৳{Number(item.product.sale_price).toFixed(2)} / unit
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <CheckoutCartItems 
+              items={items} 
+              updateQuantity={updateQuantity} 
+              removeFromCart={removeFromCart} 
+            />
           </div>
 
           {/* Order Summary */}
           <div className="space-y-6">
-            <Card className="bg-card/80 backdrop-blur-xl border-white/10 border shadow-2xl sticky top-24">
-              <CardHeader className="pb-4">
-                <CardTitle className="font-display text-lg tracking-wider">Order Summary</CardTitle>
-                <CardDescription>Review your order before paying</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-display">৳{totalPrice.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Handling</span>
-                    <span className="font-display text-success">Free</span>
-                  </div>
-                  <Separator className="bg-white/10" />
-                  <div className="flex justify-between items-end">
-                    <span className="font-display font-medium">Total</span>
-                    <span className="font-display text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-                      ৳{totalPrice.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleCheckout}
-                  className="w-full h-12 gradient-primary font-display text-sm tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 relative overflow-hidden group"
-                  size="lg"
-                  disabled={loading}
-                >
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                  {loading ? (
-                    <>
-                      <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4" />
-                      Proceed to Payment
-                    </>
-                  )}
-                </Button>
-
-                <div className="rounded-lg bg-secondary/30 p-3 flex gap-3 items-start border border-white/5">
-                  <ShieldCheck className="w-5 h-5 text-success shrink-0" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-foreground">Secure Checkout</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">Your transaction is secured with end-to-end encryption. We typically process orders within 5 minutes.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <CheckoutSummary 
+              totalPrice={totalPrice} 
+              loading={loading} 
+              onCheckout={handleCheckout} 
+            />
           </div>
         </div>
       </div>
@@ -259,4 +147,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-
