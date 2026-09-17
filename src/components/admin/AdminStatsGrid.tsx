@@ -2,21 +2,20 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { DollarSign, Package, TrendingUp, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { fetchOrders, fetchProducts } from '@/lib/shopApi';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAdminStats } from '@/lib/shopApi';
 
-type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
-type AdminProduct = NonNullable<Awaited<ReturnType<typeof fetchProducts>>>[number];
+export const AdminStatsGrid = (): React.ReactElement => {
+  const { data: adminStats, isLoading } = useQuery({
+    queryKey: ['admin-stats-views'],
+    queryFn: fetchAdminStats,
+    refetchInterval: 30000, // Refetch stats every 30 seconds
+  });
 
-interface AdminStatsGridProps {
-  orders: AdminOrder[] | undefined;
-  products: AdminProduct[] | undefined;
-}
-
-export const AdminStatsGrid = ({ orders, products }: AdminStatsGridProps): React.ReactElement => {
   const stats = [
     {
       label: 'Revenue Today',
-      value: `৳${(orders || []).reduce((sum, o) => sum + Number(o.total), 0).toFixed(2)}`,
+      value: `৳${(adminStats?.revenue || 0).toFixed(2)}`,
       icon: DollarSign,
       color: 'text-primary',
       bg: 'bg-primary/5',
@@ -24,17 +23,15 @@ export const AdminStatsGrid = ({ orders, products }: AdminStatsGridProps): React
     },
     {
       label: 'Orders Today',
-      value: (orders || []).length.toString(),
+      value: (adminStats?.orders || 0).toString(),
       icon: Package,
       color: 'text-accent',
       bg: 'bg-accent/5',
       border: 'border-accent/20'
     },
     {
-      label: 'Avg Margin',
-      value: products?.length
-        ? `${((products.reduce((sum, p) => sum + ((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100, 0) / products.length)).toFixed(1)}%`
-        : '0%',
+      label: 'Profit Today',
+      value: `৳${(adminStats?.profit || 0).toFixed(2)}`,
       icon: TrendingUp,
       color: 'text-success',
       bg: 'bg-success/5',
@@ -42,7 +39,7 @@ export const AdminStatsGrid = ({ orders, products }: AdminStatsGridProps): React
     },
     {
       label: 'Action Required',
-      value: (orders || []).filter((o) => o.status === 'pending' || o.status === 'processing').length.toString(),
+      value: (adminStats?.pendingActions || 0).toString(),
       icon: AlertTriangle,
       color: 'text-destructive',
       bg: 'bg-destructive/10',
@@ -67,7 +64,11 @@ export const AdminStatsGrid = ({ orders, products }: AdminStatsGridProps): React
               )}
             </div>
             <div>
-              <p className="text-3xl font-bold font-display tracking-tight text-foreground">{stat.value}</p>
+              {isLoading ? (
+                <div className="h-9 w-24 bg-white/10 animate-pulse rounded"></div>
+              ) : (
+                <p className="text-3xl font-bold font-display tracking-tight text-foreground">{stat.value}</p>
+              )}
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">{stat.label}</p>
             </div>
           </CardContent>

@@ -10,6 +10,7 @@ import {
   cancelOrder,
   refundOrder,
   validateOrder,
+  startSourcing,
 } from '@/lib/shopApi';
 import { sendOrderCompletionEmail } from '@/lib/emailService';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -69,14 +70,28 @@ const AdminDashboard = () => {
     enabled: isAdmin === true,
   });
 
-  const handleAction = async () => {
+  const handleAction = async (data?: any) => {
     if (!actionDialog.order) return;
     setLoading(true);
     try {
       let result;
       switch (actionDialog.action) {
+        case 'source':
+          result = await startSourcing(actionDialog.order.id);
+          if (result.success) {
+            toast({ title: 'Sourcing Started', description: 'Order moved to sourcing.' });
+          } else {
+            toast({ title: 'Action Failed', description: result.error, variant: 'destructive' });
+          }
+          break;
         case 'fulfill':
-          result = await fulfillOrder(actionDialog.order.id);
+          result = await fulfillOrder(
+            actionDialog.order.id, 
+            data?.deliveryCode, 
+            data?.costPaid, 
+            data?.sourcedFrom, 
+            data?.notes
+          );
           if (result.success) {
             await sendOrderCompletionEmail(actionDialog.order.id);
             toast({ title: 'Order Fulfilled', description: 'Product delivered successfully.' });
@@ -169,7 +184,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <AdminStatsGrid orders={orders} products={products} />
+        <AdminStatsGrid />
 
         <Tabs defaultValue="orders" className="space-y-6">
           <TabsList className="bg-secondary/30 p-1 rounded-xl border border-white/5 backdrop-blur-md">

@@ -1,4 +1,5 @@
-import { Gamepad2, ShoppingCart, User, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 const ShopHeader = () => {
   const location = useLocation();
@@ -17,18 +19,23 @@ const ShopHeader = () => {
   const { user, signOut } = useAuth();
   const { totalItems } = useCart();
   const { isAdmin } = useAdmin();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const closeMobile = () => setMobileOpen(false);
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/50">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
+      <div className="container flex h-16 items-center justify-between gap-2">
+        {/* Logo */}
+        <Link to="/" onClick={closeMobile} className="flex items-center gap-2 group shrink-0">
           <Gamepad2 className="h-7 w-7 text-primary animate-pulse-neon" />
           <span className="font-display text-lg font-bold tracking-wider text-foreground">
             <span className="text-primary">RETRO</span>HUB
           </span>
         </Link>
 
-        <nav className="flex items-center gap-3">
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex items-center gap-3">
           <Link to="/">
             <Button
               variant={!isAdminPage ? 'default' : 'ghost'}
@@ -67,7 +74,7 @@ const ShopHeader = () => {
                     My Orders
                   </DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem onClick={signOut} className="text-destructive">
+                <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </DropdownMenuItem>
@@ -91,6 +98,103 @@ const ShopHeader = () => {
               )}
             </Button>
           </Link>
+        </nav>
+
+        {/* Mobile right cluster */}
+        <div className="flex sm:hidden items-center gap-2">
+          {/* Cart icon always visible on mobile */}
+          <Link to="/checkout" onClick={closeMobile}>
+            <Button variant="outline" size="icon" className="relative border-primary/30 hover:border-primary h-9 w-9">
+              <ShoppingCart className="h-4 w-4" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full gradient-accent text-[10px] font-bold flex items-center justify-center text-accent-foreground">
+                  {totalItems}
+                </span>
+              )}
+            </Button>
+          </Link>
+
+          {/* Hamburger */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 border border-white/10"
+            onClick={() => setMobileOpen(o => !o)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      <div
+        className={cn(
+          'sm:hidden overflow-hidden transition-all duration-300 ease-in-out',
+          mobileOpen ? 'max-h-[80vh] border-b border-border/50' : 'max-h-0'
+        )}
+      >
+        <nav className="container py-4 flex flex-col gap-1 overflow-y-auto max-h-[80vh]">
+          <Link
+            to="/"
+            onClick={closeMobile}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors',
+              !isAdminPage ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+            )}
+          >
+            <Store className="h-4 w-4" />
+            Shop
+          </Link>
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={closeMobile}
+              className={cn(
+                'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors',
+                isAdminPage ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+              )}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Admin
+            </Link>
+          )}
+
+          {user && (
+            <Link
+              to="/orders"
+              onClick={closeMobile}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              My Orders
+            </Link>
+          )}
+
+          <div className="border-t border-border/30 mt-1 pt-2">
+            {user ? (
+              <div>
+                <p className="px-4 py-1 text-xs text-muted-foreground truncate">{user.email}</p>
+                <button
+                  onClick={() => { signOut(); closeMobile(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={closeMobile}
+                className="flex items-center justify-center gap-2 mx-2 py-3 rounded-xl text-sm font-display tracking-wider gradient-primary text-primary-foreground"
+              >
+                <User className="h-4 w-4" />
+                Sign In / Register
+              </Link>
+            )}
+          </div>
         </nav>
       </div>
     </header>

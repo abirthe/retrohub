@@ -5,20 +5,20 @@ export type ProductCategory = Database['public']['Enums']['product_category'];
 export type DeliveryType = Database['public']['Enums']['delivery_type'];
 export type Region = Database['public']['Enums']['region_tag'];
 export type OrderStatus = Database['public']['Enums']['order_status'];
-export type KeyStatus = Database['public']['Enums']['key_status'];
 export type AppRole = Database['public']['Enums']['app_role'];
 
 export type Product = Database['public']['Tables']['products']['Row'];
 export type Order = Database['public']['Tables']['orders']['Row'];
-export type InventoryKey = Database['public']['Tables']['inventory_keys']['Row'];
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
+export type Delivery = Database['public']['Tables']['deliveries']['Row'];
+export type AdminActionLog = Database['public']['Tables']['admin_action_logs']['Row'];
 
 // Fetch products from database
 export async function fetchProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('id, title, sale_price, image_url, category, platform, region, in_stock, delivery_type, created_at, is_active')
+    .select('id, title, sale_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
@@ -30,14 +30,43 @@ export async function fetchProducts() {
 export async function fetchOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, products(title, platform, in_stock, delivery_type)')
+    .select('*, products(title, platform, in_stock, delivery_type, source_url, source_platform)')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data;
 }
 
-// Create an order with stock validation
+// Fetch deliveries for an order
+export async function fetchOrderDeliveries(orderId: string) {
+  const { data, error } = await supabase
+    .from('deliveries')
+    .select('*')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Delivery[];
+}
+
+// Admin Stats
+export async function fetchAdminStats() {
+  const [revenueRes, ordersRes, profitRes, pendingRes] = await Promise.all([
+    supabase.from('v_revenue_today').select('revenue').maybeSingle(),
+    supabase.from('v_orders_today').select('order_count').maybeSingle(),
+    supabase.from('v_profit_today').select('*').maybeSingle(),
+    supabase.from('v_pending_action_count').select('count').maybeSingle(),
+  ]);
+
+  return {
+    revenue: revenueRes.data?.revenue || 0,
+    orders: ordersRes.data?.order_count || 0,
+    profit: profitRes.data?.profit || 0,
+    pendingActions: pendingRes.data?.count || 0,
+  };
+}
+
+// Create an order
 export async function createOrder(
   productId: string,
   total: number,
@@ -46,7 +75,6 @@ export async function createOrder(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  // Bypass stock validation and create order directly
   const { data: orderData, error: insertError } = await supabase
     .from('orders')
     .insert({
@@ -81,28 +109,41 @@ export async function checkIsAdmin(): Promise<boolean> {
 
 // Admin Order Management Functions
 
-// Fulfill order manually (backend verifies inventory or handles custom orders)
-export async function fulfillOrder(orderId: string, customOutput?: string) {
-  // Check if it's a custom order
-  const { data: order } = await supabase.from('orders').select('product_id').eq('id', orderId).single();
-  
-  // If no product_id (custom request) OR admin explicitly provided a custom output/key
-  if (!order?.product_id || customOutput) {
-    const { error } = await supabase.from('orders').update({
-      status: 'completed',
-      final_output: customOutput || 'Order fulfilled manually.',
-    }).eq('id', orderId);
-    
-    if (error) return { success: false, error: error.message };
-    return { success: true, message: 'Order fulfilled manually' };
-  }
-
-  // Otherwise, use automated inventory key assignment
-  const { data, error } = await supabase.rpc('fulfill_order_manual' as never, {
+// Verify payment
+export async function validateOrder(orderId: string) {
+  const { data, error } = await supabase.rpc('verify_payment' as never, {
     p_order_id: orderId
   } as never);
   if (error) throw error;
-  return (data as unknown) as { success: boolean; error?: string; message?: string; key_assigned?: boolean };
+  return (data as unknown) as { success: boolean; error?: string; message?: string };
+}
+
+// Start Sourcing
+export async function startSourcing(orderId: string) {
+  const { data, error } = await supabase.rpc('start_sourcing' as never, {
+    p_order_id: orderId
+  } as never);
+  if (error) throw error;
+  return (data as unknown) as { success: boolean; error?: string; message?: string };
+}
+
+// Fulfill order manually via deliveries table
+export async function fulfillOrder(
+  orderId: string, 
+  deliveryCode: string, 
+  costPaid?: number, 
+  sourcedFrom?: string, 
+  notes?: string
+) {
+  const { data, error } = await supabase.rpc('fulfill_order' as never, {
+    p_order_id: orderId,
+    p_delivery_code: deliveryCode,
+    p_cost_paid: costPaid || null,
+    p_sourced_from: sourcedFrom || null,
+    p_notes: notes || null
+  } as never);
+  if (error) throw error;
+  return (data as unknown) as { success: boolean; error?: string; message?: string; delivery_id?: string };
 }
 
 // Hold order
@@ -122,7 +163,7 @@ export async function cancelOrder(orderId: string, reason?: string) {
     p_reason: reason || null
   } as never);
   if (error) throw error;
-  return (data as unknown) as { success: boolean; error?: string; message?: string; key_released?: boolean };
+  return (data as unknown) as { success: boolean; error?: string; message?: string };
 }
 
 // Refund order
@@ -132,37 +173,15 @@ export async function refundOrder(orderId: string, reason?: string) {
     p_reason: reason || null
   } as never);
   if (error) throw error;
-  return (data as unknown) as { success: boolean; error?: string; message?: string; key_released?: boolean };
-}
-
-// Validate order
-export async function validateOrder(orderId: string) {
-  const { data, error } = await supabase.rpc('validate_order' as never, {
-    p_order_id: orderId
-  } as never);
-  if (error) throw error;
   return (data as unknown) as { success: boolean; error?: string; message?: string };
 }
 
-// Check inventory availability
-export async function checkInventoryAvailability(productId: string) {
-  const { data, error } = await supabase.rpc('check_inventory_availability' as never, {
-    p_product_id: productId
-  } as never);
-  if (error) throw error;
-  return (data as unknown) as { success: boolean; error?: string; product_id?: string; product_title?: string; available_keys?: number; in_stock?: number; has_inventory?: boolean };
-}
-
-// Update order with transaction ID
+// Update order with transaction ID and set to payment_submitted
 export async function updateOrderTransactionId(orderIds: string[], transactionId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  // We use Promise.all to update multiple orders if necessary, though usually it's one cart checkout = multiple orders
   const updates = orderIds.map(async (id) => {
-    // Check if we can update customer_input. 
-    // We first fetch the current input to avoid overwriting other data if possible, 
-    // but here we might just merge or overwrite.
     const { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
       .select('customer_input')
@@ -177,7 +196,8 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
     return supabase
       .from('orders')
       .update({
-        customer_input: newInput
+        customer_input: newInput,
+        status: 'payment_submitted'
       })
       .eq('id', id)
       .eq('user_id', user.id);
@@ -187,8 +207,19 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
 
   const errors = results.filter(r => r.error);
   if (errors.length > 0) {
-    throw new Error('Failed to update transaction ID for created orders. Please contact support.');
+    throw new Error('Failed to submit payment. Please contact support.');
   }
 
+  return { success: true };
+}
+
+// Update product prices (Admin only)
+export async function updateProductPrice(id: string, salePrice: number, costPrice: number) {
+  const { error } = await supabase
+    .from('products')
+    .update({ sale_price: salePrice, cost_price: costPrice })
+    .eq('id', id);
+    
+  if (error) throw error;
   return { success: true };
 }

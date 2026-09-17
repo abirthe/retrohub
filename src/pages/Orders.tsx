@@ -1,48 +1,55 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Package, ArrowLeft, CheckCircle2, Clock, XCircle, AlertCircle, Search, Calendar } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Package, ArrowLeft, CheckCircle2, Clock, XCircle, AlertCircle, RotateCcw, CreditCard } from 'lucide-react';
 import ShopHeader from '@/components/ShopHeader';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { MobileOrderCard } from '@/components/orders/MobileOrderCard';
+import { DesktopOrderTable } from '@/components/orders/DesktopOrderTable';
 
 const statusStyles: Record<string, { className: string; icon: React.ReactNode; label: string }> = {
-  completed: {
-    className: 'bg-success/10 text-success border-success/20 hover:bg-success/20',
-    icon: <CheckCircle2 className="h-3.5 w-3.5" />,
-    label: 'Completed',
-  },
-  processing: {
-    className: 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20',
-    icon: <Clock className="h-3.5 w-3.5 animate-pulse" />,
-    label: 'Processing',
-  },
   pending: {
-    className: 'bg-accent/10 text-accent border-accent/20 hover:bg-accent/20',
+    className: 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20',
     icon: <AlertCircle className="h-3.5 w-3.5" />,
     label: 'Pending',
   },
-  validated: {
-    className: 'bg-primary/20 text-primary border-primary/30',
+  payment_submitted: {
+    className: 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20',
+    icon: <CreditCard className="h-3.5 w-3.5" />,
+    label: 'Payment Submitted',
+  },
+  payment_verified: {
+    className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20',
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
-    label: 'Validated',
+    label: 'Payment Verified',
+  },
+  sourcing: {
+    className: 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20',
+    icon: <Clock className="h-3.5 w-3.5 animate-pulse" />,
+    label: 'Sourcing',
+  },
+  fulfilled: {
+    className: 'bg-success/10 text-success border-success/20 hover:bg-success/20',
+    icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+    label: 'Fulfilled',
+  },
+  cancelled: {
+    className: 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20',
+    icon: <XCircle className="h-3.5 w-3.5" />,
+    label: 'Cancelled',
+  },
+  refunded: {
+    className: 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20',
+    icon: <RotateCcw className="h-3.5 w-3.5" />,
+    label: 'Refunded',
   },
   failed: {
     className: 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20',
     icon: <XCircle className="h-3.5 w-3.5" />,
     label: 'Failed',
-  },
+  }
 };
 
 const Orders = () => {
@@ -55,7 +62,7 @@ const Orders = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('orders')
-        .select('*, products(title, platform, category)')
+        .select('*, products(title, platform, category), deliveries(*)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -98,10 +105,7 @@ const Orders = () => {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Track and manage your purchases</p>
           </div>
-
-          {/* Could add a search/filter here later */}
         </div>
-
 
         <div className="space-y-6">
           {isLoading ? (
@@ -128,86 +132,26 @@ const Orders = () => {
             </Card>
           ) : (
             <Card className="bg-card/60 backdrop-blur-xl border-white/5 overflow-hidden shadow-2xl">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-secondary/50">
-                    <TableRow className="border-white/5 hover:bg-transparent">
-                      <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pl-6">Order ID</TableHead>
-                      <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Product</TableHead>
-                      <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Status</TableHead>
-                      <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Total</TableHead>
-                      <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Date</TableHead>
-                      <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pr-6">Delivery</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((order) => {
-                      const status = statusStyles[order.status] || statusStyles.pending;
-                      const orderDate = new Date(order.created_at).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      });
-
-                      return (
-                        <TableRow key={order.id} className="border-white/5 hover:bg-white/5 transition-colors group">
-                          <TableCell className="font-mono text-xs text-muted-foreground pl-6">
-                            #{order.id.slice(0, 8)}
-                          </TableCell>
-
-                          <TableCell className="text-sm font-medium text-foreground">
-                            <div className="flex items-center gap-2">
-                              <span className="w-8 h-8 rounded bg-background/50 border border-white/5 flex items-center justify-center text-[10px] text-muted-foreground">
-                                {order.products?.platform?.charAt(0) || '?'}
-                              </span>
-                              {order.products?.title || 'Unknown Product'}
-                            </div>
-                          </TableCell>
-
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={cn("text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit transition-colors", status.className)}
-                            >
-                              {status.icon}
-                              {status.label}
-                            </Badge>
-                          </TableCell>
-
-                          <TableCell className="font-display text-sm font-bold text-white group-hover:text-primary transition-colors">
-                            ৳{Number(order.total).toFixed(2)}
-                          </TableCell>
-
-                          <TableCell className="text-xs text-muted-foreground tabular-nums">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-3 h-3 opacity-50" />
-                              {orderDate}
-                            </div>
-                          </TableCell>
-
-                          <TableCell className="pr-6">
-                            {order.final_output ? (
-                              <div className="text-xs space-y-1.5 animate-in fade-in slide-in-from-left-2 duration-500">
-                                <div className="font-mono text-success whitespace-pre-wrap bg-success/5 p-2 rounded border border-success/20 select-all selection:bg-success/30 max-h-40 overflow-y-auto">
-                                  {order.final_output}
-                                </div>
-                                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                  <CheckCircle2 className="w-3 h-3 text-success" />
-                                  Sent to email
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="text-xs text-muted-foreground italic opacity-50">
-                                Awaiting completion...
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+              {/* Mobile card layout */}
+              <div className="sm:hidden divide-y divide-white/5">
+                {orders.map((order) => {
+                  const status = statusStyles[order.status || 'pending'] || statusStyles.pending;
+                  const orderDate = new Date(order.created_at || '').toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                  });
+                  return (
+                    <MobileOrderCard 
+                      key={order.id} 
+                      order={order} 
+                      statusStyle={status} 
+                      orderDate={orderDate} 
+                    />
+                  );
+                })}
               </div>
+
+              {/* Desktop table layout */}
+              <DesktopOrderTable orders={orders} statusStyles={statusStyles} />
             </Card>
           )}
         </div>
@@ -217,4 +161,3 @@ const Orders = () => {
 };
 
 export default Orders;
-
