@@ -204,6 +204,7 @@ function parseSaleFile(filePath) {
       cost_price: deriveCostPrice(salePrice),
       region: regionFromTitle(name),
       is_active: true,
+      in_stock: 100,
     });
   }
   return products;
@@ -230,6 +231,7 @@ function parseSteamGamesFile(filePath) {
       cost_price: deriveCostPrice(salePrice),
       region: regionFromTitle(name),
       is_active: true,
+      in_stock: 100,
     });
   }
   return products;
@@ -256,6 +258,7 @@ function parsePSGamesFile(filePath) {
       cost_price: deriveCostPrice(salePrice),
       region: detectRegion(region) || regionFromTitle(name),
       is_active: true,
+      in_stock: 100,
     });
   }
   return products;
@@ -282,6 +285,7 @@ function parseXboxGamesFile(filePath) {
       cost_price: deriveCostPrice(salePrice),
       region: detectRegion(region) || regionFromTitle(name),
       is_active: true,
+      in_stock: 100,
     });
   }
   return products;
@@ -315,6 +319,7 @@ function parseArekta2File(filePath) {
       cost_price: deriveCostPrice(salePrice),
       region: regionFromTitle(name),
       is_active: true,
+      in_stock: 100,
     });
   }
   return products;
@@ -341,6 +346,7 @@ function parseOvrokFile(filePath) {
       cost_price: deriveCostPrice(salePrice),
       region: regionFromTitle(name),
       is_active: true,
+      in_stock: 100,
     });
   }
   return products;
