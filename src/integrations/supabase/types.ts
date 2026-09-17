@@ -268,7 +268,7 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "refunded"
-      product_category: "giftcard" | "topup" | "subscription"
+      product_category: "pc_game" | "xbox_game" | "ps_game" | "topup" | "subscription" | "software" | "giftcard"
       region_tag:
         | "GLOBAL"
         | "US"
@@ -438,7 +438,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
-      product_category: ["giftcard", "topup", "subscription"],
+      product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard"],
       region_tag: [
         "GLOBAL",
         "US",
