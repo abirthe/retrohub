@@ -3,7 +3,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
-const envPath = path.join(__dirname, '.env');
+const envPath = path.join(__dirname, '..', '.env');
 const envContent = fs.readFileSync(envPath, 'utf8');
 for (const line of envContent.split('\n')) {
   const t = line.trim();
@@ -22,7 +22,7 @@ function cleanTitle(t) {
 }
 
 async function run() {
-  const dir = path.join(__dirname, 'Products');
+  const dir = path.join(__dirname, '..', 'Products');
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.xlsx') || f.endsWith('.ods'));
 
   const { data: dbProducts } = await supabase.from('products').select('*');
