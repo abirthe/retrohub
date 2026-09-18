@@ -104,8 +104,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         )}
 
-        {/* Badges top-left */}
-        <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
+        {/* Badges */}
+        <div className="absolute top-3 left-0 w-full px-3 z-20 flex justify-between gap-1.5">
           <Badge variant="outline" className={cn('text-[10px] backdrop-blur-md transition-colors flex items-center gap-1', meta.badge)}>
             <CategoryIcon className="h-2.5 w-2.5" />
             {meta.label}

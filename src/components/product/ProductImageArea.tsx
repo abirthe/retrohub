@@ -40,7 +40,7 @@ export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
         </span>
       )}
 
-      <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
+      <div className="absolute top-3 left-0 w-full px-3 z-20 flex justify-between gap-1.5">
         <Badge variant="outline" className={cn("text-xs backdrop-blur-md px-3 py-1", categoryColor[product.category] || categoryColor.giftcard)}>
           {product.category}
         </Badge>
