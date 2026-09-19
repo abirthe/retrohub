@@ -31,6 +31,14 @@ export const REGIONS = {
   ID: { code: 'ID', label: '🇮🇩 Indonesia', flag: '🇮🇩' },
   PH: { code: 'PH', label: '🇵🇭 Philippines', flag: '🇵🇭' },
   VN: { code: 'VN', label: '🇻🇳 Vietnam', flag: '🇻🇳' },
+  AR: { code: 'AR', label: '🇦🇷 Argentina', flag: '🇦🇷' },
+  CO: { code: 'CO', label: '🇨🇴 Colombia', flag: '🇨🇴' },
+  CL: { code: 'CL', label: '🇨🇱 Chile', flag: '🇨🇱' },
+  PE: { code: 'PE', label: '🇵🇪 Peru', flag: '🇵🇪' },
+  EG: { code: 'EG', label: '🇪🇬 Egypt', flag: '🇪🇬' },
+  NG: { code: 'NG', label: '🇳🇬 Nigeria', flag: '🇳🇬' },
+  PK: { code: 'PK', label: '🇵🇰 Pakistan', flag: '🇵🇰' },
+  BD: { code: 'BD', label: '🇧🇩 Bangladesh', flag: '🇧🇩' },
 } as const;
 
 export type RegionCode = keyof typeof REGIONS;
