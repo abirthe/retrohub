@@ -54,7 +54,7 @@ const AdminDashboard = () => {
     }
   }, [user, isAdmin, adminLoading, navigate]);
 
-  const { data: orders, isLoading: ordersLoading } = useQuery({
+  const { data: orders, isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['admin-orders'],
     queryFn: fetchOrders,
     enabled: isAdmin === true,
@@ -197,11 +197,17 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
-            <OrdersTab
-              orders={orders}
-              ordersLoading={ordersLoading}
-              openActionDialog={openActionDialog}
-            />
+            {ordersError ? (
+              <div className="p-4 bg-destructive/20 text-destructive border border-destructive/50 rounded-lg">
+                Error loading orders: {ordersError instanceof Error ? ordersError.message : String(ordersError)}
+              </div>
+            ) : (
+              <OrdersTab
+                orders={orders}
+                ordersLoading={ordersLoading}
+                openActionDialog={openActionDialog}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="inventory">
