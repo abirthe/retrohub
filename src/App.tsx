@@ -14,6 +14,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Payment = lazy(() => import("./pages/Payment"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const CustomOrder = lazy(() => import("./pages/CustomOrder"));
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/orders" element={<Orders />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/custom-order" element={<CustomOrder />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
