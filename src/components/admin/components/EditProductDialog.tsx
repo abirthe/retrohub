@@ -61,7 +61,7 @@ export const EditProductDialog = ({ product, open, onClose }: EditProductDialogP
         description: description || null,
         category,
         platform: platform || null,
-        region: region as any,
+        region: region as Product['region'],
         sale_price: Number(salePrice),
         cost_price: Number(costPrice),
         in_stock: Number(inStock),
@@ -73,8 +73,8 @@ export const EditProductDialog = ({ product, open, onClose }: EditProductDialogP
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['products'] }); // in case frontend queries it
       onClose();
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      toast({ title: 'Error', description: (error as Error).message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
