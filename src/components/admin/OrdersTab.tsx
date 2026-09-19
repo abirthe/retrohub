@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Search, Copy, CheckCircle2, Truck, Pause, XCircle, RotateCcw, AlertCircle, Clock, ExternalLink, BoxSelect, CreditCard } from 'lucide-react';
+import { Search, Copy, CheckCircle2, Truck, Pause, XCircle, RotateCcw, AlertCircle, Clock, ExternalLink, BoxSelect, CreditCard, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { generateOrderEmailTemplate } from '@/lib/emailTemplates';
 import type { fetchOrders } from '@/lib/shopApi';
 
 type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
@@ -153,6 +154,17 @@ const OrdersTab = ({ orders, ordersLoading, openActionDialog }: OrdersTabProps) 
                     <div className="mt-6 pt-5 border-t border-white/5 flex flex-wrap gap-3 items-center">
                       <p className="text-xs text-muted-foreground mr-auto">Actions:</p>
                       
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 text-xs font-display tracking-wide border-white/10 hover:bg-white/5 text-muted-foreground hover:text-white"
+                        asChild
+                      >
+                        <a href={generateOrderEmailTemplate(order, (order.profiles as { email?: string } | null)?.email || 'customer@example.com')}>
+                          <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
+                        </a>
+                      </Button>
+
                       {(order.status === 'pending' || order.status === 'payment_submitted') && (
                         <Button size="sm" onClick={() => openActionDialog('validate', order)} className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/20 h-8 text-xs font-display tracking-wide">
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Verify Payment

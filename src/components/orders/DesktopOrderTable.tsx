@@ -2,10 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Delivery } from '@/lib/shopApi';
+import type { Delivery, Order } from '@/lib/shopApi';
 
 export interface DesktopOrderTableProps {
-  orders: any[];
+  orders: (Order & { products?: { platform?: string; title?: string }; deliveries?: Delivery[] })[];
   statusStyles: Record<string, { className: string; icon: React.ReactNode; label: string }>;
 }
 

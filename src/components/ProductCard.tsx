@@ -8,7 +8,7 @@ import {
 import { useCart } from '@/contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { getRegionLabel } from '@/lib/regions';
-import { cn } from '@/lib/utils';
+import { cn, generateProductUrl } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
 const deliveryIcon = {
@@ -67,7 +67,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/product/${product.id}`);
+    navigate(generateProductUrl(product));
   };
 
   const hasImage = Boolean(product.image_url);

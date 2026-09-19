@@ -13,7 +13,8 @@ import { ProductFeatures } from '@/components/product/ProductFeatures';
 import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
 
 const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const id = slug ? slug.slice(-36) : '';
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -117,15 +118,15 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Left Column: Image Area and Features */}
           <div className="lg:col-span-7 space-y-6">
-            <ProductImageArea product={product as any} />
-            <ProductFeatures product={product as any} />
+            <ProductImageArea product={product as Product} />
+            <ProductFeatures product={product as Product} />
           </div>
 
           {/* Right Column: Sticky Purchasing Card */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
             <ProductPurchaseCard 
-              product={product as any} 
-              variants={variants as any}
+              product={product as Product} 
+              variants={variants as Product[]}
               quantity={quantity} 
               setQuantity={setQuantity} 
               onAddToCart={handleAddToCart} 

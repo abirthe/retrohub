@@ -28,7 +28,7 @@ interface OrderActionDialogProps {
   onClose: () => void;
   reason: string;
   onReasonChange: (val: string) => void;
-  onConfirm: (data?: any) => void;
+  onConfirm: (data?: unknown) => void;
   loading: boolean;
 }
 
