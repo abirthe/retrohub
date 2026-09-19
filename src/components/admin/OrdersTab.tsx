@@ -153,17 +153,6 @@ const OrdersTab = ({ orders, ordersLoading, openActionDialog }: OrdersTabProps) 
 
                     <div className="mt-6 pt-5 border-t border-white/5 flex flex-wrap gap-3 items-center">
                       <p className="text-xs text-muted-foreground mr-auto">Actions:</p>
-                      
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 text-xs font-display tracking-wide border-white/10 hover:bg-white/5 text-muted-foreground hover:text-white"
-                        asChild
-                      >
-                        <a href={generateOrderEmailTemplate(order, (order.profiles as { email?: string } | null)?.email || 'customer@example.com')}>
-                          <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
-                        </a>
-                      </Button>
 
                       {(order.status === 'pending' || order.status === 'payment_submitted') && (
                         <Button size="sm" onClick={() => openActionDialog('validate', order)} className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/20 h-8 text-xs font-display tracking-wide">
