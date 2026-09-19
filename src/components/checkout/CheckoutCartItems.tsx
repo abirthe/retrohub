@@ -1,14 +1,17 @@
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 export interface CheckoutCartItemsProps {
   items: any[];
   updateQuantity: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
+  customerInput: Record<string, string>;
+  setCustomerInput: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-export const CheckoutCartItems = ({ items, updateQuantity, removeFromCart }: CheckoutCartItemsProps) => {
+export const CheckoutCartItems = ({ items, updateQuantity, removeFromCart, customerInput, setCustomerInput }: CheckoutCartItemsProps) => {
   return (
     <Card className="bg-card/50 backdrop-blur-md border-white/5 border overflow-hidden">
       <CardHeader className="bg-white/5 border-b border-white/5">
@@ -34,7 +37,7 @@ export const CheckoutCartItems = ({ items, updateQuantity, removeFromCart }: Che
               <div className="flex-1 min-w-0 space-y-1.5">
                 <h3 className="font-display text-sm font-bold text-foreground line-clamp-2 leading-snug">{item.product.title}</h3>
                 <p className="text-xs text-muted-foreground line-clamp-1">{item.product.description}</p>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex flex-wrap items-center gap-2 mt-2">
                   <div className="flex items-center rounded-md border border-white/10 bg-background/50">
                     <Button
                       variant="ghost"
@@ -63,6 +66,19 @@ export const CheckoutCartItems = ({ items, updateQuantity, removeFromCart }: Che
                     Remove
                   </Button>
                 </div>
+                
+                {item.product.category === 'topup' && (
+                  <div className="mt-3 pt-3 border-t border-white/5">
+                    <label className="text-xs font-semibold text-primary mb-1.5 block">Player / Game ID <span className="text-destructive">*</span></label>
+                    <Input 
+                      placeholder="Enter Game ID or Player Tag"
+                      value={customerInput[item.product.id] || ''}
+                      onChange={(e) => setCustomerInput(prev => ({ ...prev, [item.product.id]: e.target.value }))}
+                      className="h-8 text-xs bg-background/50 border-white/10 focus:border-primary/50 max-w-sm"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="text-right shrink-0">

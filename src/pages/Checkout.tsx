@@ -19,6 +19,12 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [customerInput, setCustomerInput] = useState<Record<string, string>>({});
 
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const hasTopup = items.some(i => i.product.category === 'topup');
+  const topupsValid = !hasTopup || items.filter(i => i.product.category === 'topup').every(i => customerInput[i.product.id]?.trim());
+  const canCheckout = !hasTopup || (termsAccepted && topupsValid);
+
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -56,6 +62,14 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
+    if (!canCheckout) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all Game IDs and accept the terms.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -65,7 +79,10 @@ const Checkout = () => {
       // Create orders for each item with stock validation
       for (const item of items) {
         for (let i = 0; i < item.quantity; i++) {
-          const order = await createOrder(item.product.id, Number(item.product.sale_price), customerInput);
+          const payload = item.product.category === 'topup' 
+            ? { game_id: customerInput[item.product.id] || '' } 
+            : {};
+          const order = await createOrder(item.product.id, Number(item.product.sale_price), payload);
           createdOrderIds.push(order.id);
         }
       }
@@ -128,7 +145,9 @@ const Checkout = () => {
             <CheckoutCartItems 
               items={items} 
               updateQuantity={updateQuantity} 
-              removeFromCart={removeFromCart} 
+              removeFromCart={removeFromCart}
+              customerInput={customerInput}
+              setCustomerInput={setCustomerInput}
             />
           </div>
 
@@ -137,7 +156,11 @@ const Checkout = () => {
             <CheckoutSummary 
               totalPrice={totalPrice} 
               loading={loading} 
-              onCheckout={handleCheckout} 
+              onCheckout={handleCheckout}
+              hasTopup={hasTopup}
+              termsAccepted={termsAccepted}
+              setTermsAccepted={setTermsAccepted}
+              canCheckout={canCheckout}
             />
           </div>
         </div>

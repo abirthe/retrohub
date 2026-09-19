@@ -2,14 +2,27 @@ import { CreditCard, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export interface CheckoutSummaryProps {
   totalPrice: number;
   loading: boolean;
   onCheckout: () => void;
+  hasTopup?: boolean;
+  termsAccepted?: boolean;
+  setTermsAccepted?: (val: boolean) => void;
+  canCheckout?: boolean;
 }
 
-export const CheckoutSummary = ({ totalPrice, loading, onCheckout }: CheckoutSummaryProps) => {
+export const CheckoutSummary = ({ 
+  totalPrice, 
+  loading, 
+  onCheckout,
+  hasTopup = false,
+  termsAccepted = false,
+  setTermsAccepted,
+  canCheckout = true
+}: CheckoutSummaryProps) => {
   return (
     <Card className="bg-card/80 backdrop-blur-xl border-white/10 border shadow-2xl sticky top-24">
       <CardHeader className="pb-4">
@@ -35,11 +48,25 @@ export const CheckoutSummary = ({ totalPrice, loading, onCheckout }: CheckoutSum
           </div>
         </div>
 
+        {hasTopup && (
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <Checkbox 
+              id="terms" 
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted?.(checked as boolean)}
+              className="mt-0.5"
+            />
+            <label htmlFor="terms" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+              I agree that the authority won't be responsible for misinformation (e.g. wrong Game ID) and such cases are <strong className="text-destructive font-semibold">not refundable</strong>.
+            </label>
+          </div>
+        )}
+
         <Button
           onClick={onCheckout}
           className="w-full h-12 gradient-primary font-display text-sm tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 relative overflow-hidden group"
           size="lg"
-          disabled={loading}
+          disabled={loading || !canCheckout}
         >
           <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           {loading ? (

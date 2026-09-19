@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search, Sparkles, Zap, Gift, Repeat, ShieldAlert,
   Monitor, Gamepad2, Trophy, Wrench, ChevronDown,
@@ -91,6 +92,7 @@ const Index = () => {
   const [activeSubcategory, setActiveSubcategory] = useState<string>('');
   const [sort, setSort]                   = useState<SortValue>('newest');
   const [sortOpen, setSortOpen]           = useState(false);
+  const navigate = useNavigate();
 
   const { data: products, isLoading } = useProducts();
 
@@ -298,7 +300,7 @@ const Index = () => {
                     variant="ghost"
                     onClick={() => {
                       if (cat.value === 'custom_orders') {
-                        window.location.href = 'mailto:support@retrohub.com?subject=Custom%20Order%20Request';
+                        navigate('/custom-order');
                         return;
                       }
                       setActiveCategory(cat.value);
