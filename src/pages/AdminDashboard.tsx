@@ -198,8 +198,8 @@ const AdminDashboard = () => {
 
           <TabsContent value="orders" className="space-y-4">
             {ordersError ? (
-              <div className="p-4 bg-destructive/20 text-destructive border border-destructive/50 rounded-lg">
-                Error loading orders: {ordersError instanceof Error ? ordersError.message : String(ordersError)}
+              <div className="p-4 bg-destructive/20 text-destructive border border-destructive/50 rounded-lg whitespace-pre-wrap font-mono text-sm">
+                Error loading orders: {JSON.stringify(ordersError, null, 2)}
               </div>
             ) : (
               <OrdersTab
