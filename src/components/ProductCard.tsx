@@ -105,12 +105,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
 
         {/* Badges */}
-        <div className="absolute top-3 left-0 w-full px-3 z-20 flex justify-between gap-1.5">
-          <Badge variant="outline" className={cn('text-[10px] backdrop-blur-md transition-colors flex items-center gap-1', meta.badge)}>
-            <CategoryIcon className="h-2.5 w-2.5" />
-            {meta.label}
+        <div className="absolute top-3 inset-x-3 z-20 flex items-start justify-between gap-1.5">
+          <Badge variant="outline" className={cn('text-[10px] backdrop-blur-md transition-colors flex items-center gap-1 shrink-0', meta.badge)}>
+            <CategoryIcon className="h-2.5 w-2.5 shrink-0" />
+            <span className="truncate">{meta.label}</span>
           </Badge>
-          <Badge variant="outline" className="text-[10px] border-white/10 text-muted-foreground backdrop-blur-md">
+          <Badge variant="outline" className="text-[10px] border-white/10 text-muted-foreground backdrop-blur-md shrink-0 flex items-center">
             {getRegionLabel(product.region || 'GLOBAL')}
           </Badge>
         </div>
