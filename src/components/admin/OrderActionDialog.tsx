@@ -139,9 +139,20 @@ export const OrderActionDialog = ({
             {action === 'fulfill' && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="deliveryCode" className="text-xs uppercase tracking-wider text-foreground flex items-center gap-1">
-                    Delivery Code / Key <span className="text-destructive">*</span>
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="deliveryCode" className="text-xs uppercase tracking-wider text-foreground flex items-center gap-1">
+                      Delivery Code / Key <span className="text-destructive">*</span>
+                    </Label>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-[10px] bg-accent/10 text-accent hover:bg-accent/20 px-2 rounded font-display"
+                      onClick={() => setDeliveryCode(`Hello!\n\nHere is your product: \n[INSERT_KEY_HERE]\n\nIf you have any issues, please let us know.\nThank you for choosing us!`)}
+                    >
+                      ✨ Grok Msg
+                    </Button>
+                  </div>
                   <textarea
                     id="deliveryCode"
                     value={deliveryCode}

@@ -28,7 +28,7 @@ const statusStyles: Record<string, { className: string; icon: React.ReactNode; l
   sourcing: {
     className: 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20',
     icon: <Clock className="h-3.5 w-3.5 animate-pulse" />,
-    label: 'Sourcing',
+    label: 'Processing',
   },
   fulfilled: {
     className: 'bg-success/10 text-success border-success/20 hover:bg-success/20',

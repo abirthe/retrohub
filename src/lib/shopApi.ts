@@ -30,7 +30,7 @@ export async function fetchProducts() {
 export async function fetchOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, products(title, platform, in_stock, delivery_type, source_url, source_platform)')
+    .select('*, products(title, platform, in_stock, delivery_type, source_url, source_platform), profiles(email)')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -220,6 +220,17 @@ export async function updateProductPrice(id: string, salePrice: number, costPric
     .update({ sale_price: salePrice, cost_price: costPrice })
     .eq('id', id);
     
+  if (error) throw error;
+  return { success: true };
+}
+
+// Update full product details (Admin only)
+export async function updateProductDetails(id: string, details: Partial<Product>) {
+  const { error } = await supabase
+    .from('products')
+    .update(details)
+    .eq('id', id);
+
   if (error) throw error;
   return { success: true };
 }
