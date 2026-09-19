@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Sparkles, Zap, Gift, Repeat, ShieldAlert,
@@ -93,6 +93,37 @@ const Index = () => {
   const [sort, setSort]                   = useState<SortValue>('newest');
   const [sortOpen, setSortOpen]           = useState(false);
   const navigate = useNavigate();
+
+  const [animatedPlaceholder, setAnimatedPlaceholder] = useState('');
+
+  useEffect(() => {
+    const text = "Search games, platforms, subscriptions...";
+    let i = 0;
+    let isDeleting = false;
+    
+    const interval = setInterval(() => {
+      const currentText = text.substring(0, i);
+      const showCursor = isDeleting ? true : (i % 2 === 0);
+      
+      setAnimatedPlaceholder(currentText + (showCursor ? "_" : ""));
+      
+      if (!isDeleting) {
+        i++;
+        if (i > text.length + 20) {
+          isDeleting = true;
+          i = text.length;
+        }
+      } else {
+        i--;
+        if (i < 0) {
+          isDeleting = false;
+          i = 0;
+        }
+      }
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const { data: products, isLoading } = useProducts();
 
@@ -247,11 +278,11 @@ const Index = () => {
 
             {/* Top row: search + sort */}
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-              <div className="relative flex-1 max-w-md">
+              <div className="relative flex-1 w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="product-search"
-                  placeholder="Search games, platforms, subscriptions..."
+                  placeholder={animatedPlaceholder}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10 h-11 bg-background/50 border-primary/20 focus:border-primary/50 focus:ring-primary/20 transition-all font-display tracking-wide text-sm"
