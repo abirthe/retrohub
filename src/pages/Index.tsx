@@ -12,6 +12,7 @@ import type { ProductCategory } from '@/lib/shopApi';
 import heroBg from '@/assets/hero-bg.jpg';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface CategoryDef {
   label: string;
@@ -29,16 +30,50 @@ const categories: CategoryDef[] = [
     icon: Gamepad2,  
     color: 'text-blue-400',
     subcategories: [
-      { label: 'All Games', value: 'all_games' },
-      { label: 'PC Games', value: 'pc_game' },
-      { label: 'Xbox', value: 'xbox_game' },
-      { label: 'PlayStation', value: 'ps_game' }
+      { label: 'Xbox', value: 'games_xbox' },
+      { label: 'Play Station', value: 'games_ps' },
+      { label: 'Steam', value: 'games_steam' },
+      { label: 'GOG', value: 'games_gog' },
+      { label: 'Others', value: 'games_others' }
     ]
   },
-  { label: 'Top-Ups',       value: 'topup',        icon: Zap,       color: 'text-yellow-400' },
-  { label: 'Subscriptions', value: 'subscription', icon: Repeat,    color: 'text-purple-400' },
-  { label: 'Gift Cards',    value: 'giftcard',     icon: Gift,      color: 'text-pink-400' },
-  { label: 'Software',      value: 'software',     icon: Wrench,    color: 'text-orange-400' },
+  { 
+    label: 'Accounts',         
+    value: 'accounts',        
+    icon: User,  
+    color: 'text-teal-400',
+    subcategories: [
+      { label: 'Games', value: 'accounts_games' },
+      { label: 'Application', value: 'accounts_app' },
+      { label: 'Others', value: 'accounts_others' }
+    ]
+  },
+  { 
+    label: 'Gift card',    
+    value: 'giftcard',     
+    icon: Gift,      
+    color: 'text-pink-400',
+    subcategories: [
+      { label: 'XBOX', value: 'giftcard_xbox' },
+      { label: 'STEAM', value: 'giftcard_steam' },
+      { label: 'PlayStation', value: 'giftcard_ps' },
+      { label: 'Others', value: 'giftcard_others' }
+    ]
+  },
+  { 
+    label: 'Subscription', 
+    value: 'subscription', 
+    icon: Repeat,    
+    color: 'text-purple-400',
+    subcategories: [
+      { label: 'Game Pass', value: 'sub_gamepass' },
+      { label: 'PSN', value: 'sub_psn' },
+      { label: 'EA', value: 'sub_ea' },
+      { label: 'Others', value: 'sub_others' }
+    ]
+  },
+  { label: 'Top up',       value: 'topup',        icon: Zap,       color: 'text-yellow-400' },
+  { label: 'Request Custom Orders', value: 'custom_orders', icon: Monitor, color: 'text-orange-400' },
 ];
 
 const SORT_OPTIONS = [
@@ -88,14 +123,50 @@ const Index = () => {
         (p.platform?.toLowerCase().includes(search.toLowerCase()) ?? false);
         
       let matchesCategory = false;
+      const titleLower = p.title.toLowerCase();
+      const platLower = p.platform?.toLowerCase() || '';
+
       if (activeCategory === 'all') {
         matchesCategory = true;
       } else if (activeCategory === 'games') {
-        if (activeSubcategory && activeSubcategory !== 'all_games') {
-          matchesCategory = p.category === activeSubcategory;
+        if (activeSubcategory) {
+          if (activeSubcategory === 'games_xbox') matchesCategory = p.category === 'xbox_game' || titleLower.includes('xbox') || platLower.includes('xbox');
+          else if (activeSubcategory === 'games_ps') matchesCategory = p.category === 'ps_game' || titleLower.includes('playstation') || titleLower.includes('ps4') || titleLower.includes('ps5') || platLower.includes('playstation');
+          else if (activeSubcategory === 'games_steam') matchesCategory = (p.category === 'pc_game' && (titleLower.includes('steam') || platLower.includes('steam'))) || platLower === 'steam';
+          else if (activeSubcategory === 'games_gog') matchesCategory = (p.category === 'pc_game' && (titleLower.includes('gog') || platLower.includes('gog'))) || platLower === 'gog';
+          else if (activeSubcategory === 'games_others') matchesCategory = ['pc_game', 'xbox_game', 'ps_game'].includes(p.category) && !titleLower.includes('xbox') && !platLower.includes('xbox') && !titleLower.includes('playstation') && !titleLower.includes('ps4') && !titleLower.includes('ps5') && !platLower.includes('playstation') && !titleLower.includes('steam') && !platLower.includes('steam') && !titleLower.includes('gog') && !platLower.includes('gog');
         } else {
           matchesCategory = ['pc_game', 'xbox_game', 'ps_game'].includes(p.category);
         }
+      } else if (activeCategory === 'accounts') {
+        if (activeSubcategory) {
+          if (activeSubcategory === 'accounts_games') matchesCategory = titleLower.includes('account') && ['pc_game', 'xbox_game', 'ps_game'].includes(p.category);
+          else if (activeSubcategory === 'accounts_app') matchesCategory = titleLower.includes('account') && p.category === 'software';
+          else if (activeSubcategory === 'accounts_others') matchesCategory = titleLower.includes('account') && !['pc_game', 'xbox_game', 'ps_game', 'software'].includes(p.category);
+        } else {
+          matchesCategory = titleLower.includes('account');
+        }
+      } else if (activeCategory === 'giftcard') {
+        if (activeSubcategory) {
+          if (activeSubcategory === 'giftcard_xbox') matchesCategory = p.category === 'giftcard' && (titleLower.includes('xbox') || platLower.includes('xbox'));
+          else if (activeSubcategory === 'giftcard_steam') matchesCategory = p.category === 'giftcard' && (titleLower.includes('steam') || platLower.includes('steam'));
+          else if (activeSubcategory === 'giftcard_ps') matchesCategory = p.category === 'giftcard' && (titleLower.includes('playstation') || titleLower.includes('psn') || platLower.includes('playstation'));
+          else if (activeSubcategory === 'giftcard_others') matchesCategory = p.category === 'giftcard' && !titleLower.includes('xbox') && !titleLower.includes('steam') && !titleLower.includes('playstation') && !titleLower.includes('psn');
+        } else {
+          matchesCategory = p.category === 'giftcard';
+        }
+      } else if (activeCategory === 'subscription') {
+        if (activeSubcategory) {
+          if (activeSubcategory === 'sub_gamepass') matchesCategory = p.category === 'subscription' && (titleLower.includes('game pass') || titleLower.includes('gamepass'));
+          else if (activeSubcategory === 'sub_psn') matchesCategory = p.category === 'subscription' && (titleLower.includes('psn') || titleLower.includes('playstation plus') || titleLower.includes('ps plus'));
+          else if (activeSubcategory === 'sub_ea') matchesCategory = p.category === 'subscription' && (titleLower.includes('ea play') || titleLower.includes('ea'));
+          else if (activeSubcategory === 'sub_others') matchesCategory = p.category === 'subscription' && !titleLower.includes('game pass') && !titleLower.includes('gamepass') && !titleLower.includes('psn') && !titleLower.includes('playstation plus') && !titleLower.includes('ps plus') && !titleLower.includes('ea play') && !titleLower.includes('ea');
+        } else {
+          matchesCategory = p.category === 'subscription';
+        }
+      } else if (activeCategory === 'custom_orders') {
+        // Typically custom orders won't have regular products unless marked, we can show a placeholder or nothing
+        matchesCategory = false;
       } else {
         matchesCategory = p.category === activeCategory;
       }
@@ -226,9 +297,13 @@ const Index = () => {
                     id={`cat-${cat.value}`}
                     variant="ghost"
                     onClick={() => {
+                      if (cat.value === 'custom_orders') {
+                        window.location.href = 'mailto:support@retrohub.com?subject=Custom%20Order%20Request';
+                        return;
+                      }
                       setActiveCategory(cat.value);
-                      if (cat.value === 'games') {
-                        setActiveSubcategory('all_games');
+                      if (cat.subcategories && cat.subcategories.length > 0) {
+                        setActiveSubcategory(cat.subcategories[0].value);
                       } else {
                         setActiveSubcategory('');
                       }
