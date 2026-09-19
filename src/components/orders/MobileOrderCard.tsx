@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Delivery } from '@/lib/shopApi';
+import type { Delivery, Order } from '@/lib/shopApi';
 
 export interface MobileOrderCardProps {
-  order: any;
+  order: Order & { products?: unknown, deliveries?: unknown };
   statusStyle: { className: string; icon: React.ReactNode; label: string };
   orderDate: string;
 }

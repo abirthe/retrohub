@@ -70,7 +70,7 @@ const AdminDashboard = () => {
     enabled: isAdmin === true,
   });
 
-  const handleAction = async (data?: any) => {
+  const handleAction = async (data?: unknown) => {
     if (!actionDialog.order) return;
     setLoading(true);
     try {

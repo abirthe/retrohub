@@ -30,7 +30,7 @@ export async function fetchProducts() {
 export async function fetchOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, products(title, platform, in_stock, delivery_type, source_url, source_platform)')
+    .select('*, products(title, platform, in_stock, delivery_type, source_url, source_platform), profiles(email)')
     .order('created_at', { ascending: false });
 
   if (error) throw error;

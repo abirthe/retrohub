@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { cn, generateProductUrl } from '@/lib/utils';
 
 export interface ProductPurchaseCardProps {
   product: {
@@ -82,7 +82,7 @@ export const ProductPurchaseCard = ({ product, variants, quantity, setQuantity, 
                     <Button
                       key={v.id}
                       variant={isSelected ? 'default' : 'outline'}
-                      onClick={() => navigate(`/product/${v.id}`, { replace: true })}
+                      onClick={() => navigate(generateProductUrl(v as Product), { replace: true })}
                       className={cn(
                         "h-auto py-2.5 px-3 justify-start font-display text-sm whitespace-normal text-left h-full transition-all duration-300",
                         isSelected 

@@ -19,12 +19,12 @@ export const ProductFeatures = ({ product }: ProductFeaturesProps) => {
       <div className="text-muted-foreground leading-relaxed text-sm space-y-4">
         {product.description ? (
           // Split by newlines OR emojis that act as list markers
-          product.description.split(/(?=\n|✅|📞|⭐|💸|-|\*)/).filter(Boolean).map((line, i) => {
+          product.description.split(/(?=\n|✅|📞|⭐|💸|-|\*)/u).filter(Boolean).map((line, i) => {
             const cleanLine = line.trim();
             if (!cleanLine) return null;
 
             // If it starts with an emoji or bullet, format as a list item
-            const isBullet = /^[✅📞⭐💸\-*]/.test(cleanLine);
+            const isBullet = /^[✅📞⭐💸\-*]/u.test(cleanLine);
             
             if (isBullet) {
               // Extract the first character as the icon, and the rest as text
