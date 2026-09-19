@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreditCard, CheckCircle2, ArrowRight } from 'lucide-react';
-import ShopHeader from '@/components/ShopHeader';
+import ShopHeader from '@/components/layout/ShopHeader';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { updateOrderTransactionId } from '@/lib/shopApi';

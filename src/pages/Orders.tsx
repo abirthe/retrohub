@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Package, ArrowLeft, CheckCircle2, Clock, XCircle, AlertCircle, RotateCcw, CreditCard } from 'lucide-react';
-import ShopHeader from '@/components/ShopHeader';
+import ShopHeader from '@/components/layout/ShopHeader';
 import { useNavigate } from 'react-router-dom';
 import { MobileOrderCard } from '@/components/orders/MobileOrderCard';
 import { DesktopOrderTable } from '@/components/orders/DesktopOrderTable';

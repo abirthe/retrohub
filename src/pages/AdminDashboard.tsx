@@ -15,7 +15,7 @@ import {
 import { sendOrderCompletionEmail } from '@/lib/emailService';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
-import ShopHeader from '@/components/ShopHeader';
+import ShopHeader from '@/components/layout/ShopHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';

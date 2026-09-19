@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import ShopHeader from '@/components/ShopHeader';
+import ShopHeader from '@/components/layout/ShopHeader';
 import { Gamepad2, ArrowRight } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
 
