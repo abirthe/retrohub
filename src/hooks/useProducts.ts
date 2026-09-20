@@ -1,9 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchProducts } from '@/lib/shopApi';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { fetchStoreProducts } from '@/lib/shopApi';
 
-export function useProducts() {
-  return useQuery({
-    queryKey: ['products'],
-    queryFn: fetchProducts,
+interface FilterOptions {
+  search?: string;
+  activeCategory?: string;
+  activeSubcategory?: string;
+  sort?: string;
+}
+
+export function useProducts(filters: FilterOptions = {}) {
+  return useInfiniteQuery({
+    queryKey: ['products', filters],
+    queryFn: ({ pageParam = 0 }) => fetchStoreProducts({ ...filters, pageParam }),
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
   });
 }

@@ -14,7 +14,7 @@ export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
 export type Delivery = Database['public']['Tables']['deliveries']['Row'];
 export type AdminActionLog = Database['public']['Tables']['admin_action_logs']['Row'];
 
-// Fetch products from database
+// Fetch products from database (for Admin - fetches all products)
 export async function fetchProducts(): Promise<Product[]> {
   try {
     const PAGE_SIZE = 1000;
@@ -61,6 +61,101 @@ export async function fetchProducts(): Promise<Product[]> {
   } catch (error) {
     throw error;
   }
+}
+
+// Fetch products for storefront (grouped, filtered, and paginated)
+export async function fetchStoreProducts({
+  pageParam = 0,
+  search = '',
+  activeCategory = 'all',
+  activeSubcategory = '',
+  sort = 'newest'
+}: {
+  pageParam?: number;
+  search?: string;
+  activeCategory?: string;
+  activeSubcategory?: string;
+  sort?: string;
+}) {
+  const PAGE_SIZE = 24;
+  const from = pageParam * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  let query = supabase
+    .from('v_grouped_products')
+    .select('*', { count: 'exact' });
+
+  // 1. Search filter
+  if (search) {
+    // Search title or platform
+    query = query.or(`title.ilike.%${search}%,platform.ilike.%${search}%`);
+  }
+
+  // 2. Category logic
+  if (activeCategory === 'games') {
+    if (activeSubcategory === 'games_xbox') {
+      query = query.or('category.eq.xbox_game,title.ilike.%xbox%,platform.ilike.%xbox%');
+    } else if (activeSubcategory === 'games_ps') {
+      query = query.or('category.eq.ps_game,title.ilike.%playstation%,title.ilike.%ps4%,title.ilike.%ps5%,platform.ilike.%playstation%');
+    } else if (activeSubcategory === 'games_steam') {
+      query = query.or('category.eq.pc_game,title.ilike.%steam%,platform.ilike.%steam%');
+    } else if (activeSubcategory === 'games_gog') {
+      query = query.or('title.ilike.%gog%,platform.ilike.%gog%');
+    } else if (activeSubcategory === 'games_others') {
+      // Must not be xbox/ps/steam/gog
+      query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
+      // We would ideally filter out the others, but standard category matching is safer here for "others"
+    } else {
+      query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
+    }
+  } else if (activeCategory === 'giftcard') {
+    query = query.eq('category', 'giftcard');
+    if (activeSubcategory === 'giftcard_xbox') {
+      query = query.or('title.ilike.%xbox%,platform.ilike.%xbox%');
+    } else if (activeSubcategory === 'giftcard_steam') {
+      query = query.or('title.ilike.%steam%,platform.ilike.%steam%');
+    } else if (activeSubcategory === 'giftcard_ps') {
+      query = query.or('title.ilike.%playstation%,title.ilike.%psn%,platform.ilike.%playstation%');
+    }
+  } else if (activeCategory === 'subscription') {
+    query = query.eq('category', 'subscription');
+    if (activeSubcategory === 'sub_gamepass') {
+      query = query.or('title.ilike.%game pass%,title.ilike.%gamepass%');
+    } else if (activeSubcategory === 'sub_psn') {
+      query = query.or('title.ilike.%psn%,title.ilike.%playstation plus%,title.ilike.%ps plus%');
+    } else if (activeSubcategory === 'sub_ea') {
+      query = query.ilike('title', '%ea play%');
+    }
+  } else if (activeCategory === 'accounts') {
+    // Accounts could be just anything with 'account' in title or a specific category if you had one
+    query = query.ilike('title', '%account%');
+  } else if (activeCategory !== 'all') {
+    query = query.eq('category', activeCategory);
+  }
+
+  // 3. Sorting
+  if (sort === 'price_asc') {
+    query = query.order('sale_price', { ascending: true });
+  } else if (sort === 'price_desc') {
+    query = query.order('sale_price', { ascending: false });
+  } else if (sort === 'name_asc') {
+    query = query.order('title', { ascending: true });
+  } else {
+    // default: newest
+    query = query.order('created_at', { ascending: false });
+  }
+
+  // 4. Pagination
+  query = query.range(from, to);
+
+  const { data, error, count } = await query;
+  if (error) throw error;
+
+  return {
+    products: (data as Product[]) ?? [],
+    nextPage: data?.length === PAGE_SIZE ? pageParam + 1 : undefined,
+    totalCount: count ?? 0,
+  };
 }
 
 
