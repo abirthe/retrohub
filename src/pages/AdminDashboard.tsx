@@ -29,6 +29,7 @@ import {
 // Subcomponents
 import OrdersTab from '@/components/admin/OrdersTab';
 import InventoryTab from '@/components/admin/InventoryTab';
+import CustomOrdersTab from '@/components/admin/CustomOrdersTab';
 import AdminStatsGrid from '@/components/admin/AdminStatsGrid';
 import OrderActionDialog, { type ActionDialogState } from '@/components/admin/OrderActionDialog';
 
@@ -194,6 +195,9 @@ const AdminDashboard = () => {
             <TabsTrigger value="inventory" className="rounded-lg gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent transition-all">
               <RefreshCw className="h-4 w-4" /> Inventory
             </TabsTrigger>
+            <TabsTrigger value="custom_orders" className="rounded-lg gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all">
+              <Package className="h-4 w-4" /> Custom Orders
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
@@ -212,6 +216,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="inventory">
             <InventoryTab products={products} />
+          </TabsContent>
+          
+          <TabsContent value="custom_orders">
+            <CustomOrdersTab />
           </TabsContent>
         </Tabs>
 

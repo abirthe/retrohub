@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import ShopHeader from '@/components/layout/ShopHeader';
 import { ArrowLeft, Send, Sparkles } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
+import { submitCustomOrder } from '@/lib/shopApi';
 
 const CustomOrder = () => {
   const navigate = useNavigate();
@@ -33,17 +34,27 @@ const CustomOrder = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate API call for custom order submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Request Submitted!",
-      description: "We have received your custom order request. Our team will contact you shortly via email.",
-    });
-    
-    setLoading(false);
-    navigate('/');
+    try {
+      await submitCustomOrder(formData);
+      
+      toast({
+        title: "Request Submitted!",
+        description: "We have received your custom order request. Our team will contact you shortly via email.",
+      });
+      navigate('/');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error submitting custom order:', error);
+      toast({
+        title: "Submission Failed",
+        description: message || "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-background relative selection:bg-primary/20 flex flex-col">
