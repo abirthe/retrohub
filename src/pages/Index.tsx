@@ -6,8 +6,18 @@ import { useProducts } from '@/hooks/useProducts';
 import { CATEGORIES } from '@/lib/constants';
 import type { SortValue } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { filterAndGroupProducts } from '@/lib/productFilters';
 import { cn } from '@/lib/utils';
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 const Index = () => {
   const [search, setSearch]               = useState('');
@@ -47,14 +57,23 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const { data: products, isLoading } = useProducts();
+  const debouncedSearch = useDebounce(search, 300);
 
-  const filtered = filterAndGroupProducts(products, {
-    search,
+  const { 
+    data, 
+    isLoading, 
+    isFetchingNextPage, 
+    hasNextPage, 
+    fetchNextPage 
+  } = useProducts({
+    search: debouncedSearch,
     activeCategory,
     activeSubcategory,
-    sort,
+    sort
   });
+
+  const allProducts = data?.pages.flatMap(page => page.products) || [];
+  const totalCount = data?.pages[0]?.totalCount || 0;
 
   const activeCat = CATEGORIES.find(c => c.value === activeCategory) ?? CATEGORIES[0];
 
@@ -88,7 +107,7 @@ const Index = () => {
               {activeCategory === 'all' ? 'All Products' : activeCat.label}
             </h2>
             <span className="text-xs text-muted-foreground font-mono">
-              {filtered.length.toLocaleString()} products
+              {totalCount.toLocaleString()} products
             </span>
           </div>
 
@@ -98,14 +117,37 @@ const Index = () => {
               <p className="font-display tracking-wider animate-pulse">Loading amazing deals...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
-              {filtered.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+            <div className="space-y-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+                {allProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+              
+              {hasNextPage && (
+                <div className="flex justify-center pt-8 pb-12">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => fetchNextPage()} 
+                    disabled={isFetchingNextPage}
+                    className="w-full sm:w-auto min-w-[200px] border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    {isFetchingNextPage ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        Loading more...
+                      </div>
+                    ) : (
+                      'Load More'
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
-          {!isLoading && filtered.length === 0 && (
+          {!isLoading && allProducts.length === 0 && (
             <div className="text-center py-32 text-muted-foreground bg-card/30 rounded-2xl border border-white/5 border-dashed">
               <p className="font-display tracking-wider text-xl mb-2">No products found</p>
               <p className="text-sm">Try adjusting your search or filters.</p>
