@@ -7,13 +7,13 @@
  *   2. node scripts/seed-products.cjs
  */
 
-const XLSX = require('../node_modules/xlsx');
-const { createClient } = require('../node_modules/@supabase/supabase-js');
 const path = require('path');
 const fs = require('fs');
+const XLSX = require('../../node_modules/xlsx');
+const { createClient } = require('../../node_modules/@supabase/supabase-js');
 
 // Load .env file manually
-const envPath = path.join(__dirname, '..', '.env');
+const envPath = fs.existsSync(path.join(__dirname, '..', '..', '.env')) ? path.join(__dirname, '..', '..', '.env') : path.join(__dirname, '..', '.env');
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf8');
   for (const line of envContent.split('\n')) {

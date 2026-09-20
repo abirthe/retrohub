@@ -15,10 +15,10 @@
 
 const path = require('path');
 const fs   = require('fs');
-const { createClient } = require('../node_modules/@supabase/supabase-js');
+const { createClient } = require('../../node_modules/@supabase/supabase-js');
 
 // ── env loader ────────────────────────────────────────────────────────────────
-const envPath = path.join(__dirname, '..', '.env');
+const envPath = fs.existsSync(path.join(__dirname, '..', '..', '.env')) ? path.join(__dirname, '..', '..', '.env') : path.join(__dirname, '..', '.env');
 if (fs.existsSync(envPath)) {
   for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
     const t = line.trim();

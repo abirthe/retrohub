@@ -251,6 +251,6 @@ lines.push('  region = EXCLUDED.region,');
 lines.push('  updated_at = NOW();');
 
 const sqlContent = lines.join('\n');
-const outPath = path.join(__dirname, 'products-seed.sql');
+const outPath = path.join(__dirname, '..', 'database', 'products-seed.sql');
 fs.writeFileSync(outPath, sqlContent, 'utf8');
-process.stdout.write('Written to: scripts/products-seed.sql (' + (sqlContent.length / 1024).toFixed(1) + ' KB)\n');
+process.stdout.write('Written to: scripts/database/products-seed.sql (' + (sqlContent.length / 1024).toFixed(1) + ' KB)\n');
