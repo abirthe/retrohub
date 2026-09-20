@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Edit2, Save, X, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { updateProductPrice, type Product } from '@/lib/shopApi';
-import { InventoryRow } from './components/InventoryRow';
+import { InventoryRow } from './InventoryRow';
 
 interface InventoryTabProps {
   products: Product[] | undefined;

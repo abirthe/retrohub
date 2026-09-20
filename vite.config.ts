@@ -10,6 +10,9 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
+    watch: {
+      ignored: ['**/Products/**', '**/scripts/**'],
+    },
   },
   plugins: [react()],
   resolve: {

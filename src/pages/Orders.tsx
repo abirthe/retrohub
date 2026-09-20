@@ -4,10 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Package, ArrowLeft, CheckCircle2, Clock, XCircle, AlertCircle, RotateCcw, CreditCard } from 'lucide-react';
-import ShopHeader from '@/components/layout/ShopHeader';
+import { ShopHeader } from '@/components/layout';
 import { useNavigate } from 'react-router-dom';
-import { MobileOrderCard } from '@/components/orders/MobileOrderCard';
-import { DesktopOrderTable } from '@/components/orders/DesktopOrderTable';
+import { MobileOrderCard, DesktopOrderTable } from '@/components/orders';
 
 const statusStyles: Record<string, { className: string; icon: React.ReactNode; label: string }> = {
   pending: {

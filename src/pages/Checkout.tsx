@@ -5,11 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { createOrder } from '@/lib/shopApi';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, ArrowLeft, ShieldCheck } from 'lucide-react';
-import ShopHeader from '@/components/layout/ShopHeader';
+import { ShopHeader } from '@/components/layout';
 import { useToast } from '@/hooks/use-toast';
 import heroBg from '@/assets/hero-bg.jpg';
-import { CheckoutCartItems } from '@/components/checkout/CheckoutCartItems';
-import { CheckoutSummary } from '@/components/checkout/CheckoutSummary';
+import { CheckoutCartItems, CheckoutSummary } from '@/components/checkout';
 
 const Checkout = () => {
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();

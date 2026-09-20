@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import ShopHeader from '@/components/layout/ShopHeader';
+import { ShopHeader } from '@/components/layout';
 import { ArrowLeft, Send, Sparkles } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
 import { submitCustomOrder } from '@/lib/shopApi';
