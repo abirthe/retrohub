@@ -17,6 +17,7 @@ const Orders = lazy(() => import("./pages/Orders"));
 const Payment = lazy(() => import("./pages/Payment"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CustomOrder = lazy(() => import("./pages/CustomOrder"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/custom-order" element={<CustomOrder />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
