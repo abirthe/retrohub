@@ -44,7 +44,7 @@ export async function fetchOrderDeliveries(orderId: string) {
     .select('*')
     .eq('order_id', orderId)
     .order('created_at', { ascending: false });
-    
+
   if (error) throw error;
   return data as Delivery[];
 }
@@ -129,10 +129,10 @@ export async function startSourcing(orderId: string) {
 
 // Fulfill order manually via deliveries table
 export async function fulfillOrder(
-  orderId: string, 
-  deliveryCode: string, 
-  costPaid?: number, 
-  sourcedFrom?: string, 
+  orderId: string,
+  deliveryCode: string,
+  costPaid?: number,
+  sourcedFrom?: string,
   notes?: string
 ) {
   const { data, error } = await supabase.rpc('fulfill_order' as never, {
@@ -219,7 +219,7 @@ export async function updateProductPrice(id: string, salePrice: number, costPric
     .from('products')
     .update({ sale_price: salePrice, cost_price: costPrice })
     .eq('id', id);
-    
+
   if (error) throw error;
   return { success: true };
 }

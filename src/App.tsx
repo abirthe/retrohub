@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 
+import { AppErrorBoundary } from "@/components/ErrorBoundary";
+
 const Index = lazy(() => import("./pages/Index"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -31,19 +33,21 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/product/:slug" element={<ProductDetail />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/payment" element={<Payment />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/custom-order" element={<CustomOrder />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <AppErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/payment" element={<Payment />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/custom-order" element={<CustomOrder />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </AppErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
     </CartProvider>

@@ -72,12 +72,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const hasImage = Boolean(product.image_url);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick();
+    }
+  };
+
   return (
     <div
+      role="article"
+      tabIndex={0}
       onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
       className={cn(
         'group relative rounded-xl bg-card/60 border border-white/5 hover:border-white/20',
-        'transition-all duration-500 overflow-hidden cursor-pointer backdrop-blur-sm',
+        'transition-all duration-500 overflow-hidden cursor-pointer backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         meta.glow,
       )}
     >
@@ -151,6 +161,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
           <Button
             size="sm"
+            aria-label={product.in_stock > 0 ? `Buy ${product.title}` : `${product.title} out of stock`}
             className={cn(
               'font-display text-[10px] sm:text-xs tracking-wider gap-1 sm:gap-1.5 transition-all duration-300 h-7 sm:h-9 px-2 sm:px-3 shrink-0',
               product.in_stock > 0

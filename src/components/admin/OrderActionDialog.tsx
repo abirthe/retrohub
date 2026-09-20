@@ -101,14 +101,22 @@ export const OrderActionDialog = ({
                 <span className="text-muted-foreground shrink-0">Revenue</span>
                 <span className="font-bold text-white">৳{Number(order.total).toFixed(2)}</span>
               </div>
-              {(order.customer_input as Record<string, string> | null)?.transaction_id && (
-                <div className="pt-2 mt-2 border-t border-white/5 flex justify-between items-center">
-                  <span className="text-muted-foreground">Trx ID</span>
-                  <code className="bg-primary/20 text-primary border-primary/30 border px-2 py-0.5 rounded text-xs font-mono">
-                    {(order.customer_input as Record<string, string>).transaction_id}
-                  </code>
-                </div>
-              )}
+              {(() => {
+                let input: Record<string, string> | null = null;
+                if (typeof order.customer_input === 'string') {
+                  try { input = JSON.parse(order.customer_input); } catch(e) { /* ignore parse error */ }
+                } else if (order.customer_input) {
+                  input = order.customer_input as Record<string, string>;
+                }
+                return input?.transaction_id ? (
+                  <div className="flex justify-between items-center bg-primary/10 px-3 py-2 rounded-lg border border-primary/20">
+                    <span className="text-xs text-muted-foreground">Transaction ID</span>
+                    <span className="font-mono text-xs font-bold text-primary tracking-wider">
+                      {input.transaction_id}
+                    </span>
+                  </div>
+                ) : null;
+              })()}
             </div>
 
             {/* Validation warning */}
