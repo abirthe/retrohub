@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import ProductCard from '@/components/ProductCard';
-import ShopHeader from '@/components/layout/ShopHeader';
-import { HeroSection } from '@/components/home/HeroSection';
-import { CategoryFilter } from '@/components/home/CategoryFilter';
+import { ProductCard } from '@/components/product';
+import { ShopHeader } from '@/components/layout';
+import { HeroSection, CategoryFilter } from '@/components/home';
 import { useProducts } from '@/hooks/useProducts';
 import { CATEGORIES } from '@/lib/constants';
 import type { SortValue } from '@/lib/constants';

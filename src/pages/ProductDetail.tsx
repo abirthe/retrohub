@@ -4,13 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Package } from 'lucide-react';
-import ShopHeader from '@/components/layout/ShopHeader';
+import { ShopHeader } from '@/components/layout';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ProductImageArea } from '@/components/product/ProductImageArea';
-import { ProductFeatures } from '@/components/product/ProductFeatures';
-import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
+import { ProductImageArea, ProductFeatures, ProductPurchaseCard } from '@/components/product';
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();

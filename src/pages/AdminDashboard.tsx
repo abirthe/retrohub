@@ -15,7 +15,7 @@ import {
 import { sendOrderCompletionEmail } from '@/lib/emailService';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
-import ShopHeader from '@/components/layout/ShopHeader';
+import { ShopHeader } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -27,11 +27,14 @@ import {
 } from 'lucide-react';
 
 // Subcomponents
-import OrdersTab from '@/components/admin/OrdersTab';
-import InventoryTab from '@/components/admin/InventoryTab';
-import CustomOrdersTab from '@/components/admin/CustomOrdersTab';
-import AdminStatsGrid from '@/components/admin/AdminStatsGrid';
-import OrderActionDialog, { type ActionDialogState } from '@/components/admin/OrderActionDialog';
+import {
+  OrdersTab,
+  InventoryTab,
+  CustomOrdersTab,
+  AdminStatsGrid,
+  OrderActionDialog,
+  type ActionDialogState,
+} from '@/components/admin';
 
 type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
 

@@ -5,8 +5,10 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
 
+import { logger } from '@/lib/logger';
+
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.warn('Supabase environment variables are not set. Some features may not work.');
+  logger.warn('Supabase environment variables are not set. Some features may not work.');
 }
 
 // Import the supabase client like this:
