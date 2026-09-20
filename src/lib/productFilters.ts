@@ -194,7 +194,7 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
               titleLower.includes('playstation plus') ||
               titleLower.includes('ps plus');
           } else if (activeSubcategory === 'sub_ea') {
-            matchesCategory = titleLower.includes('ea play') || titleLower.includes('ea');
+            matchesCategory = titleLower.includes('ea play') || /\\bea\\b/.test(titleLower);
           } else if (activeSubcategory === 'sub_others') {
             matchesCategory =
               !titleLower.includes('game pass') &&
@@ -203,7 +203,7 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
               !titleLower.includes('playstation plus') &&
               !titleLower.includes('ps plus') &&
               !titleLower.includes('ea play') &&
-              !titleLower.includes('ea');
+              !/\\bea\\b/.test(titleLower);
           }
         } else {
           matchesCategory = true;
