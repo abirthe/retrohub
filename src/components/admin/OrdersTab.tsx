@@ -101,7 +101,7 @@ const OrdersTab = ({ orders, ordersLoading, openActionDialog }: OrdersTabProps) 
           filteredOrders?.map((order) => {
             const customerInput = order.customer_input as Record<string, string> | null;
             const style = statusStyles[order.status || 'pending'] || statusStyles.pending;
-            
+
             return (
               <Card key={order.id} className="overflow-hidden border-white/5 bg-card/40 backdrop-blur-md hover:border-white/10 transition-all duration-300 group">
                 <div className="p-0 flex flex-col md:flex-row">
