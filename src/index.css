@@ -110,4 +110,14 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 4s linear infinite;
+    background-size: 200% auto;
+  }
 }

@@ -24,7 +24,7 @@ export function HeroSection() {
         </div>
 
         <h1 className="font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-wider text-white drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.3)] leading-[1.1] animate-in zoom-in-95 duration-700 delay-100 uppercase">
-          Game <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-accent filter drop-shadow-none">Keys</span>{' '}
+          Game <span className="text-transparent bg-clip-text bg-[length:200%_auto] bg-gradient-to-r from-primary via-white to-accent filter drop-shadow-none animate-shimmer">Keys</span>{' '}
           <span className="text-primary">&</span>{' '}<br />
           <span className="text-white">Top-Ups</span>
         </h1>
