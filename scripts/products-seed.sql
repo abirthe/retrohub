@@ -2483,13 +2483,13 @@ VALUES
 ('PlayStation Plus Deluxe [Turkey]', 'giftcard', 'instant_code', 'PlayStation', 'https://ovrok.com/wp-content/uploads/2023/02/PS-Plus-Deluxe-Main-330x413.jpg', NULL, 2285.00, 1942.25, 'GLOBAL', 0, true),
 ('Playstation Plus Essential [Turkey]', 'giftcard', 'instant_code', 'PlayStation', 'https://ovrok.com/wp-content/uploads/2023/02/PS-Plus-Essential-Main-330x413.jpg', NULL, 1385.00, 1177.25, 'GLOBAL', 0, true),
 ('Playstation Plus Extra [Turkey]', 'giftcard', 'instant_code', 'PlayStation', 'https://ovrok.com/wp-content/uploads/2025/06/PS-Plus-Extra-Main-330x413.jpg', NULL, 2080.00, 1768.00, 'GLOBAL', 0, true),
-('1 Month Game Pass Essential (INDIA)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ESSENTIAL-1M-330x440.jpg', NULL, 755.00, 641.75, 'GLOBAL', 0, true),
-('1 Month Game Pass Premium (INDIA)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2026/02/XBOX-GAME-PASS-PEMIUM-1M-330x440.jpg', NULL, 1210.00, 1028.50, 'GLOBAL', 0, true),
-('1 Month Game Pass Ultimate (INDIA)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ULTIMATE-1M-330x440.jpg', NULL, 1705.00, 1449.25, 'GLOBAL', 0, true),
-('12 Month Game Pass Essential (India)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ESSENTIAL-12M-330x440.jpg', NULL, 4810.00, 4088.50, 'GLOBAL', 0, true),
-('3 Month Game Pass PC (INDIA)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2024/11/XBOX-GAME-PASS-PC-3M-330x440.jpg', NULL, 2145.00, 1823.25, 'GLOBAL', 0, true),
-('3 Month Game Pass Ultimate (INDIA)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2024/11/XBOX-GAME-PASS-ULTIMATE-3M-330x440.jpg', NULL, 4710.00, 4003.50, 'GLOBAL', 0, true),
-('6 Month Game Pass Essential (India)', 'giftcard', 'instant_code', NULL, 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ESSENTIAL-6M-330x440.jpg', NULL, 2435.00, 2069.75, 'GLOBAL', 0, true)
+('Xbox Game Pass (India) | Essential 1M', 'subscription', 'instant_code', 'Xbox', 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ESSENTIAL-1M.jpg', NULL, 770.00, 654.50, 'IN', 100, true),
+('Xbox Game Pass (India) | Premium 1M', 'subscription', 'instant_code', 'Xbox', 'https://ovrok.com/wp-content/uploads/2026/02/XBOX-GAME-PASS-PEMIUM-1M.jpg', NULL, 1135.00, 964.75, 'IN', 100, true),
+('Xbox Game Pass (India) | Ultimate 1M', 'subscription', 'instant_code', 'PC / Xbox', 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ULTIMATE-1M.jpg', NULL, 1500.00, 1275.00, 'IN', 100, true),
+('Xbox Game Pass (India) | Essential 12M', 'subscription', 'instant_code', 'Xbox', 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ESSENTIAL-12M.jpg', NULL, 4525.00, 3846.25, 'IN', 100, true),
+('Xbox Game Pass (India) | PC 3M', 'subscription', 'instant_code', 'PC', 'https://ovrok.com/wp-content/uploads/2024/11/XBOX-GAME-PASS-PC-3M.jpg', NULL, 1960.00, 1666.00, 'IN', 100, true),
+('Xbox Game Pass (India) | Ultimate 3M', 'subscription', 'instant_code', 'PC / Xbox', 'https://ovrok.com/wp-content/uploads/2024/11/XBOX-GAME-PASS-ULTIMATE-3M.jpg', NULL, 4525.00, 3846.25, 'IN', 100, true),
+('Xbox Game Pass (India) | Essential 6M', 'subscription', 'instant_code', 'Xbox', 'https://ovrok.com/wp-content/uploads/2019/01/XBOX-GAME-PASS-ESSENTIAL-6M.jpg', NULL, 2260.00, 1921.00, 'IN', 100, true)
 ON CONFLICT (title) DO UPDATE SET
   sale_price = EXCLUDED.sale_price,
   cost_price = EXCLUDED.cost_price,
