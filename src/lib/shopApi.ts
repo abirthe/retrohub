@@ -15,16 +15,54 @@ export type Delivery = Database['public']['Tables']['deliveries']['Row'];
 export type AdminActionLog = Database['public']['Tables']['admin_action_logs']['Row'];
 
 // Fetch products from database
-export async function fetchProducts() {
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, title, sale_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
+export async function fetchProducts(): Promise<Product[]> {
+  try {
+    const PAGE_SIZE = 1000;
+    const { count, error: countError } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true);
 
-  if (error) throw error;
-  return data as Product[];
+    if (countError) throw countError;
+    const total = count ?? 0;
+    const numPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+    if (numPages === 1) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data as Product[]) ?? [];
+    }
+
+    const pagePromises = Array.from({ length: numPages }, (_, i) => {
+      const from = i * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      return supabase
+        .from('products')
+        .select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+    });
+
+    const results = await Promise.all(pagePromises);
+    const allProducts: Product[] = [];
+    for (const res of results) {
+      if (res.error) throw res.error;
+      if (res.data) {
+        allProducts.push(...(res.data as Product[]));
+      }
+    }
+    return allProducts;
+  } catch (error) {
+    throw error;
+  }
 }
+
 
 // Fetch orders from database (admin only)
 export async function fetchOrders() {
