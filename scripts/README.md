@@ -20,6 +20,7 @@ scripts/
 │   ├── generate-sql.cjs       # Generates database/products-seed.sql from Products/*.xlsx
 │   ├── seed-products.cjs      # Direct product seeder from Excel sheets into Supabase
 │   ├── seed_ea_play.mjs       # Seeds EA Play PSN subscriptions (Turkey & Ukraine)
+│   ├── seed_ea_play_pc.mjs    # Seeds EA Play & EA Play Pro PC subscriptions (EA App / Origin)
 │   └── seed_pdf_variants.mjs  # Seeds curated gift cards, currencies, & subscription tiers
 │
 ├── pricing/             # Price scraping datasets and synchronization algorithms
