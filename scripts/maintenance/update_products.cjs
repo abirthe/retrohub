@@ -3,7 +3,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
-const envPath = path.join(__dirname, '..', '.env');
+const envPath = fs.existsSync(path.join(__dirname, '..', '..', '.env')) ? path.join(__dirname, '..', '..', '.env') : path.join(__dirname, '..', '.env');
 const envContent = fs.readFileSync(envPath, 'utf8');
 for (const line of envContent.split('\n')) {
   const t = line.trim();

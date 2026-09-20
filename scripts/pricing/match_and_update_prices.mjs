@@ -1,11 +1,35 @@
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env if not present
+const envPath = fs.existsSync(path.join(__dirname, '..', '..', '.env'))
+  ? path.join(__dirname, '..', '..', '.env')
+  : path.join(process.cwd(), '.env');
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = trimmed.slice(eqIdx + 1).trim().replace(/^\"|\"$/g, '');
+    if (!process.env[key]) process.env[key] = val;
+  }
+}
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const arekta = JSON.parse(fs.readFileSync('scripts/arekta_scraped.json', 'utf8'));
+const jsonPath = fs.existsSync(path.join(__dirname, 'arekta_scraped.json'))
+  ? path.join(__dirname, 'arekta_scraped.json')
+  : path.join(process.cwd(), 'scripts', 'pricing', 'arekta_scraped.json');
+const arekta = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 
 // Build candidate list
 const candidates = [];

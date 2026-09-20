@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Load .env
-const envPath = path.join(__dirname, '..', '.env');
+const envPath = fs.existsSync(path.join(__dirname, '..', '..', '.env')) ? path.join(__dirname, '..', '..', '.env') : path.join(__dirname, '..', '.env');
 if (fs.existsSync(envPath)) {
   for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
     const trimmed = line.trim();
