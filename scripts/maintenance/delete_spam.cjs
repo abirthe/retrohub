@@ -23,7 +23,7 @@ async function run() {
     return;
   }
   
-  // Find the exact image URL used by "Dolby Atmos" or products containing ArektaCoinStore
+  // Find the exact image URL used by "Dolby Atmos" or products containing watermarked logos
   let badImageUrl = null;
   for (const p of products) {
     if (p.title.toLowerCase().includes('dolby atmos') && p.image_url) {
@@ -31,10 +31,10 @@ async function run() {
       console.log(`Found bad image URL from ${p.title}: ${badImageUrl}`);
       break;
     }
-    // Or if the image url literally contains the word arekta
-    if (p.image_url && p.image_url.toLowerCase().includes('arekta')) {
+    // Or if the image url literally contains watermarked linode storage
+    if (p.image_url && p.image_url.toLowerCase().includes('linodeobjects')) {
        badImageUrl = p.image_url;
-       console.log(`Found bad image URL containing arekta: ${badImageUrl}`);
+       console.log(`Found bad image URL containing external storage: ${badImageUrl}`);
        break;
     }
   }
@@ -50,7 +50,7 @@ async function run() {
   let deletedCount = 0;
   
   for (const p of products) {
-    if (p.image_url === badImageUrl || (p.image_url && p.image_url.includes('arekta'))) {
+    if (p.image_url === badImageUrl || (p.image_url && p.image_url.includes('linodeobjects'))) {
       console.log(`Deleting product: ${p.title} (ID: ${p.id})`);
       const { error: delError } = await supabase.from('products').delete().eq('id', p.id);
       if (delError) {

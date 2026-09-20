@@ -26,14 +26,14 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const jsonPath = fs.existsSync(path.join(__dirname, 'arekta_scraped.json'))
-  ? path.join(__dirname, 'arekta_scraped.json')
-  : path.join(process.cwd(), 'scripts', 'pricing', 'arekta_scraped.json');
-const arekta = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+const jsonPath = fs.existsSync(path.join(__dirname, 'market_scraped.json'))
+  ? path.join(__dirname, 'market_scraped.json')
+  : path.join(process.cwd(), 'scripts', 'pricing', 'market_scraped.json');
+const marketData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 
 // Build candidate list
 const candidates = [];
-for (const p of arekta) {
+for (const p of marketData) {
   let minChildPrice = null;
   if (p.children && p.children.length > 0) {
     const validPrices = p.children.map(c => Number(c.price)).filter(pr => !isNaN(pr) && pr > 0);
@@ -86,7 +86,7 @@ async function run() {
   }
 
   process.stdout.write('Total empty DB products: ' + dbProducts.length + '\n');
-  process.stdout.write('Total Arekta candidates: ' + candidates.length + '\n');
+  process.stdout.write('Total market candidates: ' + candidates.length + '\n');
 
   const matched = [];
   const unmatched = [];
