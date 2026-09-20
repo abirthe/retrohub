@@ -25,8 +25,8 @@ const BkashPayment = () => {
                 <div>
                     <Label className="text-xs uppercase tracking-widest text-muted-foreground">Number (Send Money)</Label>
                     <div className="flex items-center gap-2 mt-1">
-                        <code className="text-2xl font-mono font-bold text-primary tracking-wider">01307692886</code>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white" onClick={() => handleCopy('01307692886', 'Bkash Number')}>
+                        <code className="text-2xl font-mono font-bold text-primary tracking-wider">01580382868</code>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white" onClick={() => handleCopy('01580382868', 'Bkash Number')}>
                             <Copy className="w-4 h-4" />
                         </Button>
                     </div>

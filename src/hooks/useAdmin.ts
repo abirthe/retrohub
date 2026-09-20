@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { checkIsAdmin } from '@/lib/shopApi';
 
 export function useAdmin() {
@@ -6,15 +7,36 @@ export function useAdmin() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkIsAdmin().then((admin) => {
-      setIsAdmin(admin);
-      setLoading(false);
-    }).catch(() => {
-      setIsAdmin(false);
-      setLoading(false);
+    let isMounted = true;
+
+    const verifyAdmin = async () => {
+      try {
+        const admin = await checkIsAdmin();
+        if (isMounted) {
+          setIsAdmin(admin);
+          setLoading(false);
+        }
+      } catch {
+        if (isMounted) {
+          setIsAdmin(false);
+          setLoading(false);
+        }
+      }
+    };
+
+    verifyAdmin();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      verifyAdmin();
     });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return { isAdmin, loading };
 }
+
 

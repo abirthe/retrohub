@@ -32,7 +32,7 @@ export const EditProductDialog = ({ product, open, onClose }: EditProductDialogP
   const [salePrice, setSalePrice] = useState('');
   const [costPrice, setCostPrice] = useState('');
   const [inStock, setInStock] = useState('');
-  const [deliveryType, setDeliveryType] = useState<'auto' | 'manual'>('manual');
+  const [deliveryType, setDeliveryType] = useState<Product['delivery_type']>('instant_code');
   const [imageUrl, setImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
 
@@ -46,7 +46,7 @@ export const EditProductDialog = ({ product, open, onClose }: EditProductDialogP
       setSalePrice(product.sale_price.toString());
       setCostPrice(product.cost_price.toString());
       setInStock(product.in_stock?.toString() || '0');
-      setDeliveryType(product.delivery_type);
+      setDeliveryType(product.delivery_type || 'instant_code');
       setImageUrl(product.image_url || '');
       setIsActive(product.is_active ?? true);
     }
@@ -145,13 +145,14 @@ export const EditProductDialog = ({ product, open, onClose }: EditProductDialogP
 
             <div className="space-y-2">
               <Label htmlFor="deliveryType" className="text-xs uppercase tracking-wider text-muted-foreground">Delivery Type</Label>
-              <Select value={deliveryType} onValueChange={(val: 'auto' | 'manual') => setDeliveryType(val)}>
+              <Select value={deliveryType} onValueChange={(val: Product['delivery_type']) => setDeliveryType(val)}>
                 <SelectTrigger className="bg-black/20 border-white/10">
                   <SelectValue placeholder="Select Delivery" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="auto">Auto (Instant)</SelectItem>
-                  <SelectItem value="manual">Manual</SelectItem>
+                  <SelectItem value="instant_code">Instant Code (Instant - 30min)</SelectItem>
+                  <SelectItem value="api_h2h">API H2H (Automated)</SelectItem>
+                  <SelectItem value="automation">Automation Bot</SelectItem>
                 </SelectContent>
               </Select>
             </div>

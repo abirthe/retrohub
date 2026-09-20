@@ -67,21 +67,22 @@ export async function sendOrderCompletionEmail(orderId: string) {
       .eq('id', orderId)
       .single();
 
-    if (orderError || !order) {
-      throw new Error('Order not found');
+    if (order.status !== 'fulfilled' && order.status !== 'completed') {
+      throw new Error(`Order is not fulfilled yet (status: ${order.status})`);
     }
 
-    if (order.status !== 'completed' || !order.final_output) {
-      throw new Error('Order not completed or no code available');
+    if (!order.final_output) {
+      throw new Error('No delivery code available for this order');
     }
 
-    // Get customer email using RPC function (works for admins)
-    const { data: customerEmail, error: emailError } = await supabase.rpc(
-      'get_user_email' as never,
-      { p_user_id: order.user_id } as never
-    );
+    // Get customer email from profiles table
+    const { data: profile, error: emailError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', order.user_id)
+      .single();
 
-    if (emailError || !customerEmail) {
+    if (emailError || !profile || !profile.email) {
       // Don't fail completely - email is optional
       return { 
         success: false, 
@@ -94,7 +95,7 @@ export async function sendOrderCompletionEmail(orderId: string) {
     const productData = order.products as { title?: string } | null;
     const result = await sendOrderEmail({
       order_id: order.id,
-      recipient: customerEmail as string,
+      recipient: profile.email,
       product_title: productData?.title || 'Product',
       code: order.final_output,
       order_total: Number(order.total),

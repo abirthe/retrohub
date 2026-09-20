@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store } from 'lucide-react';
+import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,11 +38,20 @@ const ShopHeader = () => {
         <nav className="hidden sm:flex items-center gap-3">
           <Link to="/">
             <Button
-              variant={!isAdminPage ? 'default' : 'ghost'}
+              variant={!isAdminPage && location.pathname !== '/custom-order' ? 'default' : 'ghost'}
               size="sm"
-              className={!isAdminPage ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider'}
+              className={!isAdminPage && location.pathname !== '/custom-order' ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider'}
             >
               Shop
+            </Button>
+          </Link>
+          <Link to="/custom-order">
+            <Button
+              variant={location.pathname === '/custom-order' ? 'default' : 'ghost'}
+              size="sm"
+              className={location.pathname === '/custom-order' ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider text-muted-foreground hover:text-white'}
+            >
+              Custom Order
             </Button>
           </Link>
           {isAdmin && (
@@ -140,11 +149,23 @@ const ShopHeader = () => {
             onClick={closeMobile}
             className={cn(
               'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors',
-              !isAdminPage ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+              !isAdminPage && location.pathname !== '/custom-order' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
             )}
           >
             <Store className="h-4 w-4" />
             Shop
+          </Link>
+
+          <Link
+            to="/custom-order"
+            onClick={closeMobile}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors',
+              location.pathname === '/custom-order' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+            )}
+          >
+            <Sparkles className="h-4 w-4 text-primary" />
+            Custom Order
           </Link>
 
           {isAdmin && (

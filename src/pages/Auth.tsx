@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,34 @@ const Auth = () => {
       navigate('/');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Login failed';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!loginEmail.trim()) {
+      toast({
+        title: 'Email Required',
+        description: 'Please enter your email address in the field above first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(loginEmail.trim(), {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (error) throw error;
+      toast({
+        title: 'Password Reset Email Sent',
+        description: 'Please check your email for the password reset link.',
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to send reset email';
       toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -105,7 +134,13 @@ const Auth = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="login-password">Password</Label>
-                        <span className="text-[10px] text-primary hover:underline cursor-pointer">Forgot password?</span>
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          className="text-[10px] text-primary hover:underline cursor-pointer bg-transparent border-0 p-0"
+                        >
+                          Forgot password?
+                        </button>
                       </div>
                       <Input
                         id="login-password"
