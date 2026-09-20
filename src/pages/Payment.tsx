@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -214,7 +214,7 @@ const Payment = () => {
                             </Card>
 
                             <div className="bg-secondary/30 p-4 rounded-lg border border-border/50 backdrop-blur text-sm text-center text-muted-foreground">
-                                Need help? <a href="#" className="text-primary hover:underline underline-offset-4">Contact Support</a>
+                                Need help? <Link to="/custom-order" className="text-primary hover:underline underline-offset-4 font-semibold">Contact Support / Custom Request</Link>
                             </div>
                         </div>
 

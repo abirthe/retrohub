@@ -44,7 +44,6 @@ const CustomOrder = () => {
       navigate('/');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Error submitting custom order:', error);
       toast({
         title: "Submission Failed",
         description: message || "Something went wrong. Please try again.",

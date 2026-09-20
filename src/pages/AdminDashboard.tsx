@@ -85,13 +85,19 @@ const AdminDashboard = () => {
             toast({ title: 'Action Failed', description: result.error, variant: 'destructive' });
           }
           break;
-        case 'fulfill':
+        case 'fulfill': {
+          const fulfillData = data as {
+            deliveryCode?: string;
+            costPaid?: number;
+            sourcedFrom?: string;
+            notes?: string;
+          } | undefined;
           result = await fulfillOrder(
             actionDialog.order.id, 
-            data?.deliveryCode, 
-            data?.costPaid, 
-            data?.sourcedFrom, 
-            data?.notes
+            fulfillData?.deliveryCode || '', 
+            fulfillData?.costPaid, 
+            fulfillData?.sourcedFrom, 
+            fulfillData?.notes
           );
           if (result.success) {
             await sendOrderCompletionEmail(actionDialog.order.id);
@@ -100,6 +106,7 @@ const AdminDashboard = () => {
             toast({ title: 'Fulfillment Failed', description: result.error, variant: 'destructive' });
           }
           break;
+        }
         case 'validate':
           result = await validateOrder(actionDialog.order.id);
           if (result.success) {
