@@ -29,7 +29,8 @@ scripts/
 │   ├── fetch_photos.mjs       # Fetches missing cover artwork from Steam & store APIs
 │   ├── find_photos.mjs        # Search and match tool for product cover images
 │   ├── map_images.mjs         # Maps image URLs from local assets/spreadsheets to Supabase
-│   └── remove_watermarked_images.mjs # Removes watermarked images from products
+│   ├── remove_watermarked_images.mjs # Removes watermarked images from products
+│   └── search_product_image.mjs # Multi-provider image finder with strict requirement verification
 │
 ├── maintenance/         # Catalog hygiene, category repairs, and stock monitoring
 │   ├── check-stock.cjs        # Displays total product counts and out-of-stock statistics
@@ -90,6 +91,7 @@ node scripts/testing/test_variants.mjs
 * **`match_and_update_prices.mjs`**: Compares products in Supabase that have zero or null prices against `market_scraped.json` using fuzzy matching, and updates `sale_price` and `cost_price`.
 
 ### 4. Images (`scripts/images/`)
+* **`search_product_image.mjs`**: Intelligent multi-provider image finder and validator. Searches images based on product title (using Curated High-Res Registry, Steam Store API, iTunes API, and DuckDuckGo Images) and validates candidates against strict image requirements (minimum resolution, aspect ratio e.g. 16:9 or 3:4 or 1:1, valid formats, reachable HTTP status). Supports single title lookups, batch catalog scans, dry-run previews, and `--apply` mode to commit directly to Supabase.
 * **`fetch_photos.mjs`**: Identifies games without cover images and queries public store APIs (Steam, IGDB, Epic) to retrieve and assign official poster images.
 * **`find_photos.mjs`**: Utility search script to test and verify image search queries for specific game titles.
 * **`map_images.mjs`**: Maps image URLs from local data feeds and spreadsheets into Supabase products based on title matching.
