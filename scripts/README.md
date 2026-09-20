@@ -22,14 +22,14 @@ scripts/
 │   └── seed_pdf_variants.mjs  # Seeds curated gift cards, currencies, & subscription tiers
 │
 ├── pricing/             # Price scraping datasets and synchronization algorithms
-│   ├── arekta_scraped.json    # Cached scraped catalog dataset from Arekta Coin Store
+│   ├── market_scraped.json    # Cached scraped catalog dataset from market vendor
 │   └── match_and_update_prices.mjs # Matches scraped prices to update empty/zero product prices
 │
 ├── images/              # Product image sourcing, mapping, and cleanup tools
 │   ├── fetch_photos.mjs       # Fetches missing cover artwork from Steam & store APIs
 │   ├── find_photos.mjs        # Search and match tool for product cover images
 │   ├── map_images.mjs         # Maps image URLs from local assets/spreadsheets to Supabase
-│   └── remove_arekta_images.mjs # Removes watermarked images from products
+│   └── remove_watermarked_images.mjs # Removes watermarked images from products
 │
 ├── maintenance/         # Catalog hygiene, category repairs, and stock monitoring
 │   ├── check-stock.cjs        # Displays total product counts and out-of-stock statistics
@@ -78,7 +78,7 @@ node scripts/testing/test_variants.mjs
 * **`apply-migration.cjs`**: Programmatic migration runner that executes migration SQL files directly against the Supabase instance using service role credentials.
 
 ### 2. Seeding (`scripts/seeding/`)
-* **`generate-sql.cjs`**: Reads Excel files (`Arekta.xlsx`, `Arekta 2.xlsx`, `ovrok.xlsx`, `Xbox Games.xlsx`, `PS Games.xlsx`, `STEAM GAMES.xlsx`) in `Products/`, cleans titles, detects regions and categories, and compiles `scripts/database/products-seed.sql`.
+* **`generate-sql.cjs`**: Reads Excel files (`Catalog 1.xlsx`, `Catalog 2.xlsx`, `ovrok.xlsx`, `Xbox Games.xlsx`, `PS Games.xlsx`, `STEAM GAMES.xlsx`) in `Products/`, cleans titles, detects regions and categories, and compiles `scripts/database/products-seed.sql`.
 * **`seed-products.cjs`**: Directly parses the Excel sheets and performs batch upserts into the Supabase `products` table.
 * **`seed_pdf_variants.mjs`**: Seeds specific in-game currency tiers (Valorant, Fortnite, PUBG, Roblox, Genshin Impact) and gift card variants into the database.
 * **`add_subs.mjs`**: Reads exported CSV files in `Products/subscription/` and generates base products and their associated duration variants (`Product | 1 Month`, etc.).
@@ -86,14 +86,14 @@ node scripts/testing/test_variants.mjs
 * **`add_variants.mjs`**: General-purpose variant creator across all directories in `Products/`.
 
 ### 3. Pricing (`scripts/pricing/`)
-* **`arekta_scraped.json`**: Cached scraped catalog data from Arekta Coin Store containing parent products, child variant prices, and slugs.
-* **`match_and_update_prices.mjs`**: Compares products in Supabase that have zero or null prices against `arekta_scraped.json` using fuzzy matching, and updates `sale_price` and `cost_price`.
+* **`market_scraped.json`**: Cached scraped catalog data from market sources containing parent products, child variant prices, and slugs.
+* **`match_and_update_prices.mjs`**: Compares products in Supabase that have zero or null prices against `market_scraped.json` using fuzzy matching, and updates `sale_price` and `cost_price`.
 
 ### 4. Images (`scripts/images/`)
 * **`fetch_photos.mjs`**: Identifies games without cover images and queries public store APIs (Steam, IGDB, Epic) to retrieve and assign official poster images.
 * **`find_photos.mjs`**: Utility search script to test and verify image search queries for specific game titles.
 * **`map_images.mjs`**: Maps image URLs from local data feeds and spreadsheets into Supabase products based on title matching.
-* **`remove_arekta_images.mjs`**: Clears out image URLs carrying external third-party store watermarks.
+* **`remove_watermarked_images.mjs`**: Clears out image URLs carrying external third-party store watermarks.
 
 ### 5. Maintenance (`scripts/maintenance/`)
 * **`check-stock.cjs`**: Quick health check script that queries Supabase to output total products count and out-of-stock count.

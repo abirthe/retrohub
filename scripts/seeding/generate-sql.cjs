@@ -151,7 +151,7 @@ function parseXboxGamesFile(filePath) {
   return products;
 }
 
-function parseArekta2File(filePath) {
+function parseCatalog2File(filePath) {
   const wb = XLSX.readFile(filePath);
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
@@ -188,7 +188,7 @@ const fileParsers = [
   { file: 'STEAM GAMES.xlsx', label: 'STEAM GAMES', parser: parseSteamGamesFile },
   { file: 'Xbox Games.xlsx', label: 'Xbox Games', parser: parseXboxGamesFile },
   { file: 'PS Games.xlsx', label: 'PS Games', parser: parsePSGamesFile },
-  { file: 'Arekta 2.xlsx', label: 'Arekta 2', parser: parseArekta2File },
+  { file: 'Catalog 2.xlsx', label: 'Catalog 2', parser: parseCatalog2File },
   { file: 'ovrok.xlsx', label: 'ovrok', parser: parseOvrokFile },
 ];
 

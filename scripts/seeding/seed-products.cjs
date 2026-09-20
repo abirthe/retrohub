@@ -98,9 +98,9 @@ function regionFromTitle(title) {
 
 // ─── CATEGORY DETECTION ───────────────────────────────────────────────────────
 
-// Arekta 2 uses human-readable group labels in the Category column.
+// Catalog 2 uses human-readable group labels in the Category column.
 // Mapping those group labels to our DB enum values.
-const AREKTA_SUBSCRIPTION_KEYWORDS = [
+const CATALOG_SUBSCRIPTION_KEYWORDS = [
   'subscription', 'discord nitro', 'youtube premium', 'xbox gamepass', 'xbox game pass',
   'adobe creative cloud', 'spotify', 'netflix', 'duolingo', 'telegram premium',
   'linkedin premium', 'google one', 'icloud', 'faceit', 'grammarly', 'quillbot',
@@ -108,7 +108,7 @@ const AREKTA_SUBSCRIPTION_KEYWORDS = [
   'discord server boosting', 'discord decoration', 'windows activation',
 ];
 
-const AREKTA_TOPUP_KEYWORDS = [
+const CATALOG_TOPUP_KEYWORDS = [
   'game top-up', 'top-up', 'topup', 'v-bucks', 'vbucks', 'apex coins', 'robux',
   'brawl stars', 'genshin', 'honkai', 'pubg', 'mobile legends', 'mlbb',
   'fortnite', 'roblox login', 'delta force', 'efootball', 'pes',
@@ -116,24 +116,24 @@ const AREKTA_TOPUP_KEYWORDS = [
   'zenless zone zero', 'once human', 'neverness', 'where winds meet',
 ];
 
-const AREKTA_SOFTWARE_KEYWORDS = [
+const CATALOG_SOFTWARE_KEYWORDS = [
   'software', 'vpn', 'canva', 'capcut', 'dolby atmos', 'expressvpn', 'hma pro',
   'internet download manager', 'idm', 'malwarebytes', 'mcafee', 'microsoft 365',
   'nord vpn', 'nordvpn', 'proton vpn', 'surfshark', 'zoom',
 ];
 
-const AREKTA_GIFTCARD_KEYWORDS = [
+const CATALOG_GIFTCARD_KEYWORDS = [
   'gift card', 'itunes', 'nintendo', 'blizzard', 'battlenet', 'steam online',
   'xbox gift card', 'xbox top-up', 'roblox gift card',
 ];
 
-function detectArekta2Category(nameOrGroupLabel) {
+function detectCatalog2Category(nameOrGroupLabel) {
   const lower = (nameOrGroupLabel || '').toLowerCase();
-  if (AREKTA_SOFTWARE_KEYWORDS.some(k => lower.includes(k))) return 'software';
-  if (AREKTA_SUBSCRIPTION_KEYWORDS.some(k => lower.includes(k))) return 'subscription';
-  if (AREKTA_TOPUP_KEYWORDS.some(k => lower.includes(k))) return 'topup';
-  if (AREKTA_GIFTCARD_KEYWORDS.some(k => lower.includes(k))) return 'giftcard';
-  // Default: it's a PC game listing from Arekta
+  if (CATALOG_SOFTWARE_KEYWORDS.some(k => lower.includes(k))) return 'software';
+  if (CATALOG_SUBSCRIPTION_KEYWORDS.some(k => lower.includes(k))) return 'subscription';
+  if (CATALOG_TOPUP_KEYWORDS.some(k => lower.includes(k))) return 'topup';
+  if (CATALOG_GIFTCARD_KEYWORDS.some(k => lower.includes(k))) return 'giftcard';
+  // Default: it's a PC game listing
   return 'pc_game';
 }
 
@@ -291,7 +291,7 @@ function parseXboxGamesFile(filePath) {
   return products;
 }
 
-function parseArekta2File(filePath) {
+function parseCatalog2File(filePath) {
   // Headers: ["Name","Description","Category","Image","Logo","Price","Availability","Currency"]
   const wb = XLSX.readFile(filePath);
   const ws = wb.Sheets[wb.SheetNames[0]];
@@ -307,7 +307,7 @@ function parseArekta2File(filePath) {
     
     // Determine category from the group label or product name
     const categorySource = groupLabel || name.toString();
-    const cat = detectArekta2Category(categorySource);
+    const cat = detectCatalog2Category(categorySource);
     products.push({
       title: name.toString().trim(),
       category: cat,
@@ -385,7 +385,7 @@ async function main() {
     { file: 'Xbox Games.xlsx',  label: 'Xbox Games (xbox_game)', parser: parseXboxGamesFile },
     { file: 'PS Games.xlsx',    label: 'PS Games (ps_game)',     parser: parsePSGamesFile },
     { file: 'SALE!.xlsx',       label: 'SALE! (pc_game + xbox)', parser: parseSaleFile },
-    { file: 'Arekta 2.xlsx',    label: 'Arekta 2 (multi-cat)',  parser: parseArekta2File },
+    { file: 'Catalog 2.xlsx',   label: 'Catalog 2 (multi-cat)',  parser: parseCatalog2File },
     { file: 'ovrok.xlsx',       label: 'Ovrok (giftcard)',       parser: parseOvrokFile },
   ];
 
