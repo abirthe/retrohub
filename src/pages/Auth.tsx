@@ -25,6 +25,9 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupName, setSignupName] = useState('');
 
+  const [view, setView] = useState<'auth' | 'forgot_password'>('auth');
+  const [resetEmail, setResetEmail] = useState('');
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -40,11 +43,12 @@ const Auth = () => {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!loginEmail.trim()) {
+  const handleForgotPassword = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!resetEmail.trim()) {
       toast({
         title: 'Email Required',
-        description: 'Please enter your email address in the field above first.',
+        description: 'Please enter your email address.',
         variant: 'destructive',
       });
       return;
@@ -52,7 +56,7 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(loginEmail.trim(), {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
         redirectTo: `${window.location.origin}/auth/callback`,
       });
       if (error) throw error;
@@ -60,6 +64,7 @@ const Auth = () => {
         title: 'Password Reset Email Sent',
         description: 'Please check your email for the password reset link.',
       });
+      setView('auth');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to send reset email';
       toast({ title: 'Error', description: message, variant: 'destructive' });
@@ -111,11 +116,40 @@ const Auth = () => {
 
           <Card className="bg-card/40 backdrop-blur-xl border-white/10 shadow-2xl animate-in fade-in zoom-in-95 duration-500 delay-100">
             <CardContent className="pt-6">
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-secondary/50 mb-6">
-                  <TabsTrigger value="login" className="font-display text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup" className="font-display text-xs tracking-wider data-[state=active]:bg-accent/20 data-[state=active]:text-accent transition-all">Register</TabsTrigger>
-                </TabsList>
+              {view === 'forgot_password' ? (
+                <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="text-center space-y-2 mb-4">
+                    <h2 className="text-xl font-display font-semibold text-white">Reset Password</h2>
+                    <p className="text-sm text-muted-foreground">Enter your email and we'll send you a link to reset your password.</p>
+                  </div>
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="hello@example.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                        className="bg-background/50 border-white/10 focus:border-primary/50 transition-all text-white"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full h-11 gradient-primary font-display tracking-wider relative group overflow-hidden" disabled={loading}>
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                      {loading ? 'Sending link...' : 'Send Reset Link'}
+                    </Button>
+                  </form>
+                  <Button variant="ghost" onClick={() => setView('auth')} className="w-full mt-2 text-muted-foreground hover:text-white">
+                    Back to Login
+                  </Button>
+                </div>
+              ) : (
+                <Tabs defaultValue="login" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-secondary/50 mb-6">
+                    <TabsTrigger value="login" className="font-display text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all">Sign In</TabsTrigger>
+                    <TabsTrigger value="signup" className="font-display text-xs tracking-wider data-[state=active]:bg-accent/20 data-[state=active]:text-accent transition-all">Register</TabsTrigger>
+                  </TabsList>
 
                 <TabsContent value="login" className="space-y-4 focus-visible:outline-none">
                   <form onSubmit={handleLogin} className="space-y-4">
@@ -136,7 +170,10 @@ const Auth = () => {
                         <Label htmlFor="login-password">Password</Label>
                         <button
                           type="button"
-                          onClick={handleForgotPassword}
+                          onClick={() => {
+                            setResetEmail(loginEmail);
+                            setView('forgot_password');
+                          }}
                           className="text-[10px] text-primary hover:underline cursor-pointer bg-transparent border-0 p-0"
                         >
                           Forgot password?
@@ -204,6 +241,7 @@ const Auth = () => {
                   </form>
                 </TabsContent>
               </Tabs>
+              )}
             </CardContent>
           </Card>
 
