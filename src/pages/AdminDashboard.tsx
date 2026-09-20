@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
+  fetchProducts,
   fetchOrders,
   Product,
   fulfillOrder,
@@ -66,11 +67,7 @@ const AdminDashboard = () => {
 
   const { data: products } = useQuery({
     queryKey: ['admin-products'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, created_at, is_active').order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as Product[];
-    },
+    queryFn: fetchProducts,
     enabled: isAdmin === true,
   });
 
