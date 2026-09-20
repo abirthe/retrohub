@@ -87,10 +87,14 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
   const { search, activeCategory, activeSubcategory, sort } = options;
 
   // Deduplicate products by base name (for variants like "Product | 1 Month", "Product | 3 Month")
+  // Deduplicate products by base name (and pick the lowest price variant for display)
   const groupedProducts = products.reduce((acc, curr) => {
     const baseName = curr.title.split(' | ')[0];
-    if (!acc.find((p) => p.title.split(' | ')[0] === baseName)) {
+    const existingIndex = acc.findIndex((p) => p.title.split(' | ')[0] === baseName);
+    if (existingIndex === -1) {
       acc.push(curr);
+    } else if (Number(curr.sale_price) < Number(acc[existingIndex].sale_price)) {
+      acc[existingIndex] = curr;
     }
     return acc;
   }, [] as Product[]);

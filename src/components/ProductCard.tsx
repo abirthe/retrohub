@@ -135,7 +135,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <p className="text-[9px] sm:text-[10px] font-display tracking-widest text-muted-foreground/60 uppercase">{product.platform}</p>
           )}
           <h3 className="font-display text-xs sm:text-sm font-bold tracking-wide leading-tight line-clamp-2 text-foreground group-hover:text-white transition-colors duration-300">
-            {product.title}
+            {product.title.includes(' | ') ? product.title.split(' | ')[0] : product.title}
           </h3>
           {product.description && (
             <p className="hidden sm:block text-xs text-muted-foreground/70 line-clamp-2 min-h-[2.5em]">{product.description}</p>
@@ -144,8 +144,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/5 gap-2">
           <div>
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-[10px] text-muted-foreground font-medium">৳</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {product.title.includes(' | ') ? 'From ৳' : '৳'}
+              </span>
               <span className="font-display text-base sm:text-xl font-bold text-white tracking-tight group-hover:text-accent transition-colors">
                 {Number(product.sale_price).toLocaleString('en-BD')}
               </span>
