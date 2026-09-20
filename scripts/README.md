@@ -19,6 +19,7 @@ scripts/
 │   ├── add_variants.mjs       # General CSV variant parser for products in Products/
 │   ├── generate-sql.cjs       # Generates database/products-seed.sql from Products/*.xlsx
 │   ├── seed-products.cjs      # Direct product seeder from Excel sheets into Supabase
+│   ├── seed_ea_play.mjs       # Seeds EA Play PSN subscriptions (Turkey & Ukraine)
 │   └── seed_pdf_variants.mjs  # Seeds curated gift cards, currencies, & subscription tiers
 │
 ├── pricing/             # Price scraping datasets and synchronization algorithms
