@@ -9,6 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { getRegionLabel } from '@/lib/regions';
 import { cn, generateProductUrl } from '@/lib/utils';
+import { getProductEffectiveCategory } from '@/lib/productFilters';
 import type { LucideIcon } from 'lucide-react';
 
 const deliveryIcon = {
@@ -56,7 +57,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
-  const meta = CATEGORY_META[product.category] ?? DEFAULT_META;
+  const effectiveCat = getProductEffectiveCategory(product);
+  const meta = CATEGORY_META[product.category] ?? CATEGORY_META[effectiveCat] ?? DEFAULT_META;
   const CategoryIcon = meta.icon;
 
   const handleBuy = (e: React.MouseEvent) => {
@@ -115,13 +117,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
 
         {/* Badges */}
-        <div className="absolute top-3 inset-x-3 z-20 flex items-start justify-between gap-1.5">
-          <Badge variant="outline" className={cn('text-[10px] backdrop-blur-md transition-colors flex items-center gap-1 shrink-0', meta.badge)}>
+        <div className="absolute top-2.5 sm:top-3 inset-x-2 sm:inset-x-3 z-20 flex items-start justify-between gap-1">
+          <Badge variant="outline" className={cn('text-[10px] backdrop-blur-md transition-colors flex items-center gap-1 min-w-0 max-w-[58%] px-1.5 sm:px-2.5 py-0.5', meta.badge)}>
             <CategoryIcon className="h-2.5 w-2.5 shrink-0" />
             <span className="truncate">{meta.label}</span>
           </Badge>
-          <Badge variant="outline" className="text-[10px] border-white/10 text-muted-foreground backdrop-blur-md shrink-0 flex items-center">
-            {getRegionLabel(product.region || 'GLOBAL')}
+          <Badge variant="outline" className="text-[10px] border-white/10 text-muted-foreground backdrop-blur-md shrink-0 flex items-center max-w-[42%] px-1.5 sm:px-2.5 py-0.5">
+            <span className="truncate">{getRegionLabel(product.region || 'GLOBAL')}</span>
           </Badge>
         </div>
       </div>
