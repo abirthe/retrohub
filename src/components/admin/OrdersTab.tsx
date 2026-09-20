@@ -144,8 +144,8 @@ const OrdersTab = ({ orders, ordersLoading, openActionDialog }: OrdersTabProps) 
                           ৳{Number(order.total).toFixed(2)}
                         </div>
                         {customerInput?.transaction_id && (
-                          <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
-                            <span className="font-mono tracking-wider">TrxID: {customerInput.transaction_id}</span>
+                          <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20 max-w-full">
+                            <span className="font-mono tracking-wider break-all">TrxID: {customerInput.transaction_id}</span>
                           </div>
                         )}
                       </div>
