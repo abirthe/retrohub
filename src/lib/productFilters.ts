@@ -8,6 +8,41 @@ export interface FilterOptions {
   sort: SortValue;
 }
 
+export function isOtherAccountProduct(titleLower: string): boolean {
+  return (
+    titleLower.includes('apple id') ||
+    titleLower.includes('id apple') ||
+    (titleLower.includes('apple') && titleLower.includes('account') && !titleLower.includes('gift')) ||
+    titleLower.includes('twitch account') ||
+    titleLower.includes('ready twitch') ||
+    titleLower.includes('spotify') ||
+    (titleLower.includes('telegram') && titleLower.includes('premium') && titleLower.includes('account')) ||
+    titleLower.includes('linkedin') ||
+    titleLower.includes('meta verified')
+  );
+}
+
+export function isAppAccountProduct(p: Product, titleLower: string): boolean {
+  return (
+    p.category === 'software' ||
+    titleLower.includes('canva') ||
+    titleLower.includes('chatgpt') ||
+    titleLower.includes('claude') ||
+    titleLower.includes('google ai') ||
+    titleLower.includes('gemini') ||
+    titleLower.includes('duolingo') ||
+    titleLower.includes('office') ||
+    titleLower.includes('windows 10') ||
+    titleLower.includes('windows 11') ||
+    titleLower.includes('coreldraw') ||
+    titleLower.includes('midjourney') ||
+    titleLower.includes('mullvad') ||
+    titleLower.includes('visio') ||
+    titleLower.includes('procreate') ||
+    titleLower.includes('faceapp')
+  );
+}
+
 /**
  * Resolves the primary semantic category of a product,
  * guarding against any data inconsistencies in the database.
@@ -15,23 +50,19 @@ export interface FilterOptions {
 export function getProductEffectiveCategory(p: Product): string {
   const titleLower = p.title.toLowerCase();
 
-  // 1. Account detection (Top priority so account-based products go strictly to Accounts)
-  if (titleLower.includes('account')) {
-    return 'accounts';
-  }
-
-  // 2. Gift card / Wallet detection
+  // 1. Gift card / Wallet detection
   const isGiftCardText =
     titleLower.includes('gift card') ||
     titleLower.includes('giftcard') ||
     titleLower.includes('wallet') ||
     titleLower.includes('gift code') ||
-    titleLower.includes('eshop') ||
+    titleLower.includes('eshop card') ||
+    titleLower.includes('eshop gift') ||
     titleLower.includes('itunes') ||
     titleLower.includes('riot access') ||
     titleLower.includes('playstation store gift');
 
-  if (isGiftCardText || p.category === 'giftcard') {
+  if (p.category === 'giftcard' || isGiftCardText) {
     // Distinguish games delivered as Steam Gift from actual currency gift cards
     const isSteamGiftGame =
       titleLower.includes('steam gift') &&
@@ -44,6 +75,11 @@ export function getProductEffectiveCategory(p: Product): string {
     }
   }
 
+  // 2. Top-up / Coin / Social detection
+  if (p.category === 'topup' && !isOtherAccountProduct(titleLower)) {
+    return 'topup';
+  }
+
   // 3. Subscription detection
   const isSubText =
     titleLower.includes('subscription') ||
@@ -54,23 +90,27 @@ export function getProductEffectiveCategory(p: Product): string {
     titleLower.includes('playstation plus') ||
     titleLower.includes('ea play') ||
     titleLower.includes('netflix') ||
-    titleLower.includes('spotify') ||
     titleLower.includes('discord nitro') ||
     titleLower.includes('youtube premium') ||
     titleLower.includes('crunchyroll');
 
-  if (p.category === 'subscription' || (isSubText && p.category !== 'software')) {
+  if (p.category === 'subscription' || (isSubText && p.category !== 'software' && !titleLower.includes('account'))) {
     return 'subscription';
   }
 
-  // 4. Software
-  if (p.category === 'software') {
-    return 'software';
+  // 4. Account detection
+  if (
+    titleLower.includes('account') ||
+    isOtherAccountProduct(titleLower) ||
+    titleLower.includes('login') ||
+    titleLower.includes('full access')
+  ) {
+    return 'accounts';
   }
 
-  // 5. Top-up
-  if (p.category === 'topup') {
-    return 'topup';
+  // 5. Software
+  if (p.category === 'software') {
+    return 'software';
   }
 
   // 6. Games (pc_game, xbox_game, ps_game)
@@ -209,17 +249,20 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
           matchesCategory = true;
         }
       } else if (activeCategory === 'accounts') {
-        if (effCategory !== 'accounts' && !titleLower.includes('account')) {
+        if (effCategory !== 'accounts' && !titleLower.includes('account') && !isOtherAccountProduct(titleLower)) {
           return false;
         }
 
         if (activeSubcategory) {
-          if (activeSubcategory === 'accounts_games') {
-            matchesCategory = ['pc_game', 'xbox_game', 'ps_game'].includes(p.category);
-          } else if (activeSubcategory === 'accounts_app') {
-            matchesCategory = p.category === 'software';
+          const isOther = isOtherAccountProduct(titleLower);
+          const isApp = isAppAccountProduct(p, titleLower);
+
+          if (activeSubcategory === 'accounts_app') {
+            matchesCategory = isApp && !isOther;
           } else if (activeSubcategory === 'accounts_others') {
-            matchesCategory = !['pc_game', 'xbox_game', 'ps_game', 'software'].includes(p.category);
+            matchesCategory = isOther;
+          } else if (activeSubcategory === 'accounts_games') {
+            matchesCategory = !isApp && !isOther;
           }
         } else {
           matchesCategory = true;

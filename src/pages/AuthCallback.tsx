@@ -96,10 +96,11 @@ export default function AuthCallback() {
         description: 'Your password has been successfully updated. You are now logged in.',
       });
       navigate('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An error occurred while updating password';
       toast({
         title: 'Error updating password',
-        description: err.message,
+        description: message,
         variant: 'destructive',
       });
     } finally {

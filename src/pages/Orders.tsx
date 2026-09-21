@@ -79,7 +79,7 @@ const Orders = () => {
             <Package className="w-8 h-8" />
           </div>
           <p className="font-display tracking-wider mb-4 text-xl">Please sign in to view your orders</p>
-          <Button onClick={() => navigate('/auth')} className="gradient-primary">Sign In</Button>
+          <Button onClick={() => navigate('/auth', { state: { from: '/orders' } })} className="gradient-primary">Sign In</Button>
         </div>
       </div>
     );
@@ -93,7 +93,7 @@ const Orders = () => {
           <div>
             <Button
               variant="ghost"
-              onClick={() => navigate('/')}
+              onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/'); }}
               className="mb-2 font-display text-xs tracking-wider text-muted-foreground hover:text-white p-0 h-auto hover:bg-transparent"
             >
               <ArrowLeft className="h-3 w-3 mr-2" />

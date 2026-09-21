@@ -68,7 +68,7 @@ const CustomOrder = () => {
       <div className="container relative z-10 flex-1 py-8 sm:py-16 max-w-3xl flex flex-col">
         <Button
           variant="ghost"
-          onClick={() => navigate('/')}
+          onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/'); }}
           className="font-display text-xs tracking-wider text-muted-foreground hover:text-white self-start mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

@@ -37,7 +37,9 @@ scripts/
 ├── maintenance/         # Catalog hygiene, category repairs, and stock monitoring
 │   ├── check-stock.cjs        # Displays total product counts and out-of-stock statistics
 │   ├── cleanup-products.cjs   # Normalizes categories, deduplicates products, & updates stock
+│   ├── deduplicate_products.mjs # Deduplicates items based on title/desc, keeping highest profit margin
 │   ├── delete_spam.cjs        # Cleans out duplicate or invalid catalog spam entries
+│   ├── fix_accounts_subcategories.mjs # Audits & repairs Accounts subcategories (100 Games, 100 Apps, 100 Others)
 │   └── update_products.cjs    # Batch product updater from Excel sheets
 │
 └── testing/             # Diagnostics, API connectivity, and query testers
@@ -106,7 +108,9 @@ node scripts/seeding/seed_plati_accounts.mjs
 ### 5. Maintenance (`scripts/maintenance/`)
 * **`check-stock.cjs`**: Displays total product counts and out-of-stock statistics.
 * **`cleanup-products.cjs`**: Normalizes categories, deduplicates products, & updates stock.
+* **`deduplicate_products.mjs`**: Compares products by title, clean title, and description similarity to remove exact duplicates while retaining the highest profit-making item (`sale_price - cost_price`).
 * **`delete_spam.cjs`**: Cleans out duplicate or invalid catalog spam entries.
+* **`fix_accounts_subcategories.mjs`**: Audits, categorizes, and balances the Accounts subcategories (`accounts_games`, `accounts_app`, `accounts_others`), ensuring exactly 100 products per subcategory and reassigning misplaced application products.
 * **`update_products.cjs`**: Batch product updater from Excel sheets.
 
 ### 6. Testing (`scripts/testing/`)

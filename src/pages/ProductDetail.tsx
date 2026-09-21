@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -9,25 +9,45 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProductImageArea, ProductFeatures, ProductPurchaseCard } from '@/components/product';
+import type { Product } from '@/lib/shopApi';
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const id = slug ? slug.slice(-36) : '';
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
 
+  // Robust reverse routing: Extract UUID from slug or use direct ID
+  const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const match = slug?.match(uuidRegex);
+  const id = match ? match[0] : (slug || '');
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const query = supabase
         .from('products')
         .select('*')
-        .eq('id', id)
-        .eq('is_active', true)
-        .single();
+        .eq('is_active', true);
+
+      if (match) {
+        query.eq('id', id);
+      } else {
+        query.ilike('title', `%${slug?.replace(/-/g, ' ')}%`);
+      }
+
+      const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -59,7 +79,7 @@ const ProductDetail = () => {
         description: 'Please sign in to add items to your cart',
         variant: 'destructive',
       });
-      navigate('/auth');
+      navigate('/auth', { state: { from: location.pathname } });
       return;
     }
     addToCart(product, quantity);
@@ -87,7 +107,7 @@ const ProductDetail = () => {
           </div>
           <h1 className="font-display tracking-wider text-xl font-bold mb-2">Product not found</h1>
           <p className="text-muted-foreground mb-6">The product you are looking for does not exist or has been removed.</p>
-          <Button onClick={() => navigate('/')} variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+          <Button onClick={handleBack} variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Shop
           </Button>
@@ -104,7 +124,7 @@ const ProductDetail = () => {
       <div className="container py-3 sm:py-6">
         <Button
           variant="ghost"
-          onClick={() => navigate('/')}
+          onClick={handleBack}
           className="font-display text-xs tracking-wider text-muted-foreground hover:text-white"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
