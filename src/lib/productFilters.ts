@@ -43,49 +43,6 @@ export function isAppAccountProduct(p: Product, titleLower: string): boolean {
   );
 }
 
-export function getTopupSubcategoryMatch(
-  sub: string,
-  titleLower: string,
-  platLower: string
-): boolean {
-  const isTelegram = titleLower.includes('telegram') || platLower === 'telegram';
-  const isTikTok = titleLower.includes('tiktok') || platLower === 'tiktok';
-  const isTwitch = titleLower.includes('twitch') || platLower === 'twitch';
-  const isSocial =
-    titleLower.includes('instagram') ||
-    platLower === 'instagram' ||
-    titleLower.includes('twitter') ||
-    platLower.includes('twitter') ||
-    titleLower.includes('kick');
-
-  const isGame =
-    titleLower.includes('valorant') ||
-    titleLower.includes('robux') ||
-    titleLower.includes('roblox') ||
-    titleLower.includes('pubg') ||
-    titleLower.includes('genshin') ||
-    titleLower.includes('honkai') ||
-    titleLower.includes('v-bucks') ||
-    titleLower.includes('fortnite') ||
-    titleLower.includes('mobile legends') ||
-    titleLower.includes('apex') ||
-    titleLower.includes('marvel rivals') ||
-    titleLower.includes('blood strike') ||
-    titleLower.includes('delta force') ||
-    titleLower.includes('wuthering') ||
-    titleLower.includes('zenless') ||
-    titleLower.includes('where winds meet') ||
-    titleLower.includes('neverness') ||
-    ['riot games', 'epic games', 'netease', 'hoyoverse', 'roblox'].includes(platLower);
-
-  if (sub === 'topup_games') return isGame;
-  if (sub === 'topup_telegram') return isTelegram;
-  if (sub === 'topup_tiktok') return isTikTok;
-  if (sub === 'topup_twitch') return isTwitch;
-  if (sub === 'topup_social') return isSocial;
-  if (sub === 'topup_others') return !isGame && !isTelegram && !isTikTok && !isTwitch && !isSocial;
-  return true;
-}
 
 /**
  * Resolves the primary semantic category of a product,
@@ -315,12 +272,7 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
         if (effCategory !== 'topup' && p.category !== 'topup') {
           return false;
         }
-
-        if (activeSubcategory) {
-          matchesCategory = getTopupSubcategoryMatch(activeSubcategory, titleLower, platLower);
-        } else {
-          matchesCategory = true;
-        }
+        matchesCategory = true;
       } else if (activeCategory === 'custom_orders') {
         matchesCategory = false;
       } else {
