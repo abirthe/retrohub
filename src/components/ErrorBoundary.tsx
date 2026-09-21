@@ -5,6 +5,16 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+  const isChunkLoadError = errorMessage.includes('Failed to fetch dynamically imported module') || 
+                           errorMessage.includes('Importing a module script failed');
+
+  const handleTryAgain = () => {
+    if (isChunkLoadError) {
+      window.location.reload();
+    } else {
+      resetErrorBoundary();
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 text-center selection:bg-primary/20">
@@ -24,11 +34,11 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <Button
-            onClick={resetErrorBoundary}
+            onClick={handleTryAgain}
             className="w-full sm:w-auto gradient-primary font-display text-xs tracking-wider gap-2 shadow-lg shadow-primary/20"
           >
             <RefreshCw className="w-4 h-4" />
-            Try Again
+            {isChunkLoadError ? 'Reload Page' : 'Try Again'}
           </Button>
 
           <Button
