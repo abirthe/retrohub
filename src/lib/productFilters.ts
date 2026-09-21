@@ -188,15 +188,6 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
               titleLower.includes('playstation') ||
               titleLower.includes('psn') ||
               platLower.includes('playstation');
-          } else if (activeSubcategory === 'giftcard_others') {
-            matchesCategory =
-              !titleLower.includes('xbox') &&
-              !platLower.includes('xbox') &&
-              !titleLower.includes('steam') &&
-              !platLower.includes('steam') &&
-              !titleLower.includes('playstation') &&
-              !titleLower.includes('psn') &&
-              !platLower.includes('playstation');
           }
         } else {
           matchesCategory = true;
@@ -216,15 +207,6 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
               titleLower.includes('ps plus');
           } else if (activeSubcategory === 'sub_ea') {
             matchesCategory = titleLower.includes('ea play') || /\\bea\\b/.test(titleLower);
-          } else if (activeSubcategory === 'sub_others') {
-            matchesCategory =
-              !titleLower.includes('game pass') &&
-              !titleLower.includes('gamepass') &&
-              !titleLower.includes('psn') &&
-              !titleLower.includes('playstation plus') &&
-              !titleLower.includes('ps plus') &&
-              !titleLower.includes('ea play') &&
-              !/\\bea\\b/.test(titleLower);
           }
         } else {
           matchesCategory = true;

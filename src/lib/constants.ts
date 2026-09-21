@@ -39,7 +39,6 @@ export const CATEGORIES: CategoryDef[] = [
       { label: 'XBOX', value: 'giftcard_xbox' },
       { label: 'STEAM', value: 'giftcard_steam' },
       { label: 'PlayStation', value: 'giftcard_ps' },
-      { label: 'Others', value: 'giftcard_others' }
     ]
   },
   { 
@@ -51,7 +50,6 @@ export const CATEGORIES: CategoryDef[] = [
       { label: 'Game Pass', value: 'sub_gamepass' },
       { label: 'PSN', value: 'sub_psn' },
       { label: 'EA', value: 'sub_ea' },
-      { label: 'Others', value: 'sub_others' }
     ]
   },
   { 
