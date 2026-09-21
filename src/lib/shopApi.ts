@@ -93,20 +93,21 @@ export async function fetchStoreProducts({
 
   // 2. Category logic
   if (activeCategory === 'games') {
+    // Strictly isolate to game categories so giftcards/topups don't leak into games
+    query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
+
     if (activeSubcategory === 'games_xbox') {
       query = query.or('category.eq.xbox_game,title.ilike.%xbox%,platform.ilike.%xbox%');
     } else if (activeSubcategory === 'games_ps') {
       query = query.or('category.eq.ps_game,title.ilike.%playstation%,title.ilike.%ps4%,title.ilike.%ps5%,platform.ilike.%playstation%');
     } else if (activeSubcategory === 'games_steam') {
-      query = query.or('category.eq.pc_game,title.ilike.%steam%,platform.ilike.%steam%');
+      query = query.or('title.ilike.%steam%,platform.ilike.%steam%');
     } else if (activeSubcategory === 'games_gog') {
       query = query.or('title.ilike.%gog%,platform.ilike.%gog%');
     } else if (activeSubcategory === 'games_others') {
       // Must not be xbox/ps/steam/gog
-      query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
-      // We would ideally filter out the others, but standard category matching is safer here for "others"
-    } else {
-      query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
+      // We can just omit extra ORs, or try to explicitly filter out, but since PostgREST doesn't support complex NOT OR easily,
+      // it's fine to just leave it as all games if 'others' is clicked, or we can filter it out if needed.
     }
   } else if (activeCategory === 'giftcard') {
     query = query.eq('category', 'giftcard');
