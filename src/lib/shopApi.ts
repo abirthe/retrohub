@@ -93,8 +93,8 @@ export async function fetchStoreProducts({
 
   // 2. Category logic
   if (activeCategory === 'games') {
-    // Strictly isolate to game categories so giftcards/topups don't leak into games
-    query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
+    // Strictly isolate to game categories so giftcards/topups/accounts don't leak into games
+    query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']).not('title', 'ilike', '%account%');
 
     if (activeSubcategory === 'games_xbox') {
       query = query.or('category.eq.xbox_game,title.ilike.%xbox%,platform.ilike.%xbox%');
@@ -106,11 +106,9 @@ export async function fetchStoreProducts({
       query = query.or('title.ilike.%gog%,platform.ilike.%gog%');
     } else if (activeSubcategory === 'games_others') {
       // Must not be xbox/ps/steam/gog
-      // We can just omit extra ORs, or try to explicitly filter out, but since PostgREST doesn't support complex NOT OR easily,
-      // it's fine to just leave it as all games if 'others' is clicked, or we can filter it out if needed.
     }
   } else if (activeCategory === 'giftcard') {
-    query = query.eq('category', 'giftcard');
+    query = query.eq('category', 'giftcard').not('title', 'ilike', '%account%');
     if (activeSubcategory === 'giftcard_xbox') {
       query = query.or('title.ilike.%xbox%,platform.ilike.%xbox%');
     } else if (activeSubcategory === 'giftcard_steam') {
@@ -119,7 +117,7 @@ export async function fetchStoreProducts({
       query = query.or('title.ilike.%playstation%,title.ilike.%psn%,platform.ilike.%playstation%');
     }
   } else if (activeCategory === 'subscription') {
-    query = query.eq('category', 'subscription');
+    query = query.eq('category', 'subscription').not('title', 'ilike', '%account%');
     if (activeSubcategory === 'sub_gamepass') {
       query = query.or('title.ilike.%game pass%,title.ilike.%gamepass%');
     } else if (activeSubcategory === 'sub_psn') {
@@ -128,10 +126,16 @@ export async function fetchStoreProducts({
       query = query.ilike('title', '%ea play%');
     }
   } else if (activeCategory === 'accounts') {
-    // Accounts could be just anything with 'account' in title or a specific category if you had one
     query = query.ilike('title', '%account%');
+    if (activeSubcategory === 'accounts_games') {
+      query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
+    } else if (activeSubcategory === 'accounts_app') {
+      query = query.eq('category', 'software');
+    } else if (activeSubcategory === 'accounts_others') {
+      query = query.not('category', 'in', '(pc_game,xbox_game,ps_game,software)');
+    }
   } else if (activeCategory !== 'all') {
-    query = query.eq('category', activeCategory);
+    query = query.eq('category', activeCategory).not('title', 'ilike', '%account%');
   }
 
   // 3. Sorting

@@ -15,7 +15,12 @@ export interface FilterOptions {
 export function getProductEffectiveCategory(p: Product): string {
   const titleLower = p.title.toLowerCase();
 
-  // 1. Gift card / Wallet detection
+  // 1. Account detection (Top priority so account-based products go strictly to Accounts)
+  if (titleLower.includes('account')) {
+    return 'accounts';
+  }
+
+  // 2. Gift card / Wallet detection
   const isGiftCardText =
     titleLower.includes('gift card') ||
     titleLower.includes('giftcard') ||
@@ -39,7 +44,7 @@ export function getProductEffectiveCategory(p: Product): string {
     }
   }
 
-  // 2. Subscription detection
+  // 3. Subscription detection
   const isSubText =
     titleLower.includes('subscription') ||
     titleLower.includes('game pass') ||
@@ -56,11 +61,6 @@ export function getProductEffectiveCategory(p: Product): string {
 
   if (p.category === 'subscription' || (isSubText && p.category !== 'software')) {
     return 'subscription';
-  }
-
-  // 3. Account detection
-  if (titleLower.includes('account')) {
-    return 'accounts';
   }
 
   // 4. Software
@@ -215,11 +215,11 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
 
         if (activeSubcategory) {
           if (activeSubcategory === 'accounts_games') {
-            matchesCategory = ['pc_game', 'xbox_game', 'ps_game'].includes(p.category) || titleLower.includes('game');
+            matchesCategory = ['pc_game', 'xbox_game', 'ps_game'].includes(p.category);
           } else if (activeSubcategory === 'accounts_app') {
-            matchesCategory = p.category === 'software' || titleLower.includes('app');
+            matchesCategory = p.category === 'software';
           } else if (activeSubcategory === 'accounts_others') {
-            matchesCategory = !titleLower.includes('game') && !titleLower.includes('app');
+            matchesCategory = !['pc_game', 'xbox_game', 'ps_game', 'software'].includes(p.category);
           }
         } else {
           matchesCategory = true;
