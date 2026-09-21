@@ -22,26 +22,6 @@ export function isOtherAccountProduct(titleLower: string): boolean {
   );
 }
 
-export function isAppAccountProduct(p: Product, titleLower: string): boolean {
-  return (
-    p.category === 'software' ||
-    titleLower.includes('canva') ||
-    titleLower.includes('chatgpt') ||
-    titleLower.includes('claude') ||
-    titleLower.includes('google ai') ||
-    titleLower.includes('gemini') ||
-    titleLower.includes('duolingo') ||
-    titleLower.includes('office') ||
-    titleLower.includes('windows 10') ||
-    titleLower.includes('windows 11') ||
-    titleLower.includes('coreldraw') ||
-    titleLower.includes('midjourney') ||
-    titleLower.includes('mullvad') ||
-    titleLower.includes('visio') ||
-    titleLower.includes('procreate') ||
-    titleLower.includes('faceapp')
-  );
-}
 
 
 /**
@@ -253,21 +233,7 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
         if (effCategory !== 'accounts' && !titleLower.includes('account') && !isOtherAccountProduct(titleLower)) {
           return false;
         }
-
-        if (activeSubcategory) {
-          const isOther = isOtherAccountProduct(titleLower);
-          const isApp = isAppAccountProduct(p, titleLower);
-
-          if (activeSubcategory === 'accounts_app') {
-            matchesCategory = isApp && !isOther;
-          } else if (activeSubcategory === 'accounts_others') {
-            matchesCategory = isOther;
-          } else if (activeSubcategory === 'accounts_games') {
-            matchesCategory = !isApp && !isOther;
-          }
-        } else {
-          matchesCategory = true;
-        }
+        matchesCategory = true;
       } else if (activeCategory === 'topup') {
         if (effCategory !== 'topup' && p.category !== 'topup') {
           return false;
