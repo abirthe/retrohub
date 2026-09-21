@@ -76,7 +76,6 @@ export function getTopupSubcategoryMatch(
     titleLower.includes('zenless') ||
     titleLower.includes('where winds meet') ||
     titleLower.includes('neverness') ||
-    titleLower.includes('nte') ||
     ['riot games', 'epic games', 'netease', 'hoyoverse', 'roblox'].includes(platLower);
 
   if (sub === 'topup_games') return isGame;
