@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
@@ -38,6 +38,15 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
+                {/* Storefront aliases for reverse navigation and inbound links */}
+                <Route path="/shop" element={<Navigate to="/" replace />} />
+                <Route path="/store" element={<Navigate to="/" replace />} />
+                <Route path="/products" element={<Navigate to="/" replace />} />
+                <Route path="/cart" element={<Navigate to="/checkout" replace />} />
+                <Route path="/login" element={<Navigate to="/auth" replace />} />
+                <Route path="/signin" element={<Navigate to="/auth" replace />} />
+                <Route path="/register" element={<Navigate to="/auth" replace />} />
+
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/payment" element={<Payment />} />

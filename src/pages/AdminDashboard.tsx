@@ -195,15 +195,18 @@ const AdminDashboard = () => {
         <AdminStatsGrid />
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="bg-secondary/30 p-1 rounded-xl border border-white/5 backdrop-blur-md">
-            <TabsTrigger value="orders" className="rounded-lg gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all">
-              <Package className="h-4 w-4" /> Live Orders
+          <TabsList className="w-full grid grid-cols-3 sm:w-auto sm:inline-flex h-auto p-1 bg-secondary/30 rounded-xl border border-white/5 backdrop-blur-md gap-1">
+            <TabsTrigger value="orders" className="rounded-lg gap-1.5 sm:gap-2 py-2 px-1.5 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all flex items-center justify-center">
+              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span><span className="hidden sm:inline">Live </span>Orders</span>
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="rounded-lg gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent transition-all">
-              <RefreshCw className="h-4 w-4" /> Inventory
+            <TabsTrigger value="inventory" className="rounded-lg gap-1.5 sm:gap-2 py-2 px-1.5 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-accent/20 data-[state=active]:text-accent transition-all flex items-center justify-center">
+              <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span>Inventory</span>
             </TabsTrigger>
-            <TabsTrigger value="custom_orders" className="rounded-lg gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all">
-              <Package className="h-4 w-4" /> Custom Orders
+            <TabsTrigger value="custom_orders" className="rounded-lg gap-1.5 sm:gap-2 py-2 px-1.5 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all flex items-center justify-center">
+              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span>Custom<span className="hidden sm:inline"> Orders</span></span>
             </TabsTrigger>
           </TabsList>
 

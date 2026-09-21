@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/product';
 import { ShopHeader } from '@/components/layout';
 import { HeroSection, CategoryFilter } from '@/components/home';
@@ -20,13 +21,21 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 const Index = () => {
-  const [search, setSearch]               = useState('');
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [activeSubcategory, setActiveSubcategory] = useState<string>('');
-  const [sort, setSort]                   = useState<SortValue>('newest');
-  const [sortOpen, setSortOpen]           = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [animatedPlaceholder, setAnimatedPlaceholder] = useState('');
+  // Initialize state from URL search params for seamless reverse routing
+  const initialCategory = searchParams.get('category') || 'all';
+  const initialSubcategory = searchParams.get('sub') || '';
+  const initialSearch = searchParams.get('search') || '';
+  const initialSort = (searchParams.get('sort') as SortValue) || 'newest';
+
+  const [search, setSearch]                             = useState(initialSearch);
+  const [activeCategory, setActiveCategory]             = useState<string>(initialCategory);
+  const [activeSubcategory, setActiveSubcategory]       = useState<string>(initialSubcategory);
+  const [sort, setSort]                                 = useState<SortValue>(initialSort);
+  const [sortOpen, setSortOpen]                         = useState(false);
+
+  const [animatedPlaceholder, setAnimatedPlaceholder]   = useState('');
 
   useEffect(() => {
     const text = "Search games, platforms, subscriptions...";
@@ -58,6 +67,44 @@ const Index = () => {
   }, []);
 
   const debouncedSearch = useDebounce(search, 300);
+
+  // Synchronize state changes to URL search params (enabling reverse routing & shareable URLs)
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (activeCategory && activeCategory !== 'all') params.category = activeCategory;
+    if (activeSubcategory) params.sub = activeSubcategory;
+    if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+    if (sort && sort !== 'newest') params.sort = sort;
+
+    // Only update if params actually differ from current searchParams to avoid infinite loop
+    const currentCategory = searchParams.get('category') || 'all';
+    const currentSub = searchParams.get('sub') || '';
+    const currentSearch = searchParams.get('search') || '';
+    const currentSort = searchParams.get('sort') || 'newest';
+
+    const hasChanged =
+      (params.category || 'all') !== currentCategory ||
+      (params.sub || '') !== currentSub ||
+      (params.search || '') !== currentSearch ||
+      (params.sort || 'newest') !== currentSort;
+
+    if (hasChanged) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [activeCategory, activeSubcategory, debouncedSearch, sort, searchParams, setSearchParams]);
+
+  // Synchronize browser history back/forward navigation to state
+  useEffect(() => {
+    const c = searchParams.get('category') || 'all';
+    const s = searchParams.get('sub') || '';
+    const q = searchParams.get('search') || '';
+    const st = (searchParams.get('sort') as SortValue) || 'newest';
+
+    if (c !== activeCategory) setActiveCategory(c);
+    if (s !== activeSubcategory) setActiveSubcategory(s);
+    if (q !== search) setSearch(q);
+    if (st !== sort) setSort(st);
+  }, [searchParams]);
 
   const { 
     data, 

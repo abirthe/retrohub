@@ -34,7 +34,7 @@ const Checkout = () => {
           </div>
           <h1 className="font-display text-2xl font-bold">Sign in to Checkout</h1>
           <p className="text-muted-foreground mb-4 max-w-md">You need to have an account to place orders. It's free and takes seconds.</p>
-          <Button onClick={() => navigate('/auth')} className="gradient-primary">Sign In / Register</Button>
+          <Button onClick={() => navigate('/auth', { state: { from: '/checkout' } })} className="gradient-primary">Sign In / Register</Button>
         </div>
       </div>
     );
@@ -50,7 +50,7 @@ const Checkout = () => {
           </div>
           <h1 className="font-display text-2xl font-bold">Your cart is empty</h1>
           <p className="text-muted-foreground mb-4">Looks like you haven't added anything yet.</p>
-          <Button onClick={() => navigate('/')} variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+          <Button onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/'); }} variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
           </Button>
@@ -127,7 +127,7 @@ const Checkout = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3">
           <Button
             variant="ghost"
-            onClick={() => navigate('/')}
+            onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/'); }}
             className="font-display text-xs tracking-wider text-muted-foreground hover:text-white self-start"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

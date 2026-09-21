@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,13 @@ import heroBg from '@/assets/hero-bg.jpg';
 const Auth = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  // Determine destination after successful authentication
+  const returnTo = (location.state as { from?: string } | null)?.from || searchParams.get('returnTo') || '/';
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -34,7 +39,7 @@ const Auth = () => {
     try {
       await signIn(loginEmail, loginPassword);
       toast({ title: 'Welcome back!', description: 'You have successfully signed in.' });
-      navigate('/');
+      navigate(returnTo, { replace: true });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Login failed';
       toast({ title: 'Error', description: message, variant: 'destructive' });
