@@ -127,13 +127,6 @@ export async function fetchStoreProducts({
     }
   } else if (activeCategory === 'accounts') {
     query = query.ilike('title', '%account%');
-    if (activeSubcategory === 'accounts_games') {
-      query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']);
-    } else if (activeSubcategory === 'accounts_app') {
-      query = query.eq('category', 'software');
-    } else if (activeSubcategory === 'accounts_others') {
-      query = query.not('category', 'in', '(pc_game,xbox_game,ps_game,software)');
-    }
   } else if (activeCategory === 'topup') {
     query = query.eq('category', 'topup');
   } else if (activeCategory !== 'all') {

@@ -29,11 +29,6 @@ export const CATEGORIES: CategoryDef[] = [
     value: 'accounts',        
     icon: User,  
     color: 'text-teal-400',
-    subcategories: [
-      { label: 'Games', value: 'accounts_games' },
-      { label: 'Application', value: 'accounts_app' },
-      { label: 'Others', value: 'accounts_others' }
-    ]
   },
   { 
     label: 'Gift card',    
