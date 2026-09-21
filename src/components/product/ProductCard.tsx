@@ -157,31 +157,31 @@ const ProductCard = ({ product }: ProductCardProps) => {
               {deliveryIcon[product.delivery_type]}
               <span className="font-medium">{deliveryLabel[product.delivery_type]}</span>
               <span className="mx-1 opacity-50">|</span>
-              <span className={product.in_stock > 0 ? 'text-green-400' : 'text-destructive'}>
-                {product.in_stock > 0 ? `${product.in_stock} in stock` : 'Out of Stock'}
+              <span className={product.in_stock === 0 ? 'text-destructive' : 'text-green-400'}>
+                {product.in_stock === 0 ? 'Out of Stock' : 'Available'}
               </span>
             </div>
           </div>
 
           <Button
             size="sm"
-            aria-label={product.in_stock > 0 ? `Buy ${product.title}` : `${product.title} out of stock`}
+            aria-label={product.in_stock === 0 ? `${product.title} out of stock` : `Buy ${product.title}`}
             className={cn(
               'font-display text-[10px] sm:text-xs tracking-wider gap-1 sm:gap-1.5 transition-all duration-300 h-7 sm:h-9 px-2 sm:px-3 shrink-0',
-              product.in_stock > 0
-                ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-accent text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/25'
-                : 'bg-secondary text-muted-foreground cursor-not-allowed opacity-60'
+              product.in_stock === 0
+                ? 'bg-secondary text-muted-foreground cursor-not-allowed opacity-60'
+                : 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-accent text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/25'
             )}
             onClick={handleBuy}
             disabled={product.in_stock === 0}
           >
-            {product.in_stock > 0 ? (
+            {product.in_stock === 0 ? (
+              'Sold'
+            ) : (
               <>
                 <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>Buy</span>
               </>
-            ) : (
-              'Sold'
             )}
           </Button>
         </div>

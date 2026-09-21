@@ -55,8 +55,8 @@ export const ProductPurchaseCard = ({ product, variants, quantity, setQuantity, 
           <div className="flex items-center flex-wrap gap-2 gap-y-1 text-muted-foreground">
             {deliveryIcon[product.delivery_type]}
             <span className="text-sm border-r border-white/10 pr-3 mr-1">{deliveryLabel[product.delivery_type] || 'Standard Delivery'}</span>
-            <span className={cn("text-xs font-mono px-2 py-0.5 rounded", product.in_stock > 0 ? "bg-success/20 text-success" : "bg-yellow-500/20 text-yellow-500")}>
-              {product.in_stock > 0 ? 'IN STOCK' : 'AVAILABLE'}
+            <span className={cn("text-xs font-mono px-2 py-0.5 rounded", product.in_stock === 0 ? "bg-destructive/20 text-destructive" : "bg-success/20 text-success")}>
+              {product.in_stock === 0 ? 'OUT OF STOCK' : 'AVAILABLE'}
             </span>
           </div>
         </div>
@@ -142,9 +142,9 @@ export const ProductPurchaseCard = ({ product, variants, quantity, setQuantity, 
                   +
                 </Button>
               </div>
-              {product.in_stock > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  Stock: {product.in_stock}
+              {product.in_stock !== 0 && (
+                <div className="text-xs text-emerald-400/80 font-medium">
+                  Available
                 </div>
               )}
             </div>
