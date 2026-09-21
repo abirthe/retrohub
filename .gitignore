@@ -1,5 +1,79 @@
-# Logs
-logs
+# ==============================================================================
+# RetroHub .gitignore - Security & Sensitive Data Protection
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment Files & Secrets (Never commit secrets or credentials)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+*.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ------------------------------------------------------------------------------
+# 2. Supabase & Backend Sensitive Cache
+# ------------------------------------------------------------------------------
+supabase/.temp/
+supabase/.temp
+supabase/.branches/
+supabase/.env
+supabase/.env.local
+
+# ------------------------------------------------------------------------------
+# 3. Keys, Certificates & Authentication Tokens
+# ------------------------------------------------------------------------------
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.cer
+*.id_rsa
+id_rsa*
+*.pub
+credentials.json
+service-account*.json
+serviceAccountKey.json
+secrets.json
+token.json
+tokens.json
+auth.json
+*.secret
+*.secrets
+
+# ------------------------------------------------------------------------------
+# 4. Database Backups, Dumps & Local DBs
+# ------------------------------------------------------------------------------
+*.dump
+*.sql.gz
+*.sql.tar
+*.bak
+*.backup
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# ------------------------------------------------------------------------------
+# 5. Scratch, Temporary & Diagnostic Scripts
+# ------------------------------------------------------------------------------
+scratch/
+scratch_*
+*scratch*
+tmp/
+temp/
+*.tmp
+
+# ------------------------------------------------------------------------------
+# 6. Logs & Debugging
+# ------------------------------------------------------------------------------
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,21 +81,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# ------------------------------------------------------------------------------
+# 7. Dependencies & Build Artifacts
+# ------------------------------------------------------------------------------
+node_modules/
+dist/
+dist-ssr/
 *.local
+.vercel/
+.netlify/
+.output/
+bun.lockb
 
-# Editor directories and files
+# ------------------------------------------------------------------------------
+# 8. OS & IDE Metadata
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.vercel
-.env
-bun.lockb
+*.swp
+*.swo
