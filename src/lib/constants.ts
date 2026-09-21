@@ -64,14 +64,6 @@ export const CATEGORIES: CategoryDef[] = [
     value: 'topup',        
     icon: Zap,       
     color: 'text-yellow-400',
-    subcategories: [
-      { label: 'Games', value: 'topup_games' },
-      { label: 'Telegram', value: 'topup_telegram' },
-      { label: 'TikTok', value: 'topup_tiktok' },
-      { label: 'Twitch', value: 'topup_twitch' },
-      { label: 'Social Media', value: 'topup_social' },
-      { label: 'Others', value: 'topup_others' }
-    ]
   },
   { label: 'Request Custom Orders', value: 'custom_orders', icon: Monitor, color: 'text-orange-400' },
 ];

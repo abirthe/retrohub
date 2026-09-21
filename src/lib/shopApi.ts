@@ -136,43 +136,6 @@ export async function fetchStoreProducts({
     }
   } else if (activeCategory === 'topup') {
     query = query.eq('category', 'topup');
-    if (activeSubcategory === 'topup_games') {
-      query = query.or('platform.in.("Riot Games","Epic Games",NetEase,HoYoverse,Roblox),title.ilike.%valorant%,title.ilike.%robux%,title.ilike.%roblox%,title.ilike.%pubg%,title.ilike.%genshin%,title.ilike.%honkai%,title.ilike.%v-bucks%,title.ilike.%fortnite%,title.ilike.%mobile legends%,title.ilike.%apex%,title.ilike.%marvel rivals%,title.ilike.%blood strike%,title.ilike.%delta force%,title.ilike.%wuthering%,title.ilike.%zenless%,title.ilike.%neverness%,title.ilike.%where winds meet%');
-    } else if (activeSubcategory === 'topup_telegram') {
-      query = query.or('platform.eq.Telegram,title.ilike.%telegram%');
-    } else if (activeSubcategory === 'topup_tiktok') {
-      query = query.or('platform.eq.TikTok,title.ilike.%tiktok%');
-    } else if (activeSubcategory === 'topup_twitch') {
-      query = query.or('platform.eq.Twitch,title.ilike.%twitch%');
-    } else if (activeSubcategory === 'topup_social') {
-      query = query.or('platform.in.(Instagram,"Twitter / X"),title.ilike.%instagram%,title.ilike.%twitter%,title.ilike.%kick%');
-    } else if (activeSubcategory === 'topup_others') {
-      query = query
-        .not('platform', 'in', '("Riot Games","Epic Games",NetEase,HoYoverse,Roblox,Telegram,TikTok,Twitch,Instagram,"Twitter / X")')
-        .not('title', 'ilike', '%valorant%')
-        .not('title', 'ilike', '%robux%')
-        .not('title', 'ilike', '%roblox%')
-        .not('title', 'ilike', '%pubg%')
-        .not('title', 'ilike', '%genshin%')
-        .not('title', 'ilike', '%honkai%')
-        .not('title', 'ilike', '%v-bucks%')
-        .not('title', 'ilike', '%fortnite%')
-        .not('title', 'ilike', '%mobile legends%')
-        .not('title', 'ilike', '%apex%')
-        .not('title', 'ilike', '%marvel rivals%')
-        .not('title', 'ilike', '%blood strike%')
-        .not('title', 'ilike', '%delta force%')
-        .not('title', 'ilike', '%wuthering%')
-        .not('title', 'ilike', '%zenless%')
-        .not('title', 'ilike', '%neverness%')
-        .not('title', 'ilike', '%where winds meet%')
-        .not('title', 'ilike', '%telegram%')
-        .not('title', 'ilike', '%tiktok%')
-        .not('title', 'ilike', '%twitch%')
-        .not('title', 'ilike', '%instagram%')
-        .not('title', 'ilike', '%twitter%')
-        .not('title', 'ilike', '%kick%');
-    }
   } else if (activeCategory !== 'all') {
     query = query.eq('category', activeCategory).not('title', 'ilike', '%account%');
   }
@@ -207,7 +170,7 @@ export async function fetchStoreProducts({
 export async function fetchOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, products(title, platform, in_stock, delivery_type, source_url, source_platform), profiles(email)')
+    .select('*, products(title, platform, in_stock, delivery_type, cost_price, source_url, source_platform), profiles(email)')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -463,7 +426,7 @@ export async function fetchCustomOrders() {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data as CustomOrderRow[];
+  return data as unknown as CustomOrderRow[];
 }
 
 export async function updateCustomOrderStatus(id: string, status: string) {

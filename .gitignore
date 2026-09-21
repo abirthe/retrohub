@@ -24,6 +24,7 @@ supabase/.branches/
 supabase/.env
 supabase/.env.local
 supabase/config.toml
+config.toml
 
 # ------------------------------------------------------------------------------
 # 3. Keys, Certificates & Authentication Tokens
