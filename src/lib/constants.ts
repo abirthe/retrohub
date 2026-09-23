@@ -39,6 +39,10 @@ export const CATEGORIES: CategoryDef[] = [
       { label: 'XBOX', value: 'giftcard_xbox' },
       { label: 'STEAM', value: 'giftcard_steam' },
       { label: 'PlayStation', value: 'giftcard_ps' },
+      { label: 'Apple', value: 'giftcard_apple' },
+      { label: 'Nintendo', value: 'giftcard_nintendo' },
+      { label: 'Roblox', value: 'giftcard_roblox' },
+      { label: 'Blizzard', value: 'giftcard_blizzard' },
     ]
   },
   { 

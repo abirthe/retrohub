@@ -178,6 +178,25 @@ export function getProductEffectiveSubcategory(p: Product, effCategory: string):
     ) {
       return 'giftcard_ps';
     }
+    if (platLower.includes('apple') || titleLower.includes('apple') || titleLower.includes('itunes')) {
+      return 'giftcard_apple';
+    }
+    if (platLower.includes('nintendo') || titleLower.includes('nintendo') || titleLower.includes('eshop')) {
+      return 'giftcard_nintendo';
+    }
+    if (platLower.includes('roblox') || titleLower.includes('roblox') || titleLower.includes('robux')) {
+      return 'giftcard_roblox';
+    }
+    if (
+      platLower.includes('blizzard') ||
+      platLower.includes('battle.net') ||
+      platLower.includes('battlenet') ||
+      titleLower.includes('blizzard') ||
+      titleLower.includes('battle.net') ||
+      titleLower.includes('battlenet')
+    ) {
+      return 'giftcard_blizzard';
+    }
     return null;
   }
 

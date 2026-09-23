@@ -129,6 +129,14 @@ export async function fetchStoreProducts({
       query = query.or('title.ilike.%steam%,platform.ilike.%steam%');
     } else if (activeSubcategory === 'giftcard_ps') {
       query = query.or('title.ilike.%playstation%,title.ilike.%psn%,platform.ilike.%playstation%');
+    } else if (activeSubcategory === 'giftcard_apple') {
+      query = query.or('title.ilike.%apple%,title.ilike.%itunes%,platform.ilike.%apple%');
+    } else if (activeSubcategory === 'giftcard_nintendo') {
+      query = query.or('title.ilike.%nintendo%,title.ilike.%eshop%,platform.ilike.%nintendo%');
+    } else if (activeSubcategory === 'giftcard_roblox') {
+      query = query.or('title.ilike.%roblox%,title.ilike.%robux%,platform.ilike.%roblox%');
+    } else if (activeSubcategory === 'giftcard_blizzard') {
+      query = query.or('title.ilike.%blizzard%,title.ilike.%battle.net%,title.ilike.%battlenet%,platform.ilike.%blizzard%');
     }
   } else if (activeCategory === 'subscription') {
     query = query.eq('category', 'subscription').not('title', 'ilike', '%account%');
