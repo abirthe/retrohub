@@ -8,18 +8,8 @@ export interface FilterOptions {
   sort: SortValue;
 }
 
-export function isOtherAccountProduct(titleLower: string): boolean {
-  return (
-    titleLower.includes('apple id') ||
-    titleLower.includes('id apple') ||
-    (titleLower.includes('apple') && titleLower.includes('account') && !titleLower.includes('gift')) ||
-    titleLower.includes('twitch account') ||
-    titleLower.includes('ready twitch') ||
-    titleLower.includes('spotify') ||
-    (titleLower.includes('telegram') && titleLower.includes('premium') && titleLower.includes('account')) ||
-    titleLower.includes('linkedin') ||
-    titleLower.includes('meta verified')
-  );
+export function isOtherAccountProduct(_titleLower: string): boolean {
+  return false;
 }
 
 
@@ -79,12 +69,20 @@ export function getProductEffectiveCategory(p: Product): string {
     return 'subscription';
   }
 
-  // 4. Account detection
+  // 4. Account detection (strictly game accounts; ignore keys/codes that mention "full access")
+  const isKey = titleLower.includes('key') || titleLower.includes('code');
+  const isGameAccount =
+    ['pc_game', 'xbox_game', 'ps_game'].includes(p.category) ||
+    titleLower.includes('psn') ||
+    titleLower.includes('playstation') ||
+    titleLower.includes('xbox') ||
+    titleLower.includes('steam') ||
+    titleLower.includes('minecraft');
+
   if (
-    titleLower.includes('account') ||
-    isOtherAccountProduct(titleLower) ||
-    titleLower.includes('login') ||
-    titleLower.includes('full access')
+    !isKey &&
+    isGameAccount &&
+    (titleLower.includes('account') || titleLower.includes('login') || (titleLower.includes('full access') && !titleLower.includes('key')))
   ) {
     return 'accounts';
   }
@@ -212,7 +210,20 @@ export function filterAndGroupProducts(products: Product[] | undefined, options:
           matchesCategory = true;
         }
       } else if (activeCategory === 'accounts') {
-        if (effCategory !== 'accounts' && !titleLower.includes('account') && !isOtherAccountProduct(titleLower)) {
+        const isGameAccount =
+          ['pc_game', 'xbox_game', 'ps_game'].includes(p.category) ||
+          titleLower.includes('psn') ||
+          titleLower.includes('playstation') ||
+          titleLower.includes('xbox') ||
+          titleLower.includes('steam') ||
+          titleLower.includes('minecraft') ||
+          titleLower.includes('nintendo');
+
+        if (!isGameAccount) {
+          return false;
+        }
+
+        if (effCategory !== 'accounts' && !titleLower.includes('account')) {
           return false;
         }
         matchesCategory = true;
