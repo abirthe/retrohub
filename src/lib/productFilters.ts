@@ -65,7 +65,7 @@ export function getProductEffectiveCategory(p: Product): string {
     titleLower.includes('youtube premium') ||
     titleLower.includes('crunchyroll');
 
-  if (p.category === 'subscription' || (isSubText && p.category !== 'software' && !titleLower.includes('account'))) {
+  if (p.category === 'subscription' || (isSubText && p.category !== 'software' && p.category !== 'service' && !titleLower.includes('account'))) {
     return 'subscription';
   }
 
