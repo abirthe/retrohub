@@ -418,7 +418,7 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "refunded"
-      product_category: "pc_game" | "xbox_game" | "ps_game" | "topup" | "subscription" | "software" | "giftcard"
+      product_category: "pc_game" | "xbox_game" | "ps_game" | "topup" | "subscription" | "software" | "giftcard" | "service"
       region_tag:
         | "GLOBAL"
         | "US"
@@ -449,6 +449,14 @@ export type Database = {
         | "ID"
         | "PH"
         | "VN"
+        | "AR"
+        | "CO"
+        | "CL"
+        | "PE"
+        | "EG"
+        | "NG"
+        | "PK"
+        | "BD"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -587,11 +595,12 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
-      product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard"],
+      product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard", "service"],
       region_tag: [
         "GLOBAL", "US", "EU", "ASIA", "LATAM", "UK", "CA", "MX", "BR", "IN",
         "CN", "JP", "KR", "AU", "NZ", "ME", "AFRICA", "OCEANIA", "AE", "SA",
         "ZA", "RU", "TR", "SG", "MY", "TH", "ID", "PH", "VN",
+        "AR", "CO", "CL", "PE", "EG", "NG", "PK", "BD",
       ],
     },
   },

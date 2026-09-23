@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles, Gamepad2, User, Gift, Repeat, Zap, Monitor } from 'lucide-react';
+import { Sparkles, Gamepad2, User, Gift, Repeat, Zap, Monitor, Wrench } from 'lucide-react';
 
 export interface CategoryDef {
   label: string;
@@ -39,6 +39,8 @@ export const CATEGORIES: CategoryDef[] = [
       { label: 'XBOX', value: 'giftcard_xbox' },
       { label: 'STEAM', value: 'giftcard_steam' },
       { label: 'PlayStation', value: 'giftcard_ps' },
+      { label: 'Nintendo', value: 'giftcard_nintendo' },
+      { label: 'Others', value: 'giftcard_others' },
     ]
   },
   { 
@@ -50,6 +52,7 @@ export const CATEGORIES: CategoryDef[] = [
       { label: 'Game Pass', value: 'sub_gamepass' },
       { label: 'PSN', value: 'sub_psn' },
       { label: 'EA', value: 'sub_ea' },
+      { label: 'Others', value: 'sub_others' },
     ]
   },
   { 
@@ -57,6 +60,12 @@ export const CATEGORIES: CategoryDef[] = [
     value: 'topup',        
     icon: Zap,       
     color: 'text-yellow-400',
+  },
+  { 
+    label: 'Services',       
+    value: 'service',        
+    icon: Wrench,       
+    color: 'text-cyan-400',
   },
   { label: 'Request Custom Orders', value: 'custom_orders', icon: Monitor, color: 'text-orange-400' },
 ];

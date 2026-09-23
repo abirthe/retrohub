@@ -16,6 +16,7 @@ const categoryColor: Record<string, string> = {
   giftcard: 'bg-primary/10 text-primary border-primary/20',
   topup: 'bg-accent/10 text-accent border-accent/20',
   subscription: 'bg-success/10 text-success border-success/20',
+  service: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
 };
 
 export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
