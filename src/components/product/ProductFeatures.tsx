@@ -16,41 +16,97 @@ export const ProductFeatures = ({ product }: ProductFeaturesProps) => {
         About This Product
       </h3>
       
-      <div className="text-muted-foreground leading-relaxed text-sm space-y-4">
+      <div className="text-muted-foreground leading-relaxed text-sm space-y-3">
         {product.description ? (
-          // Split by newlines OR emojis that act as list markers
-          product.description.split(/(?=\n|✅|📞|⭐|💸|-|\*)/u).filter(Boolean).map((line, i) => {
-            const cleanLine = line.trim();
-            if (!cleanLine) return null;
+          product.description
+            .split('\n')
+            .map((rawLine) => rawLine.trim())
+            .filter((cleanLine) => {
+              if (!cleanLine) return false;
+              // Ignore horizontal separators
+              if (/^[-=_*]{3,}$/.test(cleanLine)) return false;
+              return true;
+            })
+            .map((cleanLine, i) => {
+              // 1. Markdown Headings (e.g. ### ⚡ Title, #### 🛡️ Highlights)
+              if (cleanLine.startsWith('#')) {
+                const headingText = cleanLine.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
+                return (
+                  <h4 key={i} className="font-semibold text-white text-base pt-2 flex items-center gap-2">
+                    {headingText}
+                  </h4>
+                );
+              }
 
-            // If it starts with an emoji or bullet, format as a list item
-            const isBullet = /^[✅📞⭐💸\-*]/u.test(cleanLine);
-            
-            if (isBullet) {
-              // Extract the first character as the icon, and the rest as text
-              const icon = cleanLine.charAt(0);
-              const text = cleanLine.slice(1).trim();
-              
-              return (
-                <div key={i} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg border border-white/5 hover:border-primary/20 transition-colors">
-                  <div className="mt-0.5 shrink-0 text-primary">
-                    {icon === '-' || icon === '*' ? <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" /> : <span>{icon}</span>}
+              // 2. Numbered steps (e.g. 1. Step one)
+              const stepMatch = cleanLine.match(/^(\d+)\.\s*(.*)/);
+              if (stepMatch) {
+                const num = stepMatch[1];
+                const text = stepMatch[2].replace(/\*\*/g, '').trim();
+                return (
+                  <div key={i} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary text-xs font-bold shrink-0 mt-0.5">
+                      {num}
+                    </span>
+                    <span className="text-white/80">{text}</span>
                   </div>
-                  <span className="text-white/80">{text}</span>
-                </div>
-              );
-            }
-            
-            if (cleanLine.includes(':')) {
-              const [key, ...val] = cleanLine.split(':');
+                );
+              }
+
+              // 3. Bullet points and emoji list items
+              const bulletMatch = cleanLine.match(/^([-*•✅📞⭐💸🛡️📋✨👉📌])\s*(.*)/u);
+              if (bulletMatch) {
+                const icon = bulletMatch[1];
+                let text = bulletMatch[2].trim();
+                if (!text) return null;
+
+                // Handle bold label within bullet: e.g. **Label:** Value
+                let label = '';
+                const boldMatch = text.match(/^\*\*(.*?)\*\*[:\-]?\s*(.*)/);
+                if (boldMatch) {
+                  label = boldMatch[1];
+                  text = boldMatch[2];
+                }
+
+                return (
+                  <div key={i} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg border border-white/5 hover:border-primary/20 transition-colors">
+                    <div className="mt-0.5 shrink-0 text-primary">
+                      {icon === '-' || icon === '*' || icon === '•' ? (
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                      ) : (
+                        <span>{icon}</span>
+                      )}
+                    </div>
+                    <span className="text-white/80">
+                      {label && <strong className="text-white font-medium mr-1.5">{label}:</strong>}
+                      {text.replace(/\*\*/g, '')}
+                    </span>
+                  </div>
+                );
+              }
+
+              // 4. Key-value pairs (excluding URLs)
+              if (cleanLine.includes(':') && !cleanLine.startsWith('http')) {
+                const colonIdx = cleanLine.indexOf(':');
+                const key = cleanLine.slice(0, colonIdx).replace(/\*\*/g, '').trim();
+                const val = cleanLine.slice(colonIdx + 1).replace(/\*\*/g, '').trim();
+                if (key && val) {
+                  return (
+                    <div key={i} className="bg-white/5 p-3 rounded-lg border border-white/5">
+                      <span className="font-semibold text-primary">{key}:</span>{' '}
+                      <span className="text-white/80">{val}</span>
+                    </div>
+                  );
+                }
+              }
+
+              // 5. Normal text paragraphs
               return (
-                <div key={i} className="bg-white/5 p-3 rounded-lg border border-white/5">
-                  <span className="font-semibold text-primary">{key.trim()}:</span> {val.join(':').trim()}
-                </div>
+                <p key={i} className="text-white/70">
+                  {cleanLine.replace(/\*\*/g, '')}
+                </p>
               );
-            }
-            return <p key={i} className="text-white/70">{cleanLine}</p>;
-          })
+            })
         ) : (
           <p className="italic text-white/50">Experience the ultimate digital journey with {product.title}. Securely delivered to you instantly.</p>
         )}

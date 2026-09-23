@@ -126,11 +126,11 @@ export async function fetchStoreProducts({
       query = query.ilike('title', '%ea play%');
     }
   } else if (activeCategory === 'accounts') {
-    query = query.ilike('title', '%account%');
+    query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']).ilike('title', '%account%');
   } else if (activeCategory === 'topup') {
     query = query.eq('category', 'topup');
   } else if (activeCategory !== 'all') {
-    query = query.eq('category', activeCategory).not('title', 'ilike', '%account%');
+    query = query.eq('category', activeCategory as ProductCategory).not('title', 'ilike', '%account%');
   }
 
   // 3. Sorting
@@ -152,7 +152,7 @@ export async function fetchStoreProducts({
   if (error) throw error;
 
   return {
-    products: (data as Product[]) ?? [],
+    products: (data as unknown as Product[]) ?? [],
     nextPage: data?.length === PAGE_SIZE ? pageParam + 1 : undefined,
     totalCount: count ?? 0,
   };
