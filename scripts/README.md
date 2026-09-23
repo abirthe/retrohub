@@ -19,6 +19,9 @@ scripts/
 │   ├── add_variants.mjs       # General CSV variant parser for products in Products/
 │   ├── generate-sql.cjs       # Generates database/products-seed.sql from Products/*.xlsx
 │   ├── seed-products.cjs      # Direct product seeder from Excel sheets into Supabase
+│   ├── insert_google_ai_service.mjs # Seeds Google AI Pro 6-month subscription into Services category
+│   ├── scrape_arektacoin_topups.mjs # Scrapes and seeds 17 curated game top-ups (152 variants) with clean artwork
+│   ├── seed_arektacoin_giftcards.mjs # Seeds Apple, Nintendo, Roblox, and Blizzard gift cards (27 variants)
 │   ├── seed_ea_play.mjs       # Seeds EA Play PSN subscriptions (Turkey & Ukraine)
 │   ├── seed_ea_play_pc.mjs    # Seeds EA Play & EA Play Pro PC subscriptions (EA App / Origin)
 │   ├── seed_pdf_variants.mjs  # Seeds curated gift cards, currencies, & subscription tiers

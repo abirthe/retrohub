@@ -1,255 +1,187 @@
-# RETROHUB - Game Keys & Top-ups E-commerce Platform
+# RETROHUB — Game Keys, Top-ups & Digital Services Platform
 
-A modern, full-stack e-commerce platform for selling digital game keys, gift cards, top-ups, and subscriptions. Built with React, TypeScript, Supabase, and shadcn/ui components.
+![RetroHub Platform](public/favicon.ico)
 
-## 🚀 Features
-
-### Customer Features
-- **Product Browsing**: Browse products with search and category filters
-- **Product Details**: Detailed product pages with quantity selection
-- **Shopping Cart**: Add products to cart with quantity management
-- **Checkout**: Secure checkout process
-- **Order History**: View your purchase history and order status
-- **User Authentication**: Sign up and sign in with email/password
-
-### Admin Features
-- **Admin Dashboard**: Comprehensive dashboard with revenue and order statistics
-- **Order Management**: View and manage all orders
-- **Inventory Overview**: Monitor product stock, pricing, and margins
-- **Order Status Tracking**: Track orders through pending, validated, processing, completed, and failed states
-
-### Technical Features
-- **Real-time Data**: Powered by Supabase for real-time database updates
-- **Responsive Design**: Mobile-first responsive design
-- **Modern UI**: Beautiful dark theme with neon accents and glassmorphism effects
-- **Type Safety**: Full TypeScript support
-- **State Management**: React Context for cart state with localStorage persistence
-- **Form Validation**: React Hook Form with Zod validation
-- **Toast Notifications**: User-friendly notifications for actions
-
-## 🛠️ Tech Stack
-
-- **Frontend Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **UI Components**: shadcn/ui (Radix UI primitives)
-- **Styling**: Tailwind CSS with custom dark theme
-- **Backend/Database**: Supabase (PostgreSQL)
-- **State Management**: React Query (TanStack Query) + React Context
-- **Routing**: React Router v6
-- **Icons**: Lucide React
-- **Forms**: React Hook Form + Zod
-
-## 📦 Project Structure
-
-```
-retrohub/
-├── docs/                  # Project documentation & guides
-├── scripts/               # Maintenance, migration, & database seed scripts
-├── src/
-│   ├── components/        # UI components
-│   │   ├── ui/            # shadcn/ui components
-│   │   ├── admin/         # Admin dashboard subcomponents
-│   │   ├── payment/       # Payment modal & instructions
-│   │   ├── ProductCard.tsx
-│   │   └── ShopHeader.tsx
-│   ├── contexts/          # React Context providers (CartContext)
-│   ├── hooks/             # Custom React hooks (useAuth, useAdmin)
-│   ├── integrations/      # Supabase client and auto-generated types
-│   ├── lib/               # Utility functions, API layers, email helpers
-│   ├── pages/             # Page components (Index, ProductDetail, Checkout, etc.)
-│   ├── App.tsx            # Main app router
-│   └── main.tsx           # Entry point
-├── supabase/
-│   ├── functions/         # Supabase Edge Functions
-│   └── migrations/        # Database migrations
-└── public/                # Static assets
-```
-
-## 🗄️ Database Schema
-
-### Tables
-- **products**: Product catalog with categories, pricing, and stock
-- **inventory_keys**: Digital key vault for serialized inventory
-- **orders**: Customer orders with status tracking
-- **profiles**: User profile information
-- **user_roles**: Role-based access control (admin/user)
-- **audit_logs**: System audit trail
-
-### Enums
-- `product_category`: giftcard, topup, subscription
-- `delivery_type`: instant_code, api_h2h, automation
-- `region_tag`: GLOBAL, US, EU, ASIA, LATAM
-- `order_status`: pending, validated, processing, completed, failed
-- `key_status`: available, sold, expired
-- `app_role`: admin, user
-
-## 🚦 Getting Started
-
-### Prerequisites
-- Node.js 18+ and npm
-- Supabase account and project
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd code-conduit-express
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up Supabase**
-   - Create a new Supabase project at [supabase.com](https://supabase.com)
-   - Run the migrations in `supabase/migrations/` to set up your database
-   - Get your Supabase URL and anon key
-
-4. **Configure environment variables**
-   Create a `.env` file in the root directory:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-   Navigate to `http://localhost:5173`
-
-## 📝 Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run build:dev` - Build in development mode
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run test` - Run tests
-- `npm run test:watch` - Run tests in watch mode
-
-## 🎨 Design System
-
-### Colors
-- **Primary**: Cyan (#00D9FF) - Used for main actions and accents
-- **Accent**: Orange (#FF8C00) - Used for secondary actions
-- **Success**: Green - Used for completed states
-- **Destructive**: Red - Used for errors and warnings
-- **Background**: Dark blue-gray (#0F1419)
-- **Card**: Slightly lighter dark (#1A1F2E)
-
-### Typography
-- **Display Font**: Orbitron (for headings and brand)
-- **Body Font**: Inter (for body text)
-
-### Components
-All UI components are built with shadcn/ui, providing:
-- Accessible components based on Radix UI
-- Customizable styling with Tailwind CSS
-- Dark theme optimized
-
-## 🔐 Authentication & Authorization
-
-- **Authentication**: Supabase Auth with email/password
-- **Authorization**: Role-based access control (RBAC)
-  - Users can view and create their own orders
-  - Admins can view all orders and manage products
-- **Protected Routes**: Admin dashboard requires admin role
-
-## 🛒 Shopping Cart
-
-- **State Management**: React Context API
-- **Persistence**: localStorage for cart persistence across sessions
-- **Features**:
-  - Add/remove items
-  - Update quantities
-  - Stock validation
-  - Real-time price calculation
-
-## 📦 Order Flow
-
-1. **Add to Cart**: Customer adds products to cart
-2. **Checkout**: Customer reviews cart and places order
-3. **Order Creation**: Order created with "pending" status
-4. **Processing**: Admin processes order (status: validated → processing)
-5. **Fulfillment**: Order fulfilled and status updated to "completed"
-6. **Delivery**: Customer receives product details in order history
-
-## 🚀 Deployment
-
-### Build for Production
-```bash
-npm run build
-```
-
-The build output will be in the `dist/` directory.
-
-### Deploy to Vercel/Netlify
-1. Connect your repository to Vercel/Netlify
-2. Set environment variables in the deployment platform
-3. Deploy automatically on push to main branch
-
-### Environment Variables for Production
-Make sure to set:
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-
-## 📱 Responsive Design
-
-The application is fully responsive and optimized for:
-- Mobile devices (320px+)
-- Tablets (768px+)
-- Desktop (1024px+)
-- Large screens (1280px+)
-
-## 🔧 Customization
-
-### Adding New Products
-Products can be added through the Supabase dashboard or via the admin interface (if implemented).
-
-### Styling
-- Modify `src/index.css` for global styles
-- Update `tailwind.config.ts` for theme customization
-- Component styles are in individual component files
-
-### Adding Features
-- New pages: Add to `src/pages/` and update routing in `App.tsx`
-- New components: Add to `src/components/`
-- API functions: Add to `src/lib/shopApi.ts`
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Supabase connection errors**
-   - Verify environment variables are set correctly
-   - Check Supabase project is active
-   - Ensure RLS policies are configured
-
-2. **Build errors**
-   - Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-   - Check TypeScript errors: `npm run lint`
-
-3. **Cart not persisting**
-   - Check browser localStorage is enabled
-   - Verify CartContext is properly wrapped in App
-
-## 📄 License
-
-This project is private and proprietary.
-
-## 👥 Contributing
-
-This is a private project. For contributions, please contact the project maintainers.
-
-## 📞 Support
-
-For issues or questions, please open an issue in the repository or contact the development team.
+**RETROHUB** is a high-performance e-commerce platform specialized in instant game keys, in-game currency top-ups, digital gift cards, gaming subscriptions, and verified online services. Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL)**.
 
 ---
 
-Built with ❤️ using React, TypeScript, and Supabase
+## ⚡ Key Highlights & Catalog Structure
+
+RetroHub features an automated catalog with multi-region support, instant fulfillment, and 1-to-1 category isolation:
+
+### 🎮 1. Games (`games`)
+* **Xbox Games (`games_xbox`)**: Official Xbox One & Xbox Series X\|S digital game codes.
+* **PlayStation Games (`games_ps`)**: PlayStation 4 & PlayStation 5 PSN digital keys.
+* **Steam Games (`games_steam`)**: Steam PC activation keys with instant code delivery.
+* **GOG Games (`games_gog`)**: DRM-free PC games on the GOG platform.
+* **Others (`games_others`)**: Epic Games, Ubisoft Connect, EA App, and standalone PC digital keys.
+
+### 👤 2. Accounts (`accounts`)
+* Verified full-access and personal regional game accounts across Steam, PlayStation, Xbox, Minecraft, and Ubisoft.
+
+### 🎁 3. Gift Cards (`giftcard`)
+* **XBOX (`giftcard_xbox`)**: Xbox Store & Game Pass wallet gift cards.
+* **STEAM (`giftcard_steam`)**: Global, USD, INR, and regional Steam Wallet codes.
+* **PlayStation (`giftcard_ps`)**: PlayStation Store wallet recharge cards (USD, GBP, TL, etc.).
+* **Apple (`giftcard_apple`)**: Official US iTunes & Apple App Store gift cards ($2 – $100).
+* **Nintendo (`giftcard_nintendo`)**: Nintendo Switch eShop prepaid cards ($10, $20, $50).
+* **Roblox (`giftcard_roblox`)**: Official Roblox US cards (275 – 11,000 Robux).
+* **Blizzard (`giftcard_blizzard`)**: Blizzard Battle.net wallet balance cards ($10 – $100).
+
+### 🔄 4. Subscriptions (`subscription`)
+* **Game Pass (`sub_gamepass`)**: Xbox Game Pass Ultimate & PC Game Pass memberships.
+* **PSN (`sub_psn`)**: PlayStation Plus Essential, Extra, and Deluxe tiers.
+* **EA (`sub_ea`)**: EA Play & EA Play Pro memberships across PC and consoles.
+* **Others (`sub_others`)**: Discord Nitro (+2 Server Boosts), YouTube Premium, and entertainment streaming passes.
+
+### ⚡ 5. Game Top-ups (`topup`)
+* 17 curated top-up services with automated Player ID (UID) recharge:
+  - **Valorant Points**: BD, Philippines (PHP), Malaysia (MY) regions.
+  - **Wuthering Waves**: Lunites and Lunite Subscription pass.
+  - **Fortnite**: V-Bucks across PC, Xbox, and PlayStation.
+  - **PUBG Mobile**: Unknown Cash (UC) direct UID recharge.
+  - **Genshin Impact**: Genesis Crystals & Blessing of the Welkin Moon.
+  - **Honkai: Star Rail**: Oneiric Shards & Express Supply Pass.
+  - **Zenless Zone Zero**: Monochrome Film & Inter-Knot Membership.
+  - **Mobile Legends (MLBB)**: Diamonds and Weekly Diamond Pass.
+  - **Marvel Rivals**: Lattices and Battle Pass recharge.
+  - **Roblox, Apex Legends, eFootball PES, Delta Force, Neverness to Everness (NTE)**.
+
+### 🛠️ 6. Services & Software (`service`)
+* **Google AI Pro (6 Months)**: Official Google activation link for Gemini 3.1 Pro, Antigravity 2.0 (4× limits), Veo 3.1, Nano Banana 2, and 5TB Google One Cloud storage.
+* **Registration & Digital Services**: Regional Steam & PSN account setup, Microsoft Office lifetime activation keys.
+
+### 📋 7. Custom Orders (`custom_orders`)
+* Interactive request portal for custom game titles, unlisted subscriptions, or specific software requests.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend Framework** | React 18 (Functional Components & React Hooks) |
+| **Language & Type System** | TypeScript (Strict mode, zero `any`) |
+| **Styling & Design System** | Tailwind CSS with custom cyber-neon dark aesthetic |
+| **UI Primitives** | shadcn/ui + Radix UI Primitives |
+| **State & Data Fetching** | TanStack Query (React Query v5) + React Context API |
+| **Routing** | React Router v6 |
+| **Icons & Media** | Lucide React + High-Resolution Clean Visual Assets |
+| **Backend & Database** | Supabase (PostgreSQL with RLS & Stored Procedures) |
+| **Build & Tooling** | Vite v5 + PostCSS + Vitest |
+
+---
+
+## 📁 Repository Architecture
+
+```
+retrohub/
+├── public/                    # Static assets & public media
+│   └── images/
+│       ├── giftcards/         # Clean giftcard artworks (Apple, Nintendo, Roblox, Blizzard)
+│       ├── services/          # Services visual assets (Google AI Pro, etc.)
+│       └── topups/            # Clean unbranded game topup artworks
+├── src/
+│   ├── components/            # Reusable UI components
+│   │   ├── home/              # Hero, CategoryFilter, ProductGrid, Featured
+│   │   ├── layout/            # ShopHeader, Footer, Navigation
+│   │   ├── product/           # ProductPurchaseCard, ProductDetail, ProductFeatures
+│   │   ├── orders/            # Order tables, status badges, mobile order cards
+│   │   └── ui/                # Radix-based accessible UI design tokens
+│   ├── contexts/              # CartContext (persisted cart state with localStorage)
+│   ├── hooks/                 # Custom React hooks (useAuth, useToast, etc.)
+│   ├── integrations/          # Supabase client wrapper and database types
+│   ├── lib/                   # Category resolvers, API interfaces, utility helpers
+│   │   ├── constants.ts       # Central category & subcategory definitions
+│   │   ├── productFilters.ts  # Semantic 1-to-1 category and subcategory filtering
+│   │   ├── shopApi.ts         # High-level Supabase storefront and admin query engine
+│   │   └── utils.ts           # Styling and formatting utilities
+│   ├── pages/                 # Route components (Index, ProductDetail, Checkout, Orders, Admin)
+│   ├── App.tsx                # Application routing and ErrorBoundary setup
+│   └── main.tsx               # Client entry point
+├── scripts/                   # Seeding, maintenance, database migrations, and testing tools
+│   ├── database/              # Schema setup and compiled SQL seeds
+│   ├── images/                # Image mapping and cleanup scripts
+│   ├── maintenance/           # Catalog deduplication and orphan cleanup tools
+│   ├── pricing/               # Market price scrapers and sync algorithms
+│   ├── seeding/               # Automated product and variant seeders
+│   └── testing/               # Catalog diagnostics and validation tests
+├── supabase/                  # Supabase migrations and Edge Functions
+└── package.json               # Dependencies and build scripts
+```
+
+---
+
+## 🗄️ Database Architecture & Views
+
+### Core Tables
+* **`products`**: Product entries containing `title`, `sale_price`, `cost_price`, `category`, `platform`, `region`, `delivery_type`, `in_stock`, `is_active`, and structured markdown `description`.
+* **`orders`**: Customer transactions containing `status`, `total`, `cost`, `profit`, `customer_input`, and user linkage.
+* **`deliveries`**: Order fulfillment logs and credentials issued to customers.
+* **`profiles`**: User account profile information and contact details.
+* **`user_roles`**: Role-based access control (`admin`, `user`).
+* **`audit_logs` & `admin_action_logs`**: System audit trails.
+
+### Optimized PostgreSQL Views
+* **`v_grouped_products`**: Groups catalog variants by base title, deduplicating listings and presenting the lowest entry price.
+* **`v_revenue_today`**, **`v_orders_today`**, **`v_profit_today`**: Real-time sales and revenue KPIs for the Admin Dashboard.
+* **`v_pending_action_count`**: Real-time count of orders awaiting fulfillment.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+* **Node.js**: v18.0.0 or higher
+* **npm**: v9.0.0 or higher
+* **Supabase Project**: PostgreSQL database instance
+
+### 2. Environment Setup
+Create a `.env` file in the project root:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### 3. Installation & Local Development
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Run TypeScript type check
+npx tsc --noEmit
+
+# Build production bundle
+npm run build
+```
+
+---
+
+## 🔧 Maintenance & Seeding Toolchain
+
+All catalog utilities are executed from the project root using Node.js:
+
+```bash
+# Seed 17 curated game top-ups (152 variants) from ArektaCoinStore
+node scripts/seeding/scrape_arektacoin_topups.mjs
+
+# Seed Apple, Nintendo, Roblox, and Blizzard gift cards (27 variants)
+node scripts/seeding/seed_arektacoin_giftcards.mjs
+
+# Ingest Google AI Pro 6-month subscription service
+node scripts/seeding/insert_google_ai_service.mjs
+
+# Audit inventory and stock
+node scripts/maintenance/check-stock.cjs
+```
+
+---
+
+## 📄 License
+Private & Proprietary — Developed for RetroHub E-Commerce. All rights reserved.
