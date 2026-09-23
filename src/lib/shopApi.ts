@@ -105,7 +105,21 @@ export async function fetchStoreProducts({
     } else if (activeSubcategory === 'games_gog') {
       query = query.or('title.ilike.%gog%,platform.ilike.%gog%');
     } else if (activeSubcategory === 'games_others') {
-      // Must not be xbox/ps/steam/gog
+      query = query.eq('category', 'pc_game')
+        .not('platform', 'ilike', '%steam%')
+        .not('platform', 'ilike', '%gog%')
+        .not('platform', 'ilike', '%xbox%')
+        .not('platform', 'ilike', '%playstation%')
+        .not('platform', 'ilike', '%psn%')
+        .not('platform', 'ilike', '%ps4%')
+        .not('platform', 'ilike', '%ps5%')
+        .not('title', 'ilike', '%steam%')
+        .not('title', 'ilike', '%gog%')
+        .not('title', 'ilike', '%xbox%')
+        .not('title', 'ilike', '%playstation%')
+        .not('title', 'ilike', '%psn%')
+        .not('title', 'ilike', '%ps4%')
+        .not('title', 'ilike', '%ps5%');
     }
   } else if (activeCategory === 'giftcard') {
     query = query.eq('category', 'giftcard').not('title', 'ilike', '%account%');
@@ -115,6 +129,14 @@ export async function fetchStoreProducts({
       query = query.or('title.ilike.%steam%,platform.ilike.%steam%');
     } else if (activeSubcategory === 'giftcard_ps') {
       query = query.or('title.ilike.%playstation%,title.ilike.%psn%,platform.ilike.%playstation%');
+    } else if (activeSubcategory === 'giftcard_nintendo') {
+      query = query.or('title.ilike.%nintendo%,title.ilike.%eshop%,platform.ilike.%nintendo%');
+    } else if (activeSubcategory === 'giftcard_others') {
+      query = query
+        .not('title', 'ilike', '%xbox%')
+        .not('title', 'ilike', '%steam%')
+        .not('title', 'ilike', '%playstation%')
+        .not('title', 'ilike', '%nintendo%');
     }
   } else if (activeCategory === 'subscription') {
     query = query.eq('category', 'subscription').not('title', 'ilike', '%account%');
@@ -124,11 +146,20 @@ export async function fetchStoreProducts({
       query = query.or('title.ilike.%psn%,title.ilike.%playstation plus%,title.ilike.%ps plus%');
     } else if (activeSubcategory === 'sub_ea') {
       query = query.ilike('title', '%ea play%');
+    } else if (activeSubcategory === 'sub_others') {
+      query = query
+        .not('title', 'ilike', '%game pass%')
+        .not('title', 'ilike', '%gamepass%')
+        .not('title', 'ilike', '%ps plus%')
+        .not('title', 'ilike', '%playstation plus%')
+        .not('title', 'ilike', '%ea play%');
     }
   } else if (activeCategory === 'accounts') {
     query = query.in('category', ['pc_game', 'xbox_game', 'ps_game']).ilike('title', '%account%');
   } else if (activeCategory === 'topup') {
     query = query.eq('category', 'topup');
+  } else if (activeCategory === 'service') {
+    query = query.or('category.eq.service,category.eq.software');
   } else if (activeCategory !== 'all') {
     query = query.eq('category', activeCategory as ProductCategory).not('title', 'ilike', '%account%');
   }

@@ -1,5 +1,6 @@
+import { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,7 +27,23 @@ export function CategoryFilter({
   activeSubcategory, setActiveSubcategory
 }: CategoryFilterProps) {
   const navigate = useNavigate();
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
   const activeSort = SORT_OPTIONS.find(s => s.value === sort) ?? SORT_OPTIONS[0];
+
+  // Auto-scroll active category into visible area
+  useEffect(() => {
+    if (!categoryScrollRef.current) return;
+    const activeEl = categoryScrollRef.current.querySelector(`#cat-${activeCategory}`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeCategory]);
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!categoryScrollRef.current) return;
+    const scrollAmount = direction === 'left' ? -250 : 250;
+    categoryScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
 
   return (
     <div className="relative z-50 bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3.5 sm:p-5 shadow-2xl shadow-black/50">
@@ -75,40 +92,65 @@ export function CategoryFilter({
           </div>
         </div>
 
-        {/* Category pills */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = activeCategory === cat.value;
-            return (
-              <Button
-                key={cat.value}
-                id={`cat-${cat.value}`}
-                variant="ghost"
-                onClick={() => {
-                  if (cat.value === 'custom_orders') {
-                    navigate('/custom-order');
-                    return;
-                  }
-                  setActiveCategory(cat.value);
-                  if (cat.subcategories && cat.subcategories.length > 0) {
-                    setActiveSubcategory(cat.subcategories[0].value);
-                  } else {
-                    setActiveSubcategory('');
-                  }
-                }}
-                className={cn(
-                  "rounded-xl gap-1.5 sm:gap-2 font-display text-xs sm:text-sm tracking-wide whitespace-nowrap px-3 sm:px-4 py-3.5 sm:py-5 transition-all duration-300",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
-                    : "bg-white/5 text-muted-foreground border border-white/10 hover:border-primary/50 hover:bg-primary/10 hover:text-white"
-                )}
-              >
-                <Icon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", isActive ? "text-primary-foreground" : cat.color)} />
-                {cat.label}
-              </Button>
-            );
-          })}
+        {/* Category pills with left/right scroll controls */}
+        <div className="relative group/pills flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleScroll('left')}
+            className="hidden sm:flex absolute left-0 z-20 h-8 w-8 -translate-x-2 rounded-full bg-background/90 border border-white/10 text-muted-foreground hover:text-white hover:bg-primary/20 shadow-md backdrop-blur-md opacity-0 group-hover/pills:opacity-100 transition-opacity"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <div
+            ref={categoryScrollRef}
+            className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 scroll-smooth w-full"
+          >
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              const isActive = activeCategory === cat.value;
+              return (
+                <Button
+                  key={cat.value}
+                  id={`cat-${cat.value}`}
+                  variant="ghost"
+                  onClick={() => {
+                    if (cat.value === 'custom_orders') {
+                      navigate('/custom-order');
+                      return;
+                    }
+                    setActiveCategory(cat.value);
+                    if (cat.subcategories && cat.subcategories.length > 0) {
+                      setActiveSubcategory(cat.subcategories[0].value);
+                    } else {
+                      setActiveSubcategory('');
+                    }
+                  }}
+                  className={cn(
+                    "rounded-xl gap-1.5 sm:gap-2 font-display text-xs sm:text-sm tracking-wide whitespace-nowrap px-3 sm:px-4 py-3.5 sm:py-5 transition-all duration-300 shrink-0",
+                    isActive 
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
+                      : "bg-white/5 text-muted-foreground border border-white/10 hover:border-primary/50 hover:bg-primary/10 hover:text-white"
+                  )}
+                >
+                  <Icon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", isActive ? "text-primary-foreground" : cat.color)} />
+                  {cat.label}
+                </Button>
+              );
+            })}
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleScroll('right')}
+            className="hidden sm:flex absolute right-0 z-20 h-8 w-8 translate-x-2 rounded-full bg-background/90 border border-white/10 text-muted-foreground hover:text-white hover:bg-primary/20 shadow-md backdrop-blur-md opacity-0 group-hover/pills:opacity-100 transition-opacity"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Subcategories (only shows if active category has subcategories) */}

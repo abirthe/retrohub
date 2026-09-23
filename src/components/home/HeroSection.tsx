@@ -9,6 +9,7 @@ const ROTATING_ITEMS = [
   'Gift Cards',
   'Subscriptions',
   'Game Accounts',
+  'Gaming & Digital Services',
 ];
 
 function AnimatedTagline() {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles } from 'lucide-react';
+import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles, Zap, Wrench } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,11 +38,31 @@ const ShopHeader = () => {
         <nav className="hidden sm:flex items-center gap-3">
           <Link to="/">
             <Button
-              variant={!isAdminPage && location.pathname !== '/custom-order' ? 'default' : 'ghost'}
+              variant={!isAdminPage && location.pathname === '/' && !location.search ? 'default' : 'ghost'}
               size="sm"
-              className={!isAdminPage && location.pathname !== '/custom-order' ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider'}
+              className={!isAdminPage && location.pathname === '/' && !location.search ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider text-muted-foreground hover:text-white'}
             >
               Shop
+            </Button>
+          </Link>
+          <Link to="/?category=topup">
+            <Button
+              variant={location.search.includes('category=topup') ? 'default' : 'ghost'}
+              size="sm"
+              className={location.search.includes('category=topup') ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider text-muted-foreground hover:text-white'}
+            >
+              <Zap className="h-3.5 w-3.5 mr-1.5 text-yellow-400" />
+              Top-Up
+            </Button>
+          </Link>
+          <Link to="/?category=service">
+            <Button
+              variant={location.search.includes('category=service') ? 'default' : 'ghost'}
+              size="sm"
+              className={location.search.includes('category=service') ? 'gradient-primary font-display text-xs tracking-wider' : 'font-display text-xs tracking-wider text-muted-foreground hover:text-white'}
+            >
+              <Wrench className="h-3.5 w-3.5 mr-1.5 text-cyan-400" />
+              Services
             </Button>
           </Link>
           <Link to="/custom-order">
@@ -154,6 +174,30 @@ const ShopHeader = () => {
           >
             <Store className="h-4 w-4" />
             Shop
+          </Link>
+
+          <Link
+            to="/?category=topup"
+            onClick={closeMobile}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors',
+              location.search.includes('category=topup') ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+            )}
+          >
+            <Zap className="h-4 w-4 text-yellow-400" />
+            Top-Up
+          </Link>
+
+          <Link
+            to="/?category=service"
+            onClick={closeMobile}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors',
+              location.search.includes('category=service') ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+            )}
+          >
+            <Wrench className="h-4 w-4 text-cyan-400" />
+            Services
           </Link>
 
           <Link

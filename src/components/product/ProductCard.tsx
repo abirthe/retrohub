@@ -39,6 +39,7 @@ const CATEGORY_META: Record<string, CategoryMeta> = {
   topup:        { label: 'Top-Up',       icon: Zap,       badge: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', glow: 'group-hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.4)]',     imgBg: 'from-yellow-900/20' },
   subscription: { label: 'Subscription', icon: Repeat,    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20', glow: 'group-hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.4)]',    imgBg: 'from-purple-900/20' },
   software:     { label: 'Software',     icon: Wrench,    badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20', glow: 'group-hover:shadow-[0_0_40px_-10px_rgba(249,115,22,0.4)]',    imgBg: 'from-orange-900/20' },
+  service:      { label: 'Services',     icon: Wrench,    badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',       glow: 'group-hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.4)]',     imgBg: 'from-cyan-900/20' },
   giftcard:     { label: 'Gift Card',    icon: Gift,      badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20',       glow: 'group-hover:shadow-[0_0_40px_-10px_rgba(236,72,153,0.4)]',    imgBg: 'from-pink-900/20' },
 };
 
@@ -98,14 +99,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Image area */}
       <div className={cn('relative h-32 sm:h-44 overflow-hidden bg-gradient-to-b', meta.imgBg, 'to-card/80')}>
-        <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent z-10 pointer-events-none" />
 
         {hasImage ? (
           <img
             src={product.image_url!}
             alt={product.title}
-            loading="lazy"
-            className="w-full h-full object-contain p-2 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 relative z-0"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = 'none';
             }}
