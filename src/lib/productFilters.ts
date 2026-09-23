@@ -178,10 +178,7 @@ export function getProductEffectiveSubcategory(p: Product, effCategory: string):
     ) {
       return 'giftcard_ps';
     }
-    if (platLower.includes('nintendo') || titleLower.includes('nintendo') || titleLower.includes('eshop')) {
-      return 'giftcard_nintendo';
-    }
-    return 'giftcard_others';
+    return null;
   }
 
   if (effCategory === 'subscription') {

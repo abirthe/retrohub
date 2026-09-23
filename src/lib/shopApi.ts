@@ -129,14 +129,6 @@ export async function fetchStoreProducts({
       query = query.or('title.ilike.%steam%,platform.ilike.%steam%');
     } else if (activeSubcategory === 'giftcard_ps') {
       query = query.or('title.ilike.%playstation%,title.ilike.%psn%,platform.ilike.%playstation%');
-    } else if (activeSubcategory === 'giftcard_nintendo') {
-      query = query.or('title.ilike.%nintendo%,title.ilike.%eshop%,platform.ilike.%nintendo%');
-    } else if (activeSubcategory === 'giftcard_others') {
-      query = query
-        .not('title', 'ilike', '%xbox%')
-        .not('title', 'ilike', '%steam%')
-        .not('title', 'ilike', '%playstation%')
-        .not('title', 'ilike', '%nintendo%');
     }
   } else if (activeCategory === 'subscription') {
     query = query.eq('category', 'subscription').not('title', 'ilike', '%account%');
