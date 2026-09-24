@@ -8,7 +8,18 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
   const isChunkLoadError = errorMessage.includes('Failed to fetch dynamically imported module') || 
                            errorMessage.includes('Importing a module script failed');
 
+  React.useEffect(() => {
+    if (isChunkLoadError) {
+      const alreadyReloaded = window.sessionStorage.getItem('chunk_error_reloaded');
+      if (!alreadyReloaded) {
+        window.sessionStorage.setItem('chunk_error_reloaded', 'true');
+        window.location.reload();
+      }
+    }
+  }, [isChunkLoadError]);
+
   const handleTryAgain = () => {
+    window.sessionStorage.removeItem('chunk_error_reloaded');
     if (isChunkLoadError) {
       window.location.reload();
     } else {
