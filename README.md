@@ -1,161 +1,174 @@
-# RETROHUB — Game Keys, Top-ups & Digital Services Platform
+# RETROHUB — Game Keys, Top-ups & Digital Commerce Platform 🎮⚡
 
 ![RetroHub Platform](public/favicon.ico)
 
-**RETROHUB** is a high-performance e-commerce platform specialized in instant game keys, in-game currency top-ups, digital gift cards, gaming subscriptions, and verified online services. Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL)**.
+**RETROHUB** is an enterprise-grade digital goods e-commerce platform built for instantaneous fulfillment of digital game keys, in-game currency top-ups, verified gaming accounts, digital gift cards, subscription passes, and software services.
+
+Engineered with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL 15+)**, the platform delivers ultra-low latency catalog browsing, real-time merchant margin tracking, local mobile payment workflows, and automated digital delivery pipelines.
 
 ---
 
-## ⚡ Key Highlights & Catalog Structure
+## ⚡ Core Capabilities & Highlights
 
-RetroHub features an automated catalog with multi-region support, instant fulfillment, and 1-to-1 category isolation:
-
-### 🎮 1. Games (`games`)
-* **Xbox Games (`games_xbox`)**: Official Xbox One & Xbox Series X\|S digital game codes.
-* **PlayStation Games (`games_ps`)**: PlayStation 4 & PlayStation 5 PSN digital keys.
-* **Steam Games (`games_steam`)**: Steam PC activation keys with instant code delivery.
-* **GOG Games (`games_gog`)**: DRM-free PC games on the GOG platform.
-* **Others (`games_others`)**: Epic Games, Ubisoft Connect, EA App, and standalone PC digital keys.
-
-### 👤 2. Accounts (`accounts`)
-* Verified full-access and personal regional game accounts across Steam, PlayStation, Xbox, Minecraft, and Ubisoft.
-
-### 🎁 3. Gift Cards (`giftcard`)
-* **XBOX (`giftcard_xbox`)**: Xbox Store & Game Pass wallet gift cards.
-* **STEAM (`giftcard_steam`)**: Global, USD, INR, and regional Steam Wallet codes.
-* **PlayStation (`giftcard_ps`)**: PlayStation Store wallet recharge cards (USD, GBP, TL, etc.).
-* **Apple (`giftcard_apple`)**: Official US iTunes & Apple App Store gift cards ($2 – $100).
-* **Nintendo (`giftcard_nintendo`)**: Nintendo Switch eShop prepaid cards ($10, $20, $50).
-* **Roblox (`giftcard_roblox`)**: Official Roblox US cards (275 – 11,000 Robux).
-* **Blizzard (`giftcard_blizzard`)**: Blizzard Battle.net wallet balance cards ($10 – $100).
-
-### 🔄 4. Subscriptions (`subscription`)
-* **Game Pass (`sub_gamepass`)**: Xbox Game Pass Ultimate & PC Game Pass memberships.
-* **PSN (`sub_psn`)**: PlayStation Plus Essential, Extra, and Deluxe tiers.
-* **EA (`sub_ea`)**: EA Play & EA Play Pro memberships across PC and consoles.
-* **Others (`sub_others`)**: Discord Nitro (+2 Server Boosts), YouTube Premium, and entertainment streaming passes.
-
-### ⚡ 5. Game Top-ups (`topup`)
-* 17 curated top-up services with automated Player ID (UID) recharge:
-  - **Valorant Points**: BD, Philippines (PHP), Malaysia (MY) regions.
-  - **Wuthering Waves**: Lunites and Lunite Subscription pass.
-  - **Fortnite**: V-Bucks across PC, Xbox, and PlayStation.
-  - **PUBG Mobile**: Unknown Cash (UC) direct UID recharge.
-  - **Genshin Impact**: Genesis Crystals & Blessing of the Welkin Moon.
-  - **Honkai: Star Rail**: Oneiric Shards & Express Supply Pass.
-  - **Zenless Zone Zero**: Monochrome Film & Inter-Knot Membership.
-  - **Mobile Legends (MLBB)**: Diamonds and Weekly Diamond Pass.
-  - **Marvel Rivals**: Lattices and Battle Pass recharge.
-  - **Roblox, Apex Legends, eFootball PES, Delta Force, Neverness to Everness (NTE)**.
-
-### 🛠️ 6. Services & Software (`service`)
-* **Google AI Pro (6 Months)**: Official Google activation link for Gemini 3.1 Pro, Antigravity 2.0 (4× limits), Veo 3.1, Nano Banana 2, and 5TB Google One Cloud storage.
-* **Registration & Digital Services**: Regional Steam & PSN account setup, Microsoft Office lifetime activation keys.
-
-### 📋 7. Custom Orders (`custom_orders`)
-* Interactive request portal for custom game titles, unlisted subscriptions, or specific software requests.
+* **Multi-Platform Digital Goods**: Steam, Xbox, PlayStation, Nintendo, Epic Games, GOG, and EA App.
+* **Direct Player UID In-Game Top-Ups**: 17+ curated games with automated Player ID / Server / Zone ID input validation (Valorant, MLBB, PUBG Mobile, Genshin Impact, Honkai: Star Rail, Fortnite, Roblox, etc.).
+* **Verified Gaming Accounts**: Full-access regional and verified accounts isolated into a dedicated category.
+* **Global & Regional Digital Gift Cards**: Apple iTunes, Steam Wallet, PSN, Xbox, Nintendo eShop, Roblox, and Blizzard Battle.net.
+* **Gaming & Cloud Subscriptions**: Xbox Game Pass (Ultimate/PC), PlayStation Plus (Essential/Extra/Deluxe), EA Play, Discord Nitro, and YouTube Premium.
+* **Software & Digital Services**: Lifetime Microsoft Office/Windows activation licenses, regional PSN/Steam account setup, and Google AI Pro 6-Month plans.
+* **On-Demand Custom Orders**: Dedicated custom request portal (`/custom-order`) with admin queue triage.
+* **Local Payment Channels**: Integrated checkout for Bangladeshi payment workflows: **bKash** (Personal/Merchant with 1% automated charge calculation) and **Bank Wire Transfers** (City Bank, DBBL, BRAC Bank).
+* **Automated Order Fulfillment**: Immediate delivery code revelation in `/orders` alongside automated HTML receipt emails dispatched via Supabase Edge Functions + Resend API.
+* **Merchant Back-Office Suite**: Live daily revenue, order counts, and net profit analytics, 8-state order lifecycle management, inline stock/price updates, and custom orders board.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend Framework** | React 18 (Functional Components & React Hooks) |
-| **Language & Type System** | TypeScript (Strict mode, zero `any`) |
-| **Styling & Design System** | Tailwind CSS with custom cyber-neon dark aesthetic |
-| **UI Primitives** | shadcn/ui + Radix UI Primitives |
-| **State & Data Fetching** | TanStack Query (React Query v5) + React Context API |
-| **Routing** | React Router v6 |
-| **Icons & Media** | Lucide React + High-Resolution Clean Visual Assets |
-| **Backend & Database** | Supabase (PostgreSQL with RLS & Stored Procedures) |
-| **Build & Tooling** | Vite v5 + PostCSS + Vitest |
+| Layer | Technologies & Libraries | Key Responsibility |
+| :--- | :--- | :--- |
+| **Frontend Core** | React 18.3, TypeScript 5.8 | Functional components, strict typing (zero `any`), custom hooks |
+| **Styling & Theme** | Tailwind CSS 3.4, PostCSS, Lucide React | Cyber-neon dark aesthetic, glassmorphism, responsive design |
+| **UI Component Primitives**| Radix UI, shadcn/ui, Sonner, Vaul | Accessible dialogs, dropdowns, sheets, modals, and toasts |
+| **State & Data Fetching** | TanStack Query v5 (React Query), Context API | Server state caching, optimistic updates, persistent cart |
+| **Routing** | React Router DOM v6 | Client-side routing with guarded admin & auth views |
+| **Backend & Database** | Supabase (PostgreSQL 15+) | Row-Level Security (RLS), stored procedures, views, auth |
+| **Email Delivery** | Supabase Edge Functions, Resend API | Automated order fulfillment email dispatch |
+| **Build & Tooling** | Vite 5.4, SWC Plugin, Vitest, ESLint 9 | Lightning-fast HMR, automated testing, modern bundling |
 
 ---
 
-## 📁 Repository Architecture
+## 📁 Repository Structure
 
 ```
 retrohub/
-├── public/                    # Static assets & public media
-│   └── images/
-│       ├── giftcards/         # Clean giftcard artworks (Apple, Nintendo, Roblox, Blizzard)
-│       ├── services/          # Services visual assets (Google AI Pro, etc.)
-│       └── topups/            # Clean unbranded game topup artworks
-├── src/
-│   ├── components/            # Reusable UI components
-│   │   ├── home/              # Hero, CategoryFilter, ProductGrid, Featured
-│   │   ├── layout/            # ShopHeader, Footer, Navigation
-│   │   ├── product/           # ProductPurchaseCard, ProductDetail, ProductFeatures
-│   │   ├── orders/            # Order tables, status badges, mobile order cards
-│   │   └── ui/                # Radix-based accessible UI design tokens
-│   ├── contexts/              # CartContext (persisted cart state with localStorage)
-│   ├── hooks/                 # Custom React hooks (useAuth, useToast, etc.)
-│   ├── integrations/          # Supabase client wrapper and database types
-│   ├── lib/                   # Category resolvers, API interfaces, utility helpers
-│   │   ├── constants.ts       # Central category & subcategory definitions
-│   │   ├── productFilters.ts  # Semantic 1-to-1 category and subcategory filtering
-│   │   ├── shopApi.ts         # High-level Supabase storefront and admin query engine
-│   │   └── utils.ts           # Styling and formatting utilities
-│   ├── pages/                 # Route components (Index, ProductDetail, Checkout, Orders, Admin)
-│   ├── App.tsx                # Application routing and ErrorBoundary setup
-│   └── main.tsx               # Client entry point
-├── scripts/                   # Seeding, maintenance, database migrations, and testing tools
-│   ├── database/              # Schema setup and compiled SQL seeds
-│   ├── images/                # Image mapping and cleanup scripts
-│   ├── maintenance/           # Catalog deduplication and orphan cleanup tools
-│   ├── pricing/               # Market price scrapers and sync algorithms
-│   ├── seeding/               # Automated product and variant seeders
-│   └── testing/               # Catalog diagnostics and validation tests
-├── supabase/                  # Supabase migrations and Edge Functions
-└── package.json               # Dependencies and build scripts
+├── docs/                           # Authoritative platform documentation
+│   └── MERCHANT_SYSTEM_OVERVIEW.md # Feature specs, capabilities & merchant SOP
+├── public/                         # Static assets & public artwork
+│   └── images/                     # Categorized game, gift card, top-up & service assets
+├── scripts/                        # Catalog automation, seeding, pricing & maintenance
+│   ├── database/                   # Schema DDL, migrations, and compiled seed SQL
+│   ├── images/                     # Cover artwork mapping and watermarking cleaners
+│   ├── maintenance/                # Deduplication, orphan cleanup, stock audit utilities
+│   ├── pricing/                    # Market scrapers and dynamic margin sync algorithms
+│   ├── seeding/                    # Multi-source product catalog and variant seeders
+│   └── README.md                   # Comprehensive scripts documentation
+├── src/                            # Application source code
+│   ├── components/                 # Modular React components
+│   │   ├── admin/                  # AdminSuite tabs, order dialogs, stats grid, inventory
+│   │   ├── checkout/               # Checkout payment triggers & review cards
+│   │   ├── home/                   # Hero banner, category pills, product grid, filters
+│   │   ├── layout/                 # ShopHeader, Footer, navigation drawers
+│   │   ├── orders/                 # Desktop order tables and mobile order cards
+│   │   ├── payment/                # bKash and Bank Wire instructions components
+│   │   ├── product/                # Product details, purchase cards, variant selectors
+│   │   └── ui/                     # Radix UI design tokens & buttons
+│   ├── contexts/                   # CartContext with localStorage persistence
+│   ├── hooks/                      # Custom hooks (useAuth, useToast, etc.)
+│   ├── integrations/               # Supabase client initialization and generated types
+│   ├── lib/                        # Business logic, category filters, API helpers
+│   │   ├── constants.ts            # Category and subcategory taxonomy definitions
+│   │   ├── emailService.ts         # Supabase Edge Function email dispatch client
+│   │   ├── productFilters.ts       # 1-to-1 strict category isolation logic
+│   │   ├── regions.ts              # 28 supported region codes and flag helpers
+│   │   ├── shopApi.ts              # Storefront & Admin data layer and RPC wrappers
+│   │   └── utils.ts                # Tailwind class mergers and number formatters
+│   ├── pages/                      # Page routes (Index, ProductDetail, Checkout, Payment, Orders, Admin)
+│   ├── App.tsx                     # Route hierarchy, query client & error boundary
+│   └── main.tsx                    # React client entry point
+├── supabase/                       # Supabase migration scripts and edge functions
+│   └── migrations/                 # Versioned SQL migrations (RLS, views, RPCs)
+├── package.json                    # Dependencies and scripts
+├── tailwind.config.ts              # Custom theme tokens, neon colors, animations
+└── vite.config.ts                  # Vite build and path aliases configuration
 ```
 
 ---
 
-## 🗄️ Database Architecture & Views
+## 🔄 End-to-End Order & Delivery Flow
 
-### Core Tables
-* **`products`**: Product entries containing `title`, `sale_price`, `cost_price`, `category`, `platform`, `region`, `delivery_type`, `in_stock`, `is_active`, and structured markdown `description`.
-* **`orders`**: Customer transactions containing `status`, `total`, `cost`, `profit`, `customer_input`, and user linkage.
-* **`deliveries`**: Order fulfillment logs and credentials issued to customers.
-* **`profiles`**: User account profile information and contact details.
-* **`user_roles`**: Role-based access control (`admin`, `user`).
-* **`audit_logs` & `admin_action_logs`**: System audit trails.
+```
+[ Customer Storefront ]
+        │
+        ▼ (Selects Product & enters Player ID / Server if Top-up)
+[ Cart & Checkout ]
+        │
+        ▼ (Selects bKash or Bank Transfer)
+[ Payment Portal (/payment) ]
+        │
+        ▼ (Submits Transaction ID / Slip Reference)
+[ Order Status: payment_submitted ]
+        │
+        ▼
+[ Admin Dashboard (/admin) ]
+        │
+        ├─► Merchant checks statement & clicks "Validate" (Status: payment_verified)
+        │
+        ▼
+[ Fulfillment Execution ]
+        ├─► Automated Key Assigned (`instant_code` with SKIP LOCKED)
+        │    OR
+        └─► Merchant inputs code/credentials (`fulfill_order` RPC)
+        │
+        ▼ (Status: fulfilled)
+┌────────────────────────────────────────────────────────┐
+│  - Code unlocked & displayed in Customer /orders page   │
+│  - Delivery email dispatched via Resend Edge Function  │
+│  - Margin logged & financial analytics updated         │
+└────────────────────────────────────────────────────────┘
+```
 
-### Optimized PostgreSQL Views
-* **`v_grouped_products`**: Groups catalog variants by base title, deduplicating listings and presenting the lowest entry price.
-* **`v_revenue_today`**, **`v_orders_today`**, **`v_profit_today`**: Real-time sales and revenue KPIs for the Admin Dashboard.
-* **`v_pending_action_count`**: Real-time count of orders awaiting fulfillment.
+---
+
+## 🗄️ Database Architecture & Key Views
+
+### Core Relational Tables
+* **`products`**: Catalog items (`title`, `sale_price`, `cost_price`, `category`, `platform`, `region`, `delivery_type`, `in_stock`, `is_active`, `description`).
+* **`inventory_keys`**: Digital keys and serials (`pin_code`, `serial_number`, `status: available | sold | expired`).
+* **`orders`**: Customer transactions (`user_id`, `product_id`, `total`, `status`, `customer_input`).
+* **`deliveries`**: Order fulfillment records (`order_id`, `delivery_code`, `cost_paid`, `sourced_from`, `notes`).
+* **`custom_orders`**: On-demand user requests (`name`, `email`, `product_name`, `platform`, `details`, `status`).
+* **`user_roles`**: Administrative RBAC (`role: admin | user`).
+* **`audit_logs` & `admin_action_logs`**: Tamper-proof system audit logs.
+
+### Real-Time Financial Views
+* **`v_revenue_today`**: Aggregated gross sales completed in the current calendar day.
+* **`v_orders_today`**: Count of successfully completed orders today.
+* **`v_profit_today`**: Net margin dynamically calculated as $\text{Total Sale} - \text{Total Cost}$.
+* **`v_pending_action_count`**: Real-time counter of orders awaiting verification or fulfillment.
 
 ---
 
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-* **Node.js**: v18.0.0 or higher
-* **npm**: v9.0.0 or higher
-* **Supabase Project**: PostgreSQL database instance
+* **Node.js**: `v18.0.0` or higher
+* **npm**: `v9.0.0` or higher
+* **Supabase Project**: Linked Supabase database instance
 
-### 2. Environment Setup
+### 2. Environment Configuration
 Create a `.env` file in the project root:
 
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
+VITE_SUPABASE_PROJECT_ID=your-project-id
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key # Required only for maintenance & seed scripts
 ```
 
-### 3. Installation & Local Development
+### 3. Local Installation & Development
 ```bash
 # Install dependencies
 npm install
 
-# Start development server
+# Start local development server (http://localhost:8080 or port shown)
 npm run dev
 
-# Run TypeScript type check
+# Run TypeScript type verification
 npx tsc --noEmit
+
+# Run unit tests
+npm run test
 
 # Build production bundle
 npm run build
@@ -163,23 +176,37 @@ npm run build
 
 ---
 
-## 🔧 Maintenance & Seeding Toolchain
+## 🧰 Catalog Scripts & Automation Toolchain
 
-All catalog utilities are executed from the project root using Node.js:
+RetroHub features a dedicated suite of Node.js scripts for catalog management, maintenance, seeding, and margin calculations located in [`scripts/`](scripts/README.md):
 
 ```bash
-# Seed 17 curated game top-ups (152 variants) from ArektaCoinStore
-node scripts/seeding/scrape_arektacoin_topups.mjs
+# Seed curated digital gift cards (Apple, Steam, PlayStation, Nintendo, Roblox, Blizzard)
+node scripts/seeding/seed_digital_giftcards.mjs
 
-# Seed Apple, Nintendo, Roblox, and Blizzard gift cards (27 variants)
-node scripts/seeding/seed_arektacoin_giftcards.mjs
+# Seed 17+ game top-up products and denominations
+node scripts/seeding/seed_game_topups.mjs
 
-# Ingest Google AI Pro 6-month subscription service
-node scripts/seeding/insert_google_ai_service.mjs
+# Seed verified gaming accounts
+node scripts/seeding/seed_plati_accounts.mjs
 
-# Audit inventory and stock
+# Preview catalog deduplication (safe dry-run)
+node scripts/maintenance/deduplicate_products_strict.mjs
+
+# Execute catalog deduplication (live mode)
+node scripts/maintenance/deduplicate_products_strict.mjs --execute
+
+# Audit out-of-stock and inactive products
 node scripts/maintenance/check-stock.cjs
 ```
+
+For full documentation of all available scripts, execution flags, and data flows, see **[scripts/README.md](scripts/README.md)**.
+
+---
+
+## 📚 Documentation
+* **[Platform & Merchant System Specification](docs/MERCHANT_SYSTEM_OVERVIEW.md)**: Exhaustive reference covering all website features, category taxonomy, payment handling, admin operations, and merchant standard operating procedures.
+* **[Tooling & Scripts Manual](scripts/README.md)**: Developer documentation for seeding, maintenance, database migration, and pricing sync tools.
 
 ---
 
