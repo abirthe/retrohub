@@ -8,16 +8,39 @@ import { CartProvider } from "@/contexts/CartContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 
-const Index = lazy(() => import("./pages/Index"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const Auth = lazy(() => import("./pages/Auth"));
-const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const Checkout = lazy(() => import("./pages/Checkout"));
-const Orders = lazy(() => import("./pages/Orders"));
-const Payment = lazy(() => import("./pages/Payment"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const CustomOrder = lazy(() => import("./pages/CustomOrder"));
-const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+// Helper to auto-recover when a new Vercel deployment replaces JS chunk hashes
+const lazyWithRetry = <T extends React.ComponentType<any>>(
+  componentImport: () => Promise<{ default: T }>
+) =>
+  lazy(async () => {
+    const pageHasBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasBeenForceRefreshed) {
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+        window.location.reload();
+        return new Promise(() => {}); // hold until reload
+      }
+      throw error;
+    }
+  });
+
+const Index = lazyWithRetry(() => import("./pages/Index"));
+const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"));
+const Auth = lazyWithRetry(() => import("./pages/Auth"));
+const ProductDetail = lazyWithRetry(() => import("./pages/ProductDetail"));
+const Checkout = lazyWithRetry(() => import("./pages/Checkout"));
+const Orders = lazyWithRetry(() => import("./pages/Orders"));
+const Payment = lazyWithRetry(() => import("./pages/Payment"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const CustomOrder = lazyWithRetry(() => import("./pages/CustomOrder"));
+const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 
 const queryClient = new QueryClient();
 
