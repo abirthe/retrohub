@@ -100,10 +100,10 @@ const Index = () => {
     const q = searchParams.get('search') || '';
     const st = (searchParams.get('sort') as SortValue) || 'newest';
 
-    if (c !== activeCategory) setActiveCategory(c);
-    if (s !== activeSubcategory) setActiveSubcategory(s);
-    if (q !== search) setSearch(q);
-    if (st !== sort) setSort(st);
+    setActiveCategory(prev => (c !== prev ? c : prev));
+    setActiveSubcategory(prev => (s !== prev ? s : prev));
+    setSearch(prev => (q !== prev ? q : prev));
+    setSort(prev => (st !== prev ? st : prev));
   }, [searchParams]);
 
   const { 

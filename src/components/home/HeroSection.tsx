@@ -53,7 +53,7 @@ export function HeroSection() {
         <img
           src={heroBg}
           alt="Hero Background"
-          className="w-full h-full object-cover object-top opacity-40 animate-pulse duration-[15000ms]"
+          className="w-full h-full object-cover object-top opacity-40 animate-pulse [animation-duration:15s]"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />

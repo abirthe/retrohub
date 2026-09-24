@@ -54,7 +54,7 @@ export const ProductFeatures = ({ product }: ProductFeaturesProps) => {
               }
 
               // 3. Bullet points and emoji list items
-              const bulletMatch = cleanLine.match(/^([-*•✅📞⭐💸🛡️📋✨👉📌])\s*(.*)/u);
+              const bulletMatch = cleanLine.match(/^([-*•]|✅|📞|⭐|💸|🛡️|📋|✨|👉|📌)\s*(.*)/u);
               if (bulletMatch) {
                 const icon = bulletMatch[1];
                 let text = bulletMatch[2].trim();
@@ -62,7 +62,7 @@ export const ProductFeatures = ({ product }: ProductFeaturesProps) => {
 
                 // Handle bold label within bullet: e.g. **Label:** Value
                 let label = '';
-                const boldMatch = text.match(/^\*\*(.*?)\*\*[:\-]?\s*(.*)/);
+                const boldMatch = text.match(/^\*\*(.*?)\*\*[:-]?\s*(.*)/);
                 if (boldMatch) {
                   label = boldMatch[1];
                   text = boldMatch[2];
