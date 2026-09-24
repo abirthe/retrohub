@@ -31,7 +31,7 @@ const STANDARD_CATEGORIES: Array<{ key: string; label: string; iconType: 'packag
 
 const InventoryTab = ({ products }: InventoryTabProps) => {
   const isAccountProduct = (p: Product): boolean => {
-    const rawCat = (p.category as string || '').toLowerCase();
+    const rawCat = p.category?.toLowerCase() || '';
     if (rawCat === 'accounts' || rawCat === 'account') return true;
     const titleLower = (p.title || '').toLowerCase();
     if (titleLower.includes('account')) return true;
