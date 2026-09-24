@@ -595,7 +595,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
-      product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard", "service"],
+      product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard", "service", "accounts"],
       region_tag: [
         "GLOBAL", "US", "EU", "ASIA", "LATAM", "UK", "CA", "MX", "BR", "IN",
         "CN", "JP", "KR", "AU", "NZ", "ME", "AFRICA", "OCEANIA", "AE", "SA",

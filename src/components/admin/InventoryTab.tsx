@@ -11,34 +11,75 @@ import { cn } from '@/lib/utils';
 import { updateProductPrice, type Product } from '@/lib/shopApi';
 import { InventoryRow } from './InventoryRow';
 
+import { getProductEffectiveCategory } from '@/lib/productFilters';
+
 interface InventoryTabProps {
   products: Product[] | undefined;
 }
 
+const STANDARD_CATEGORIES: Array<{ key: string; label: string; iconType: 'package' | 'user' }> = [
+  { key: 'giftcard', label: 'Giftcard', iconType: 'package' },
+  { key: 'service', label: 'Service', iconType: 'package' },
+  { key: 'topup', label: 'Topup', iconType: 'package' },
+  { key: 'pc_game', label: 'PC Game', iconType: 'package' },
+  { key: 'subscription', label: 'Subscription', iconType: 'package' },
+  { key: 'software', label: 'Software', iconType: 'package' },
+  { key: 'xbox_game', label: 'Xbox Game', iconType: 'package' },
+  { key: 'ps_game', label: 'PS Game', iconType: 'package' },
+  { key: 'accounts', label: 'Accounts', iconType: 'user' },
+];
+
 const InventoryTab = ({ products }: InventoryTabProps) => {
-  const groupedProducts = products?.reduce((acc, product) => {
-    const cat = product.category || 'other';
-    if (!acc[cat]) {
-      acc[cat] = [];
+  const isAccountProduct = (p: Product): boolean => {
+    const rawCat = (p.category as string || '').toLowerCase();
+    if (rawCat === 'accounts' || rawCat === 'account') return true;
+    const titleLower = (p.title || '').toLowerCase();
+    if (titleLower.includes('account')) return true;
+    return getProductEffectiveCategory(p) === 'accounts';
+  };
+
+  // Build bucket mapping
+  const categoryBuckets: Record<string, Product[]> = {};
+
+  // Initialize all standard categories so they always exist
+  STANDARD_CATEGORIES.forEach(({ key }) => {
+    categoryBuckets[key] = [];
+  });
+
+  (products || []).forEach((product) => {
+    if (isAccountProduct(product)) {
+      categoryBuckets['accounts'].push(product);
+    } else {
+      const cat = product.category || 'other';
+      if (!categoryBuckets[cat]) {
+        categoryBuckets[cat] = [];
+      }
+      categoryBuckets[cat].push(product);
     }
-    acc[cat].push(product);
-    return acc;
-  }, {} as Record<string, Product[]>) || {};
+  });
 
-  const accountProducts = products?.filter(
-    (p) => p.title?.toLowerCase().includes('account')
-  ) ?? [];
+  // Collect any extra dynamic categories not in standard list
+  const extraCategories = Object.keys(categoryBuckets).filter(
+    (k) => !STANDARD_CATEGORIES.some((sc) => sc.key === k)
+  );
 
-  const allGroups: Array<{ key: string; label: string; items: Product[]; icon: React.ReactNode }> = [
-    ...Object.entries(groupedProducts).map(([cat, items]) => ({
-      key: cat,
-      label: cat.replace(/_/g, ' '),
-      items,
+  const allGroups = [
+    ...STANDARD_CATEGORIES.map(({ key, label, iconType }) => ({
+      key,
+      label,
+      items: categoryBuckets[key] || [],
+      icon: iconType === 'user' ? (
+        <User className="h-5 w-5 text-teal-400" />
+      ) : (
+        <Package className="h-5 w-5 text-primary" />
+      ),
+    })),
+    ...extraCategories.map((key) => ({
+      key,
+      label: key.replace(/_/g, ' '),
+      items: categoryBuckets[key] || [],
       icon: <Package className="h-5 w-5 text-primary" />,
     })),
-    ...(accountProducts.length > 0
-      ? [{ key: 'accounts', label: 'Accounts', items: accountProducts, icon: <User className="h-5 w-5 text-accent" /> }]
-      : []),
   ];
 
   return (
@@ -75,9 +116,17 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {items.map((p) => (
-                        <InventoryRow key={p.id} product={p} />
-                      ))}
+                      {items.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-muted-foreground text-xs italic">
+                            No products currently in this category.
+                          </td>
+                        </tr>
+                      ) : (
+                        items.map((p) => (
+                          <InventoryRow key={p.id} product={p} />
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
