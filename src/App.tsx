@@ -9,7 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 
 // Helper to auto-recover when a new Vercel deployment replaces JS chunk hashes
-const lazyWithRetry = <T extends React.ComponentType<any>>(
+const lazyWithRetry = <T extends React.ComponentType<Record<string, unknown>>>(
   componentImport: () => Promise<{ default: T }>
 ) =>
   lazy(async () => {
