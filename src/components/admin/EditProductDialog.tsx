@@ -121,6 +121,7 @@ export const EditProductDialog = ({ product, open, onClose }: EditProductDialogP
                   <SelectItem value="ps_game">PS Game</SelectItem>
                   <SelectItem value="software">Software</SelectItem>
                   <SelectItem value="service">Service</SelectItem>
+                  <SelectItem value="accounts">Accounts</SelectItem>
                 </SelectContent>
               </Select>
             </div>
