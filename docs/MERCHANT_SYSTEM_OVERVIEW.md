@@ -1,216 +1,234 @@
-# RETROHUB — Merchant System Overview & Platform Features
+# RETROHUB — Platform Features & Working Capability Specification
 
-> **A Comprehensive Guide for Merchants, Vendors, and Platform Operators**  
-> *Everything you need to know about RetroHub's digital commerce engine, automated inventory, order fulfillment, and merchant back-office.*
-
----
-
-## 1. Executive Summary
-
-**RetroHub** is an enterprise-grade digital goods e-commerce platform purpose-built for selling:
-- **Instant Game Keys & Activation Codes** (Steam, Xbox, PlayStation, GOG, Epic Games)
-- **Verified Full-Access Gaming Accounts** (Steam, PSN, Xbox, Minecraft, Ubisoft)
-- **Digital Gift Cards & Wallet Vouchers** (Apple, Steam, PlayStation, Xbox, Nintendo, Roblox, Blizzard)
-- **Gaming & Digital Subscriptions** (Xbox Game Pass, PlayStation Plus, EA Play, Discord Nitro, YouTube Premium)
-- **Direct Player ID / UID Game Top-Ups** (Valorant Points, Mobile Legends, PUBG Mobile, Genshin Impact, Fortnite)
-- **Digital Services & Software** (Google AI Pro, Microsoft Windows & Office lifetime activations)
-- **On-Demand Custom Orders** (Custom requests for unlisted games, regional services, or software)
-
-RetroHub removes physical shipping overhead entirely, replacing it with an automated digital delivery pipeline, real-time margin tracking, local & international payment verification, and an operator-focused admin dashboard.
+> **Comprehensive Technical & Operational Reference Manual**  
+> *Authoritative specification of RetroHub's digital commerce architecture, storefront capabilities, multi-tier catalog, automated delivery pipelines, local payment processing, and merchant administration suite.*
 
 ---
 
-## 2. Platform Architecture & Core Technology
+## 1. Platform Executive Summary
 
-| Platform Layer | Technology | Operational Benefit for Merchant |
-| :--- | :--- | :--- |
-| **Frontend Storefront** | React 18, TypeScript, Tailwind CSS | Ultra-fast load times, zero downtime, mobile-first responsive layout |
-| **UI Design System** | Radix UI + shadcn/ui (Cyber-neon Dark Aesthetic) | High conversion rate, modern gamer-centric interface, frictionless UX |
-| **State & Data Engine** | TanStack Query (React Query v5) | Real-time cache invalidation, instant catalog filtering, optimistic updates |
-| **Database & Auth** | Supabase (PostgreSQL 15+) | Rock-solid relational integrity, Row-Level Security (RLS), instant backups |
-| **Security & Permissions** | PostgreSQL RBAC & Stored Procedures | Admins have full operational control; customer data is cryptographically protected |
-| **Email Service** | Supabase Edge Functions + Resend API | Automated order confirmation and delivery code dispatch to customer inbox |
+**RetroHub** is a high-performance, full-stack digital goods e-commerce platform engineered specifically for instantaneous fulfillment of digital gaming and software products. It eliminates physical logistics entirely by operating an end-to-end digital delivery lifecycle with real-time margin tracking, automated stock locking, and local payment verification.
+
+### Core Product Capabilities
+* **Instant Digital Game Keys**: PC (Steam, GOG, Epic Games, Ubisoft, EA App), Xbox (One, Series X|S), and PlayStation (PS4, PS5).
+* **Verified Gaming Accounts**: Full-access and regional accounts (Steam, PSN, Xbox, Minecraft, Ubisoft) strictly isolated from code listings.
+* **Global & Regional Gift Cards**: Official digital wallet top-up cards for Apple iTunes, Steam Wallet, PlayStation Store, Xbox, Nintendo Switch eShop, Roblox (Robux), and Blizzard Battle.net.
+* **Gaming & Digital Subscriptions**: Xbox Game Pass (Ultimate & PC), PlayStation Plus (Essential, Extra, Deluxe), EA Play / EA Play Pro, Discord Nitro, and YouTube Premium.
+* **Direct Player UID Game Top-Ups**: 17+ curated games featuring client-side and backend player validation (Valorant Points, PUBG Mobile UC, Mobile Legends Diamonds, Genshin Impact, Honkai: Star Rail, Zenless Zone Zero, Marvel Rivals, and more).
+* **Software & Digital Services**: Lifetime Microsoft Windows & Office activation keys, regional account setup, and premium Google AI Pro 6-Month subscriptions (Gemini 3.1 Pro, Antigravity 2.0, Veo 3.1, Nano Banana 2, 5TB Google One).
+* **On-Demand Custom Orders**: Dedicated portal (`/custom-order`) for unlisted titles, specialized software, or enterprise requests with back-office tracking.
 
 ---
 
-## 3. Product Catalog & Category Architecture
+## 2. Storefront Architecture & Customer Experience
 
-The catalog is engineered with **strict 1-to-1 category isolation**, ensuring products never leak into incorrect filters:
+RetroHub's customer interface is built with **React 18**, **TypeScript**, and **Tailwind CSS**, styled around a cyber-neon dark gamer aesthetic with glassmorphism and micro-animations.
 
-### 🎮 Games (`games`)
-* **Xbox Games (`games_xbox`)**: Official Xbox One & Xbox Series X|S digital codes.
-* **PlayStation Games (`games_ps`)**: PlayStation 4 & PlayStation 5 PSN digital keys.
-* **Steam Games (`games_steam`)**: Steam PC global and regional activation keys.
-* **GOG Games (`games_gog`)**: DRM-free PC games.
-* **Others (`games_others`)**: Epic Games, Ubisoft Connect, EA App, and PC standalone keys.
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  RETROHUB   [ Search products... ]   [ All | Games | Accounts | Gift Cards ] │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  ⚡ HERO BANNER: Featured Digital Drops & Top-Ups                           │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Category Pills: [🎮 Games] [👤 Accounts] [🎁 Gift Card] [🔄 Subs] [⚡ Topup]  │
+│  Subcategory Filters: [Steam] [Xbox] [PlayStation] [GOG] [Others]            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Catalog Grid:                                                               │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌─────────────────────┐ │
+│  │ Steam Wallet $50     │  │ Valorant 1150 VP     │  │ Xbox Game Pass Ult  │ │
+│  │ Instant Delivery     │  │ Player ID Required   │  │ 1 Month Global      │ │
+│  │ ৳ 5,850              │  │ ৳ 1,250              │  │ ৳ 1,450             │ │
+│  │ [ Add to Cart ]      │  │ [ Select Server/UID] │  │ [ Add to Cart ]     │ │
+│  └──────────────────────┘  └──────────────────────┘  └─────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
 
-### 👤 Accounts (`accounts`)
-* Dedicated category for verified full-access accounts, regional accounts (e.g. Turkey/Ukraine/Kazakhstan PSN or Steam), and clean login credentials.
-* Kept strictly separated from digital keys so buyers always know whether they are purchasing a game key or an account.
+### Storefront Features
+1. **Dynamic Category & Subcategory Filtering**:
+   - Strict 1-to-1 category isolation guarantees products never leak across mismatched filters.
+   - Dynamic subcategory pill navigation for deep-diving into platforms (e.g., Games -> Xbox, PlayStation, Steam, GOG, Others; Gift Cards -> Apple, Steam, PlayStation, Xbox, Nintendo, Roblox, Blizzard).
+2. **Real-Time Catalog Search & Sorting**:
+   - Debounced search bar with instant query matching across title, platform, and category.
+   - Dynamic sorting: **Newest**, **Price: Low to High**, **Price: High to Low**, and **Name: A to Z**.
+3. **Cart Management with Persistence**:
+   - `CartContext` backed by browser `localStorage` ensures items persist across sessions and page refreshes.
+   - Dynamic quantity adjustments, variant switching, real-time total recalculation, and stock limits.
+4. **Player ID & Data Capture for Top-Ups**:
+   - For top-up products, checkout prompts buyers for required metadata: **Player ID (UID)**, **Zone ID / Server ID**, and **Region**.
+   - Input metadata is validated and attached directly to the order's `customer_input` JSON field.
+5. **Mobile-First Responsive Layout**:
+   - Tailored interfaces for both desktop workstations and mobile screens, including mobile swipeable order cards and sticky bottom navigation.
 
-### 🎁 Gift Cards (`giftcard`)
-* **Apple / iTunes**: Official US App Store & iTunes cards ($2 – $100).
-* **Steam Wallet**: Global, USD, INR, and regional Steam recharge cards.
-* **PlayStation Store**: Wallet credit across US, UK, and Europe regions.
-* **Xbox Gift Cards**: Microsoft balance & Game Pass vouchers.
-* **Nintendo Switch**: eShop prepaid wallet vouchers ($10, $20, $50).
-* **Roblox**: Robux gift vouchers (275 – 11,000 Robux).
-* **Blizzard Battle.net**: Wallet balance for Blizzard games and expansions.
+---
 
-### 🔄 Subscriptions (`subscription`)
-* **Xbox Game Pass**: Ultimate and PC Game Pass (1, 3, 6, 12 months).
-* **PlayStation Plus**: Essential, Extra, and Deluxe tiers.
-* **EA Play**: Standard & Pro memberships across consoles and PC.
-* **Entertainment & Utility**: Discord Nitro (+2 Server Boosts), YouTube Premium, streaming passes.
+## 3. Product Catalog & Category Specification
 
-### ⚡ Game Top-ups (`topup`)
-* Direct in-game currency recharge with automated **Player ID / UID input validation**:
-  * **Valorant Points**: Bangladesh (BDT), Philippines (PHP), Malaysia (MYR).
-  * **PUBG Mobile**: Unknown Cash (UC) direct player ID recharge.
-  * **Mobile Legends (MLBB)**: Diamonds & Weekly Diamond Passes (User ID + Zone ID).
-  * **Genshin Impact & Honkai: Star Rail**: Genesis Crystals, Oneiric Shards, Welkin Moon.
-  * **Fortnite**: V-Bucks across consoles and PC.
-  * **Free Fire, Brawl Stars, Clash of Clans, eFootball PES, Apex Legends**.
+The catalog enforces strict data integrity via PostgreSQL enums and application-level filters:
 
-### 🛠️ Services & Software (`service` / `software`)
-* Lifetime Windows 10/11 Pro & Office 365 activations.
-* Regional account registration services.
-* Premium AI packages (e.g. Google AI Pro with Gemini Advanced & cloud storage).
-
-### 📋 Custom Orders (`custom_orders`)
-* Integrated portal where customers can request unlisted games, bulk top-ups, or specialized software.
-* Merchant can review, price, and fulfill custom orders directly in the admin panel.
+| Category Key | Display Label | Subcategories / Platforms | Key Fulfillment Characteristics |
+| :--- | :--- | :--- | :--- |
+| `games` | **Games** | `games_xbox`, `games_ps`, `games_steam`, `games_gog`, `games_others` | Instant 25-character digital keys, license codes, or store vouchers. |
+| `accounts` | **Accounts** | Steam, PlayStation, Xbox, Minecraft, Ubisoft | Full-access email + password login credentials with complete ownership transfer. |
+| `giftcard` | **Gift Cards** | `giftcard_xbox`, `giftcard_steam`, `giftcard_ps`, `giftcard_apple`, `giftcard_nintendo`, `giftcard_roblox`, `giftcard_blizzard` | Prepaid digital pin codes and redemption vouchers with multi-currency support (USD, EUR, GBP, TRY, INR, BDT). |
+| `subscription`| **Subscriptions** | `sub_gamepass`, `sub_psn`, `sub_ea`, `sub_others` (Discord Nitro, YouTube) | Membership activation codes or direct subscription upgrade links (1, 3, 6, 12 months). |
+| `topup` | **Top Up** | 17+ Game Titles (Valorant, MLBB, PUBG, Genshin, Honkai, Fortnite, etc.) | Direct account injection via Player ID, Server Zone, or User ID. |
+| `service` | **Services & Software** | Google AI Pro, Windows 10/11 Pro, Office 365, Account Sourcing | Direct activation links, OEM product licenses, and enterprise service provisioning. |
+| `custom_orders`| **Custom Requests**| Unlisted Games, Bulk Orders, Specialized Services | Dedicated customer quote request form routed directly to the merchant queue. |
 
 ---
 
 ## 4. Delivery & Fulfillment Models
 
-RetroHub accommodates multiple digital fulfillment workflows:
+RetroHub supports 4 distinct fulfillment mechanisms configured per product in `delivery_type`:
 
-| Delivery Type | Label | How It Works |
-| :--- | :--- | :--- |
-| `instant_code` | **Instant - 30min Delivery** | The platform checks the `inventory_keys` database table. Upon payment verification, available keys are automatically bound to the order and instantly displayed on the customer's `/orders` screen and emailed. |
-| `api_h2h` | **Direct Sourcing / API** | Designed for external provider APIs or automated wholesale supplier bridges. |
-| `automation` | **Automated Bot Delivery** | For automated direct-to-account top-ups and UID injection. |
-| `manual` | **Operator Sourcing** | The merchant sources the item on demand, inputs the code or credentials into the Admin Dialog, and clicks "Fulfill Order". |
+```
+                    ┌─────────────────────────┐
+                    │   Verified Paid Order   │
+                    └────────────┬────────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         ▼                       ▼                       ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│  `instant_code`  │    │    `api_h2h`     │    │     `manual`     │
+│  Automated Key   │    │ Wholesale Bridge │    │ Admin Sourced    │
+│  from Inventory  │    │ Automated Top-Up │    │ Code / Account   │
+└────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                                 ▼
+                     ┌───────────────────────┐
+                     │ Order Marked Fulfilled│
+                     │  - Key in /orders     │
+                     │  - Email sent via API │
+                     └───────────────────────┘
+```
+
+1. **Instant Digital Code (`instant_code`)** — *Default Model*:
+   - Assigned directly from the `inventory_keys` table.
+   - Upon payment verification, available keys are locked using `FOR UPDATE SKIP LOCKED` to prevent duplicate assignment.
+   - Code is immediately revealed on the user's `/orders` dashboard and dispatched via email.
+2. **API Head-to-Head (`api_h2h`)**:
+   - Automated bridge for wholesale suppliers or automated provider APIs.
+3. **Automated Bot Top-up (`automation`)**:
+   - Direct-to-UID automated injection pipelines for supported game titles.
+4. **Manual Operator Fulfillment (`manual`)**:
+   - Operator sources custom credentials, paste-delivers into the Admin Order Action Dialog, and confirms fulfillment.
 
 ---
 
-## 5. Merchant Admin Dashboard Operations
+## 5. Local Payment Processing Engine
 
-Merchants access a password-protected, role-verified Admin Suite at `/admin`:
+RetroHub accommodates localized Bangladeshi payment systems alongside international payment reference tracking:
+
+### Supported Payment Channels
+1. **bKash Personal & Merchant**:
+   - Prominently displays the merchant bKash wallet number with one-click copy.
+   - Automatic dynamic **1.0% bKash transaction charge** calculation:
+     $$\text{Total Payable} = \text{Order Total} \times 1.01$$
+2. **Bank Wire Transfer**:
+   - Direct bank transfer instructions supporting:
+     - **The City Bank Limited**
+     - **Dutch-Bangla Bank Limited (DBBL)**
+     - **BRAC Bank PLC**
+   - Displays Account Name, Account Number, Branch Name, and Routing Number with copy buttons.
+
+### Payment Submission & Verification Pipeline
+1. **Order Initiation**: Order is created in `orders` with `status: 'pending'`.
+2. **Transaction Submission**: Customer submits their payment reference or bank slip identifier (`transaction_id`) on `/payment`.
+3. **State Transition**: Order transitions to `status: 'payment_submitted'`.
+4. **Merchant Verification**: Merchant verifies the transaction in bKash/Bank statements and clicks **Validate** in the Admin Suite. Order transitions to `status: 'payment_verified'`.
+
+---
+
+## 6. Customer Order Tracking & Delivery Portal (`/orders`)
+
+Customers access their personal order history at `/orders`:
+* **Live Status Progression**:
+  - `pending` (Awaiting payment submission)
+  - `payment_submitted` (Payment received, awaiting validation)
+  - `payment_verified` (Payment approved by merchant)
+  - `sourcing` (Product being acquired or generated)
+  - `fulfilled` (Completed — codes and credentials delivered)
+  - `cancelled` (Cancelled with reason recorded)
+  - `refunded` (Payment refunded to customer)
+  - `failed` (Transaction error)
+* **One-Click Delivery Code Retrieval**:
+  - Fulfilled keys and accounts are displayed in a highlighted, monospace code block with one-click copy.
+  - Multi-key orders display separate line items with individual copy handles.
+* **Automated Email Dispatch**:
+  - Integrated with Supabase Edge Functions (`send-order-email`) and Resend API.
+  - Whenever an order transitions to `fulfilled`, the customer receives an HTML receipt containing their delivery codes, order summary, and redemption instructions.
+
+---
+
+## 7. Merchant Admin Dashboard Suite (`/admin`)
+
+Merchants with the `admin` role in `user_roles` have access to an enterprise back-office suite:
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                          RETROHUB ADMIN SUITE                          │
-├──────────────┬──────────────┬──────────────┬───────────────────────────┤
-│ Revenue Today│ Orders Today │ Profit Today │ Pending Action Required   │
-│  ৳ 45,200    │      38      │   ৳ 8,450    │        3 Orders           │
-└──────────────┴──────────────┴──────────────┴───────────────────────────┘
- [ Orders Queue ]    [ Inventory Status ]    [ Custom Orders Board ]
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              RETROHUB ADMIN SUITE                               │
+├──────────────────┬──────────────────┬──────────────────┬────────────────────────┤
+│  Revenue Today   │   Orders Today   │   Profit Today   │ Pending Action Items   │
+│    ৳ 48,920      │        42        │     ৳ 9,140      │       4 Orders         │
+└──────────────────┴──────────────────┴──────────────────┴────────────────────────┘
+ [ Orders Queue ]         [ Inventory & Pricing ]         [ Custom Orders Board ]
 ```
 
 ### 1. Real-Time Financial Analytics
-* **Revenue Today**: Live total gross transaction volume in BDT (৳).
-* **Orders Today**: Number of successfully completed transactions.
-* **Profit Today**: True net margin calculated dynamically: `Sale Price - Cost Price`.
-* **Pending Actions**: Instant badge count of orders awaiting payment validation or fulfillment.
+* **Revenue Today (`v_revenue_today`)**: Aggregates all gross transactions completed within the current calendar day.
+* **Orders Today (`v_orders_today`)**: Total count of completed orders today.
+* **Net Profit Today (`v_profit_today`)**: Calculated in real time across fulfilled orders:
+  $$\text{Net Profit} = \sum (\text{Sale Price} - \text{Cost Price})$$
+* **Pending Actions (`v_pending_action_count`)**: Real-time counter of orders needing immediate operator action (`pending`, `payment_submitted`, `sourcing`).
 
-### 2. Full Order Management Lifecycle
-Every incoming order follows a safe, verifiable state machine:
-```
-[ Pending ]
-    │
-    ▼ (Customer submits Transaction ID)
-[ Payment Submitted ]
-    │
-    ▼ (Merchant checks bKash/Nagad/Bank and clicks "Validate")
-[ Payment Verified ]
-    │
-    ├─► [ Sourcing ] (Optional: When sourcing from external vendor)
-    │
-    ▼ (Merchant inputs digital key or automated key assigns)
-[ Fulfilled / Completed ] ──► Code revealed on customer screen + Email sent
-    │
-    ├─► [ On Hold ] (If customer supplied invalid UID or credentials)
-    ├─► [ Cancelled ] (Key released back to stock, reason logged)
-    └─► [ Refunded ] (Transaction reversed, key released)
-```
+### 2. Full Order Lifecycle Control (`OrdersTab`)
+Merchants execute state transitions through secure PostgreSQL stored procedures:
+* **Validate Payment**: Approves submitted TrxID (`verify_payment` RPC).
+* **Start Sourcing**: Marks order as in-process when acquiring from external vendors (`start_sourcing` RPC).
+* **Fulfill Order**: Opens dialog to input delivery code/credentials, vendor cost paid, and vendor source (`fulfill_order` RPC).
+* **Hold Order**: Pauses order when customer supplies incorrect UID or server info (`hold_order` RPC).
+* **Cancel & Refund**: Releases reserved inventory keys and logs customer explanation (`cancel_order`, `refund_order` RPCs).
+* **Search & Filters**: Instant filtering by status badge, search by Order ID, customer email, or Transaction ID.
 
-### 3. Inventory Status & Margin Analysis
-* **Full Category Breakdown**: Real-time stock counts for every category:
-  * `Giftcard` • `Service` • `Topup` • `PC Game` • `Subscription` • `Software` • `Xbox Game` • `PS Game` • `Accounts`
-* **Per-Product Metrics**:
-  * Product Name & Platform
-  * Delivery Mechanism
-  * Current In-Stock Units
-  * Cost Price vs Sale Price
-  * Net Profit Margin (Tk & %)
-* **Inline Price & Stock Updates**: Adjust prices and stock counts on the fly to react to market changes.
-* **Zero-Inventory Alerting**: Out-of-stock items automatically display badges on the storefront and prevent checkout.
+### 3. Inventory & Dynamic Margin Management (`InventoryTab`)
+* **Live Catalog Overview**: Paginated catalog table displaying product title, category, platform, region, stock, cost price, sale price, and net margin.
+* **Margin Calculations**: Live percentage ($(\text{Sale} - \text{Cost}) / \text{Sale} \times 100$) and BDT profit indicators.
+* **Inline Updates & Edit Dialog**:
+  - Quick inline updates for stock quantity and sale price.
+  - Comprehensive `EditProductDialog` to modify title, category, delivery type, source URLs, and markdown descriptions.
 
-### 4. Custom Orders Management Board
-* Live feed of customer requests containing Customer Name, Email, Product Name, Platform, and Request Details.
-* Status toggles (`pending` → `quoted` → `fulfilled` → `closed`).
-* Direct customer email contact channel.
+### 4. Custom Orders Management (`CustomOrdersTab`)
+* Dedicated kanban-style management for customer quote requests submitted on `/custom-order`.
+* Shows customer name, email, requested product, target platform, and detailed notes.
+* Status tracking pipeline: `pending` $\rightarrow$ `quoted` $\rightarrow$ `fulfilled` $\rightarrow$ `closed`.
+* Direct mailto button to contact the buyer with custom pricing.
 
 ---
 
-## 6. Customer Checkout & Payment Processing
+## 8. Security, Data Isolation & Concurrency
 
-### Local Payment Gateways Supported
-RetroHub is optimized for Bangladeshi and regional merchant payment methods:
-1. **bKash Personal & Merchant** (Send Money / Payment)
-2. **Nagad Personal** (Send Money)
-3. **Rocket** (Mobile Banking)
-4. **Bank Wire Transfer** (City Bank, Dutch-Bangla Bank, Brac Bank)
-5. **Crypto / USDT** (Optional manual or gateway integration)
-
-### Customer Checkout Flow
-1. **Cart Selection**: Customer adds games, subscriptions, or top-ups. Quantity selector and variant picker available.
-2. **Player Data Collection**: For top-up products, customer enters Player ID, Server Region, or Zone ID.
-3. **Payment Instructions**: Clear step-by-step instructions showing the merchant's bKash/Nagad/Bank numbers with one-click copy buttons.
-4. **Transaction Verification**: Customer enters their transaction reference (TrxID / Bank Slip).
-5. **Instant Order Tracking**: Customer is redirected to their personal `/orders` portal. Once fulfilled, keys and codes are copyable with one click.
-
----
-
-## 7. Security, Reliability & Data Integrity
-
-* **Row-Level Security (RLS)**: Customers can **only** read their own orders and profile data. Under no circumstances can a customer view another user's deliveries or keys.
-* **Role-Based Access Control (RBAC)**: All administrative functions (`verify_payment`, `fulfill_order`, `hold_order`, `refund_order`) execute through PostgreSQL `SECURITY DEFINER` stored procedures that verify the caller holds the `admin` role in `user_roles`.
-* **Concurrency Lock Prevention**: When automated fulfillment pulls keys from `inventory_keys`, it uses PostgreSQL's `FOR UPDATE SKIP LOCKED`. Two simultaneous orders will **never** be assigned the same code.
-* **Audit Trail**: Every administrative action, status update, refund, or stock mutation is permanently written to `audit_logs` and `admin_action_logs` with admin timestamps and IP/metadata.
-* **Sanitized Data & Zero Console Leaks**: Production builds have zero console statements, and all client-side inputs are validated via TypeScript and backend constraints.
-
----
-
-## 8. Catalog Maintenance & Automation Scripts
-
-RetroHub includes pre-built maintenance utilities located in `scripts/maintenance/`:
-
-| Script | Purpose |
-| :--- | :--- |
-| `deduplicate_products_strict.mjs` | Multi-factor duplicate cleaner checking Title, Category, Platform, Region, and Details while preserving high-profit items. |
-| `check-stock.cjs` | Audits inventory tables and syncs stock counts across the catalog. |
-| `assign_missing_images.mjs` | Scans catalog and attaches official high-resolution artworks to unbranded listings. |
-| `sanitize_image_urls.mjs` | Resolves broken image links and validates CDN uptime. |
-
----
-
-## 9. Merchant Quick Reference Checklist
-
-| Task | Where to do it | Time Required |
+| Security Layer | Technical Implementation | Operational Guarantee |
 | :--- | :--- | :--- |
-| **Check new orders** | `/admin` → Orders Tab | Real-time |
-| **Validate customer payment** | Click `Validate` on pending order | 5 seconds |
-| **Fulfill order with code** | Click `Fulfill` → Paste delivery key/credentials | 5 seconds |
-| **Add new product** | Admin Panel / Database migration | 1 minute |
-| **Change product prices** | `/admin` → Inventory Tab → Edit Price | Instant |
-| **Review daily profits** | `/admin` → Stats Grid at the top | Real-time |
-| **Process custom request** | `/admin` → Custom Orders Tab | 1 minute |
+| **Row Level Security (RLS)** | PostgreSQL RLS enabled on all tables (`orders`, `deliveries`, `profiles`, `custom_orders`). | Customers can strictly only view their own orders and keys. Data leaks are mathematically impossible at the database layer. |
+| **Role-Based Access Control** | `has_role(auth.uid(), 'admin')` verified in PostgreSQL `SECURITY DEFINER` functions. | Storefront users cannot invoke admin state changes or access financial KPIs. |
+| **Concurrency Lock Protection**| `SELECT ... FOR UPDATE SKIP LOCKED` during key assignment. | Two concurrent customer orders can never be assigned the same digital code. |
+| **Complete Audit Trails** | `audit_logs` & `admin_action_logs` tables. | Every price mutation, role change, stock adjustment, and refund is logged with timestamp and admin ID. |
+| **Zero Console Leaks** | Strict linting rules and logger redirection. | No sensitive user tokens, order payload credentials, or private keys are exposed to browser consoles. |
 
 ---
 
-*Documentation maintained by RetroHub Engineering.*  
-*For technical support, database migrations, or custom API integration, consult `docs/DEPLOYMENT.md` and `docs/DATABASE_SETUP.md`.*
+## 9. Merchant Operational Standard Operating Procedures (SOP)
+
+| Daily Task | Administrative Action | Response Time Target |
+| :--- | :--- | :--- |
+| **New Payment Received** | Check bKash/Bank app $\rightarrow$ Go to `/admin` $\rightarrow$ Find Order $\rightarrow$ Click **Validate**. | Under 5 minutes |
+| **Fulfill Digital Key** | Click **Fulfill** $\rightarrow$ Paste Key/Credentials $\rightarrow$ Confirm. System assigns code and emails customer. | Instant (Automatic) / Under 15m (Manual) |
+| **Invalid Customer UID** | Click **Hold Order** $\rightarrow$ Enter reason ("Invalid Server ID") $\rightarrow$ Contact customer. | Under 10 minutes |
+| **Restock Digital Inventory**| Go to `/admin` $\rightarrow$ Inventory $\rightarrow$ Adjust stock or run seeding toolchain. | As stock depletes |
+| **Review Custom Inquiries** | Go to `/admin` $\rightarrow$ Custom Orders tab $\rightarrow$ Quote buyer via email $\rightarrow$ Update status to `quoted`. | Within 2 hours |
+
+---
+
+*Documentation maintained by RetroHub Engineering.*
