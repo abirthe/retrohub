@@ -82,7 +82,7 @@ export const ProductPurchaseCard = ({ product, variants, quantity, setQuantity, 
                     <Button
                       key={v.id}
                       variant={isSelected ? 'default' : 'outline'}
-                      onClick={() => navigate(generateProductUrl(v as Product), { replace: true })}
+                      onClick={() => navigate(generateProductUrl({ id: v.id, title: v.title }), { replace: true })}
                       className={cn(
                         "h-auto py-2.5 px-3 justify-start font-display text-sm whitespace-normal text-left h-full transition-all duration-300",
                         isSelected 

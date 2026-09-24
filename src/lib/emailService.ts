@@ -67,7 +67,11 @@ export async function sendOrderCompletionEmail(orderId: string) {
       .eq('id', orderId)
       .single();
 
-    if (order.status !== 'fulfilled' && order.status !== 'completed') {
+    if (orderError || !order) {
+      throw new Error(`Failed to fetch order: ${orderError?.message ?? 'not found'}`);
+    }
+
+    if (order.status !== 'fulfilled') {
       throw new Error(`Order is not fulfilled yet (status: ${order.status})`);
     }
 
