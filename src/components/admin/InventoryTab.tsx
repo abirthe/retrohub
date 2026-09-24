@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
-import { Edit2, Save, X, Package } from 'lucide-react';
+import { Edit2, Save, X, Package, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { updateProductPrice, type Product } from '@/lib/shopApi';
 import { InventoryRow } from './InventoryRow';
@@ -25,6 +25,22 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
     return acc;
   }, {} as Record<string, Product[]>) || {};
 
+  const accountProducts = products?.filter(
+    (p) => p.title?.toLowerCase().includes('account')
+  ) ?? [];
+
+  const allGroups: Array<{ key: string; label: string; items: Product[]; icon: React.ReactNode }> = [
+    ...Object.entries(groupedProducts).map(([cat, items]) => ({
+      key: cat,
+      label: cat.replace(/_/g, ' '),
+      items,
+      icon: <Package className="h-5 w-5 text-primary" />,
+    })),
+    ...(accountProducts.length > 0
+      ? [{ key: 'accounts', label: 'Accounts', items: accountProducts, icon: <User className="h-5 w-5 text-accent" /> }]
+      : []),
+  ];
+
   return (
     <Card className="bg-card/40 backdrop-blur-xl border-white/10 overflow-hidden shadow-xl">
       <CardHeader className="bg-white/5 border-b border-white/5">
@@ -33,14 +49,14 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
       </CardHeader>
       <CardContent className="p-0">
         <Accordion type="single" collapsible className="w-full">
-          {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-            <AccordionItem key={category} value={category} className="border-white/5">
+          {allGroups.map(({ key, label, items, icon }) => (
+            <AccordionItem key={key} value={key} className="border-white/5">
               <AccordionTrigger className="px-6 py-4 hover:bg-white/5 hover:no-underline transition-colors data-[state=open]:bg-white/5">
                 <div className="flex items-center gap-3">
-                  <Package className="h-5 w-5 text-primary" />
-                  <span className="font-display font-bold text-base capitalize">{category.replace(/_/g, ' ')}</span>
+                  {icon}
+                  <span className="font-display font-bold text-base capitalize">{label}</span>
                   <Badge variant="outline" className="ml-2 bg-background/50 text-[10px]">
-                    {categoryProducts.length} {categoryProducts.length === 1 ? 'item' : 'items'}
+                    {items.length} {items.length === 1 ? 'item' : 'items'}
                   </Badge>
                 </div>
               </AccordionTrigger>
@@ -59,7 +75,7 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {categoryProducts.map((p) => (
+                      {items.map((p) => (
                         <InventoryRow key={p.id} product={p} />
                       ))}
                     </tbody>

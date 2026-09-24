@@ -17,7 +17,7 @@ export const MobileOrderCard = ({ order, statusStyle, orderDate }: MobileOrderCa
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="font-display text-sm font-bold text-foreground line-clamp-1">
-            {order.products?.title || 'Unknown Product'}
+            {(order.products as { title?: string } | null)?.title || 'Unknown Product'}
           </p>
           <p className="text-[10px] text-muted-foreground font-mono mt-0.5">#{order.id.slice(0, 8)}</p>
         </div>
