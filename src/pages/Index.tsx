@@ -35,36 +35,6 @@ const Index = () => {
   const [sort, setSort]                                 = useState<SortValue>(initialSort);
   const [sortOpen, setSortOpen]                         = useState(false);
 
-  const [animatedPlaceholder, setAnimatedPlaceholder]   = useState('');
-
-  useEffect(() => {
-    const text = "Search games, platforms, subscriptions...";
-    let i = 0;
-    let isDeleting = false;
-    
-    const interval = setInterval(() => {
-      const currentText = text.substring(0, i);
-      const showCursor = isDeleting ? true : (i % 2 === 0);
-      
-      setAnimatedPlaceholder(currentText + (showCursor ? "_" : ""));
-      
-      if (!isDeleting) {
-        i++;
-        if (i > text.length + 20) {
-          isDeleting = true;
-          i = text.length;
-        }
-      } else {
-        i--;
-        if (i < 0) {
-          isDeleting = false;
-          i = 0;
-        }
-      }
-    }, 100);
-    
-    return () => clearInterval(interval);
-  }, []);
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -135,7 +105,6 @@ const Index = () => {
         <CategoryFilter
           search={search}
           setSearch={setSearch}
-          animatedPlaceholder={animatedPlaceholder}
           sort={sort}
           setSort={setSort}
           sortOpen={sortOpen}
@@ -161,7 +130,7 @@ const Index = () => {
           {isLoading ? (
             <div className="text-center py-32 text-muted-foreground space-y-4">
               <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="font-display tracking-wider animate-pulse">Loading amazing deals...</p>
+              <p className="font-display tracking-wider text-muted-foreground">Loading products...</p>
             </div>
           ) : (
             <div className="space-y-8">

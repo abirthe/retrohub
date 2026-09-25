@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ShopHeader } from '@/components/layout';
-import { ArrowLeft, Send, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, MessageSquare } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
 import { submitCustomOrder } from '@/lib/shopApi';
 import { cn } from '@/lib/utils';
@@ -95,7 +95,7 @@ const CustomOrder = () => {
         <div className="bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-10 shadow-2xl shadow-black/50">
           <div className="flex flex-col items-center text-center space-y-4 mb-8">
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <Sparkles className="w-6 h-6 animate-pulse" />
+              <MessageSquare className="w-6 h-6" />
             </div>
             <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-wider text-white flex items-center justify-center flex-wrap gap-x-2">
               <span>Request Custom</span>

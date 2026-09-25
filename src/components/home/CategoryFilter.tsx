@@ -9,7 +9,6 @@ import { CATEGORIES, SORT_OPTIONS, type SortValue } from '@/lib/constants';
 interface CategoryFilterProps {
   search: string;
   setSearch: (val: string) => void;
-  animatedPlaceholder: string;
   sort: SortValue;
   setSort: (val: SortValue) => void;
   sortOpen: boolean;
@@ -21,7 +20,7 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({
-  search, setSearch, animatedPlaceholder,
+  search, setSearch,
   sort, setSort, sortOpen, setSortOpen,
   activeCategory, setActiveCategory,
   activeSubcategory, setActiveSubcategory
@@ -55,7 +54,7 @@ export function CategoryFilter({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               id="product-search"
-              placeholder={animatedPlaceholder}
+              placeholder="Search games, platforms, subscriptions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 sm:pl-10 h-10 sm:h-11 bg-background/50 border-primary/20 focus:border-primary/50 focus:ring-primary/20 transition-all font-display tracking-wide text-xs sm:text-sm rounded-xl"
