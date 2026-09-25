@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles, Zap, Wrench } from 'lucide-react';
+import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles, Zap, Wrench, MessageSquare } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,7 +28,7 @@ const ShopHeader = () => {
       <div className="container flex h-16 items-center justify-between gap-2">
         {/* Logo */}
         <Link to="/" onClick={closeMobile} className="flex items-center gap-2 group shrink-0">
-          <Gamepad2 className="h-7 w-7 text-primary animate-pulse-neon" />
+          <Gamepad2 className="h-7 w-7 text-primary transition-transform group-hover:scale-105" />
           <span className="font-display text-lg font-bold tracking-wider text-foreground">
             <span className="text-primary">RETRO</span>HUB
           </span>
@@ -208,7 +208,7 @@ const ShopHeader = () => {
               location.pathname === '/custom-order' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
             )}
           >
-            <Sparkles className="h-4 w-4 text-primary" />
+            <MessageSquare className="h-4 w-4 text-primary" />
             Custom Order
           </Link>
 

@@ -31,7 +31,7 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
     <div className="min-h-screen flex items-center justify-center bg-background p-4 text-center selection:bg-primary/20">
       <div className="max-w-md w-full bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 space-y-6 shadow-2xl shadow-black/50 animate-in fade-in zoom-in-95">
         <div className="w-16 h-16 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto border border-destructive/20">
-          <AlertTriangle className="w-8 h-8 animate-bounce" />
+          <AlertTriangle className="w-8 h-8" />
         </div>
         
         <div className="space-y-2">
