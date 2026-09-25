@@ -126,7 +126,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative flex flex-col">
+    <div className="min-h-screen relative flex flex-col">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.05]" />

@@ -75,7 +75,7 @@ const Payment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background selection:bg-primary/20">
+        <div className="min-h-screen selection:bg-primary/20">
             <ShopHeader />
 
             <main className="container py-12 md:py-20">

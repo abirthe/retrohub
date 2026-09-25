@@ -125,7 +125,7 @@ const Index = () => {
   const activeCat = CATEGORIES.find(c => c.value === activeCategory) ?? CATEGORIES[0];
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
+    <div className="min-h-screen selection:bg-primary/20">
       <ShopHeader />
 
       <HeroSection />

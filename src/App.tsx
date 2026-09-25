@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
+import BackgroundAnimation from "@/components/BackgroundAnimation";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -56,41 +57,47 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <CartProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppErrorBoundary>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                {/* Storefront aliases for reverse navigation and inbound links */}
-                <Route path="/shop" element={<Navigate to="/" replace />} />
-                <Route path="/store" element={<Navigate to="/" replace />} />
-                <Route path="/products" element={<Navigate to="/" replace />} />
-                <Route path="/cart" element={<Navigate to="/checkout" replace />} />
-                <Route path="/login" element={<Navigate to="/auth" replace />} />
-                <Route path="/signin" element={<Navigate to="/auth" replace />} />
-                <Route path="/register" element={<Navigate to="/auth" replace />} />
+        <div className="relative w-full min-h-screen">
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            <BackgroundAnimation />
+          </div>
+          <div className="relative z-10 w-full h-full">
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    {/* Storefront aliases for reverse navigation and inbound links */}
+                    <Route path="/shop" element={<Navigate to="/" replace />} />
+                    <Route path="/store" element={<Navigate to="/" replace />} />
+                    <Route path="/products" element={<Navigate to="/" replace />} />
+                    <Route path="/cart" element={<Navigate to="/checkout" replace />} />
+                    <Route path="/login" element={<Navigate to="/auth" replace />} />
+                    <Route path="/signin" element={<Navigate to="/auth" replace />} />
+                    <Route path="/register" element={<Navigate to="/auth" replace />} />
 
-                <Route path="/product/:slug" element={<ProductDetail />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/custom-order" element={<CustomOrder />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </AppErrorBoundary>
-        </BrowserRouter>
+                    <Route path="/product/:slug" element={<ProductDetail />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/payment" element={<Payment />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/custom-order" element={<CustomOrder />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </AppErrorBoundary>
+            </BrowserRouter>
+          </div>
+        </div>
       </TooltipProvider>
     </CartProvider>
   </QueryClientProvider>
 );
 
 export default App;
-

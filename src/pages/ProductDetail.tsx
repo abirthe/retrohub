@@ -87,7 +87,7 @@ const ProductDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <ShopHeader />
         <div className="container py-32 text-center flex flex-col items-center">
           <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
@@ -99,7 +99,7 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <ShopHeader />
         <div className="container py-32 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 text-destructive mb-4">
@@ -117,7 +117,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
+    <div className="min-h-screen selection:bg-primary/20">
       <ShopHeader />
 
       {/* Breadcrumb / Back */}

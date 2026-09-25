@@ -163,7 +163,7 @@ const AdminDashboard = () => {
 
   if (adminLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <ShopHeader />
         <div className="container py-32 text-center">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-6">
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
+    <div className="min-h-screen selection:bg-primary/20">
       <ShopHeader />
 
       <main className="container py-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
