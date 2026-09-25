@@ -42,10 +42,25 @@ export function useAuth() {
     return data;
   };
 
+  const signInWithGoogle = async (returnTo?: string) => {
+    const redirectUrl = new URL('/auth/callback', window.location.origin);
+    if (returnTo) {
+      redirectUrl.searchParams.set('returnTo', returnTo);
+    }
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl.toString(),
+      },
+    });
+    if (error) throw error;
+    return data;
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
 
-  return { user, loading, signUp, signIn, signOut };
+  return { user, loading, signUp, signIn, signInWithGoogle, signOut };
 }

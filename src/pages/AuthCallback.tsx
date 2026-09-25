@@ -21,14 +21,17 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      // Check for error in hash params (Supabase standard behavior)
+      // Check for error in hash or query params (Supabase standard behavior)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const hashError = hashParams.get('error_description') || hashParams.get('error');
-      const type = hashParams.get('type');
+      const searchParams = new URLSearchParams(window.location.search);
+      const authError = hashParams.get('error_description') || hashParams.get('error') || searchParams.get('error_description') || searchParams.get('error');
+      const type = hashParams.get('type') || searchParams.get('type');
+      const code = searchParams.get('code');
+      const returnTo = searchParams.get('returnTo') || '/';
 
-      if (hashError) {
+      if (authError) {
         setStatus('error');
-        setErrorMessage(decodeURIComponent(hashError.replace(/\+/g, ' ')));
+        setErrorMessage(decodeURIComponent(authError.replace(/\+/g, ' ')));
         return;
       }
 
@@ -36,6 +39,15 @@ export default function AuthCallback() {
       if (type === 'recovery') {
         setStatus('recovery');
         return;
+      }
+
+      // If PKCE auth code is present, exchange for session
+      if (code) {
+        try {
+          await supabase.auth.exchangeCodeForSession(code);
+        } catch {
+          // Fall back to getSession if already handled
+        }
       }
 
       // Check current session to see if verification succeeded
@@ -54,8 +66,8 @@ export default function AuthCallback() {
         } else if (event === 'SIGNED_IN') {
           setStatus('success');
           setTimeout(() => {
-            navigate('/');
-          }, 3000);
+            navigate(returnTo);
+          }, 2000);
         }
       });
 
@@ -63,8 +75,8 @@ export default function AuthCallback() {
       if (session && type !== 'recovery') {
         setStatus('success');
         setTimeout(() => {
-          navigate('/');
-        }, 3000);
+          navigate(returnTo);
+        }, 2000);
       }
 
       return () => {
