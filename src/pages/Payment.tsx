@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,12 +23,7 @@ const Payment = () => {
 
     const { orderIds, totalPrice } = location.state || { orderIds: [], totalPrice: 0 };
 
-    useEffect(() => {
-        if (!orderIds || orderIds.length === 0) {
-            // If accessed directly without orders, maybe redirect or just show generic
-            // For now, we allow it but show a warning
-        }
-    }, [orderIds]);
+
 
     const calculateTotal = () => {
         if (!totalPrice) return 0;
