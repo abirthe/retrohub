@@ -72,7 +72,7 @@ const Orders = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <ShopHeader />
         <div className="container py-32 text-center flex flex-col items-center">
           <div className="w-16 h-16 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mb-4">
@@ -86,7 +86,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
+    <div className="min-h-screen selection:bg-primary/20">
       <ShopHeader />
       <div className="container py-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

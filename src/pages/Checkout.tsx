@@ -26,7 +26,7 @@ const Checkout = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <ShopHeader />
         <div className="container py-32 text-center flex flex-col items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
@@ -42,7 +42,7 @@ const Checkout = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <ShopHeader />
         <div className="container py-32 text-center flex flex-col items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center text-muted-foreground mb-2">
@@ -115,7 +115,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative selection:bg-primary/20">
+    <div className="min-h-screen relative selection:bg-primary/20">
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />

@@ -7,7 +7,7 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0">
         <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.05] grayscale" />
