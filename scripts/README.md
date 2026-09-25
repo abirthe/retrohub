@@ -125,3 +125,16 @@ When performing catalog maintenance or batch operations:
 2. **Review affected row counts**: Verify that only the targeted categories or platforms will be affected.
 3. **Execute with `--execute`**: Commit the changes.
 4. **Audit results**: Run `check-stock.cjs` and verify through the Admin Suite at `/admin`.
+
+---
+
+## 📚 Related Documentation
+* **[Main Platform README](../README.md)**: Architecture, security protections, tech stack, and setup.
+* **[Merchant System Specification](../docs/MERCHANT_SYSTEM_OVERVIEW.md)**: Business logic, payment flows, and operations guide.
+
+---
+
+## 📄 License
+Private & Proprietary — Developed for RetroHub E-Commerce. All rights reserved.  
+© 2026 RETROHUB — Engineered by **Abir Hossain**.
+
