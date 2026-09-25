@@ -33,13 +33,7 @@ const BackgroundAnimation: React.FC = () => {
       }
     };
 
-    // Attempt to unlock playback on first interaction (required by iOS Safari in some states)
-    const handleTouch = () => {
-      playVideo();
-    };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('touchstart', handleTouch, { passive: true });
 
     if (Hls.isSupported()) {
       hls = new Hls({
@@ -63,7 +57,6 @@ const BackgroundAnimation: React.FC = () => {
       video.removeEventListener('loadedmetadata', playVideo);
       video.removeEventListener('canplay', playVideo);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('touchstart', handleTouch);
     };
   }, []);
 
