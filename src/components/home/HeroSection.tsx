@@ -4,7 +4,13 @@ import { Zap, ShieldAlert } from 'lucide-react';
 export function HeroSection() {
   return (
     <section className="relative min-h-[380px] sm:min-h-[460px] lg:min-h-[520px] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 z-0">
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+        }}
+      >
         <img
           src={heroBg}
           alt="Hero Background"
