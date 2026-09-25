@@ -58,6 +58,10 @@ RetroHub's customer interface is built with **React 18**, **TypeScript**, and **
    - Input metadata is validated and attached directly to the order's `customer_input` JSON field.
 5. **Mobile-First Responsive Layout**:
    - Tailored interfaces for both desktop workstations and mobile screens, including mobile swipeable order cards and sticky bottom navigation.
+6. **Authentication & Identity Hardening**:
+   - Multi-mode sign-in: Google OAuth 2.0, passwordless magic links, and standard credentials.
+   - Open redirect protection (`sanitiseReturnTo()`) validates callback targets strictly against the same origin, mitigating phishing vulnerabilities.
+   - Legal compliance pages (`/privacy` and `/terms`) are published for OAuth consent compliance.
 
 ---
 
@@ -119,25 +123,24 @@ RetroHub supports 4 distinct fulfillment mechanisms configured per product in `d
 
 ## 5. Local Payment Processing Engine
 
-RetroHub accommodates localized Bangladeshi payment systems alongside international payment reference tracking:
+RetroHub implements a streamlined mobile payment workflow tailored for the local gaming community:
 
 ### Supported Payment Channels
-1. **bKash Personal & Merchant**:
+1. **bKash Personal & Merchant (Active)**:
+   - Streamlined single-channel mobile wallet checkout.
    - Prominently displays the merchant bKash wallet number with one-click copy.
    - Automatic dynamic **1.0% bKash transaction charge** calculation:
      $$\text{Total Payable} = \text{Order Total} \times 1.01$$
-2. **Bank Wire Transfer**:
-   - Direct bank transfer instructions supporting:
-     - **The City Bank Limited**
-     - **Dutch-Bangla Bank Limited (DBBL)**
-     - **BRAC Bank PLC**
-   - Displays Account Name, Account Number, Branch Name, and Routing Number with copy buttons.
+   - Strict format validation via regex `/^[A-Z0-9]{6,30}$/i` on customer-submitted Transaction IDs (TrxID) eliminates invalid submissions and injection attempts before reaching the database.
+2. **Bank Wire Transfer (Roadmap / Standby)**:
+   - Temporarily deactivated on the storefront to minimize manual reconciliation delays and deliver an ultra-fast checkout flow.
+   - Architecture retains multi-bank routing specifications (City Bank, DBBL, BRAC Bank) for high-value wholesale accounts.
 
 ### Payment Submission & Verification Pipeline
 1. **Order Initiation**: Order is created in `orders` with `status: 'pending'`.
-2. **Transaction Submission**: Customer submits their payment reference or bank slip identifier (`transaction_id`) on `/payment`.
+2. **Transaction Submission**: Customer submits their bKash Transaction ID on `/payment`. Input is strictly regex-validated on client and sanitised.
 3. **State Transition**: Order transitions to `status: 'payment_submitted'`.
-4. **Merchant Verification**: Merchant verifies the transaction in bKash/Bank statements and clicks **Validate** in the Admin Suite. Order transitions to `status: 'payment_verified'`.
+4. **Merchant Verification**: Merchant checks the incoming transaction in their bKash statement and clicks **Validate** in the Admin Suite. Order transitions to `status: 'payment_verified'`.
 
 ---
 
@@ -156,9 +159,10 @@ Customers access their personal order history at `/orders`:
 * **One-Click Delivery Code Retrieval**:
   - Fulfilled keys and accounts are displayed in a highlighted, monospace code block with one-click copy.
   - Multi-key orders display separate line items with individual copy handles.
-* **Automated Email Dispatch**:
+* **AI-Powered Automated Email Dispatch**:
   - Integrated with Supabase Edge Functions (`send-order-email`) and Resend API.
-  - Whenever an order transitions to `fulfilled`, the customer receives an HTML receipt containing their delivery codes, order summary, and redemption instructions.
+  - Caller verification via active session JWT (`Authorization: Bearer <session.access_token>`).
+  - Powered by **xAI Grok API** (`grokApi.ts`) for intelligent, personalised customer delivery emails containing order summary, redemption steps, and support guidelines.
 
 ---
 
@@ -211,11 +215,14 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 
 | Security Layer | Technical Implementation | Operational Guarantee |
 | :--- | :--- | :--- |
-| **Row Level Security (RLS)** | PostgreSQL RLS enabled on all tables (`orders`, `deliveries`, `profiles`, `custom_orders`). | Customers can strictly only view their own orders and keys. Data leaks are mathematically impossible at the database layer. |
+| **Open Redirect Hardening** | `sanitiseReturnTo()` origin checks in `Auth.tsx` & `AuthCallback.tsx` | All post-login targets are constrained to same-origin URLs; external phishing URLs fall back to `/`. |
+| **Transaction ID Sanitization** | Client and server regex validation `/^[A-Z0-9]{6,30}$/i` | Injection payloads and malformed references are rejected prior to database mutation. |
+| **Session JWT Authorization** | Bearer token passed in `emailService.ts` via Supabase session | Edge Functions authenticate the caller identity instead of relying solely on anon keys. |
+| **Private Error Masking** | Internal `useEffect` error logging in `AdminDashboard.tsx` | Raw PostgreSQL error payloads and schema hints are shielded from end users and never rendered into the DOM. |
+| **Row Level Security (RLS)** | PostgreSQL RLS enabled on all tables (`orders`, `deliveries`, `profiles`, `custom_orders`). | Customers can strictly only view their own orders and keys. Data leaks are mathematically blocked at the database engine. |
 | **Role-Based Access Control** | `has_role(auth.uid(), 'admin')` verified in PostgreSQL `SECURITY DEFINER` functions. | Storefront users cannot invoke admin state changes or access financial KPIs. |
 | **Concurrency Lock Protection**| `SELECT ... FOR UPDATE SKIP LOCKED` during key assignment. | Two concurrent customer orders can never be assigned the same digital code. |
 | **Complete Audit Trails** | `audit_logs` & `admin_action_logs` tables. | Every price mutation, role change, stock adjustment, and refund is logged with timestamp and admin ID. |
-| **Zero Console Leaks** | Strict linting rules and logger redirection. | No sensitive user tokens, order payload credentials, or private keys are exposed to browser consoles. |
 
 ---
 
@@ -223,7 +230,7 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 
 | Daily Task | Administrative Action | Response Time Target |
 | :--- | :--- | :--- |
-| **New Payment Received** | Check bKash/Bank app $\rightarrow$ Go to `/admin` $\rightarrow$ Find Order $\rightarrow$ Click **Validate**. | Under 5 minutes |
+| **New Payment Received** | Check bKash merchant app $\rightarrow$ Go to `/admin` $\rightarrow$ Find Order $\rightarrow$ Click **Validate**. | Under 5 minutes |
 | **Fulfill Digital Key** | Click **Fulfill** $\rightarrow$ Paste Key/Credentials $\rightarrow$ Confirm. System assigns code and emails customer. | Instant (Automatic) / Under 15m (Manual) |
 | **Invalid Customer UID** | Click **Hold Order** $\rightarrow$ Enter reason ("Invalid Server ID") $\rightarrow$ Contact customer. | Under 10 minutes |
 | **Restock Digital Inventory**| Go to `/admin` $\rightarrow$ Inventory $\rightarrow$ Adjust stock or run seeding toolchain. | As stock depletes |
