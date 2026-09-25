@@ -41,6 +41,8 @@ const Payment = lazyWithRetry(() => import("./pages/Payment"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const CustomOrder = lazyWithRetry(() => import("./pages/CustomOrder"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
+const Privacy = lazyWithRetry(() => import("./pages/Privacy"));
+const Terms = lazyWithRetry(() => import("./pages/Terms"));
 
 const queryClient = new QueryClient();
 
@@ -78,6 +80,8 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/custom-order" element={<CustomOrder />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
