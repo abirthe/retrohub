@@ -137,9 +137,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <h3 className="font-display text-xs sm:text-sm font-bold tracking-wide leading-tight line-clamp-2 text-foreground group-hover:text-white transition-colors duration-300">
             {product.title.includes(' | ') ? product.title.split(' | ')[0] : product.title}
           </h3>
-          {product.description && (
-            <p className="hidden sm:block text-xs text-muted-foreground/70 line-clamp-2 min-h-[2.5em]">{product.description}</p>
-          )}
         </div>
 
         <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/5 gap-2">
@@ -154,8 +151,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
 
             <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
-              {deliveryIcon[product.delivery_type]}
-              <span className="font-medium">{deliveryLabel[product.delivery_type]}</span>
+              {deliveryIcon[product.delivery_type] || <Zap className="h-3 w-3" />}
+              <span className="font-medium">{deliveryLabel[product.delivery_type] || 'Instant - 30min'}</span>
               <span className="mx-1 opacity-50">|</span>
               <span className={product.in_stock === 0 ? 'text-destructive' : 'text-green-400'}>
                 {product.in_stock === 0 ? 'Out of Stock' : 'Available'}

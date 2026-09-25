@@ -53,8 +53,8 @@ export const ProductPurchaseCard = ({ product, variants, quantity, setQuantity, 
             {hasVariants ? baseName : product.title}
           </h1>
           <div className="flex items-center flex-wrap gap-2 gap-y-1 text-muted-foreground">
-            {deliveryIcon[product.delivery_type]}
-            <span className="text-sm border-r border-white/10 pr-3 mr-1">{deliveryLabel[product.delivery_type] || 'Standard Delivery'}</span>
+            {deliveryIcon[product.delivery_type || 'instant_code']}
+            <span className="text-sm border-r border-white/10 pr-3 mr-1">{deliveryLabel[product.delivery_type || 'instant_code'] || 'Standard Delivery'}</span>
             <span className={cn("text-xs font-mono px-2 py-0.5 rounded", product.in_stock === 0 ? "bg-destructive/20 text-destructive" : "bg-success/20 text-success")}>
               {product.in_stock === 0 ? 'OUT OF STOCK' : 'AVAILABLE'}
             </span>

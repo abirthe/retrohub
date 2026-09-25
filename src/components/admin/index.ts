@@ -9,4 +9,6 @@ export * from './OrdersTab';
 export { default as OrderActionDialog } from './OrderActionDialog';
 export * from './OrderActionDialog';
 export * from './EditProductDialog';
+export * from './AddProductDialog';
 export * from './InventoryRow';
+export * from './FeaturedTab';

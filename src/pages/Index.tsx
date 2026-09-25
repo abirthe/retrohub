@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/product';
 import { ShopHeader } from '@/components/layout';
 import { HeroSection, CategoryFilter } from '@/components/home';
+import FeaturedBanner from '@/components/home/FeaturedBanner';
 import { useProducts } from '@/hooks/useProducts';
 import { CATEGORIES } from '@/lib/constants';
 import type { SortValue } from '@/lib/constants';
@@ -117,6 +118,8 @@ const Index = () => {
 
         {/* Products Grid */}
         <div className="space-y-4">
+          <FeaturedBanner />
+
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xl font-display font-bold tracking-wide text-white flex items-center gap-2">
               {(() => { const Icon = activeCat.icon; return <Icon className={cn('w-5 h-5', activeCat.color)} />; })()}

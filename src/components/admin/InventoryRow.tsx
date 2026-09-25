@@ -12,17 +12,24 @@ import { EditProductDialog } from './EditProductDialog';
 export const InventoryRow = ({ product: p }: { product: Product }) => {
   const { toast } = useToast();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const margin = (((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100).toFixed(1);
+  const sale = Number(p.sale_price) || 0;
+  const cost = Number(p.cost_price) || 0;
+  const margin = sale > 0 ? (((sale - cost) / sale) * 100).toFixed(1) : '0.0';
 
   return (
     <>
     <tr className="hover:bg-white/5 transition-colors group">
       <td className="p-4 font-medium text-foreground group-hover:text-primary transition-colors max-w-[200px]">
-        <span className="block truncate" title={p.title}>{p.title}</span>
+        <div className="flex items-center gap-2">
+          <span className="block truncate" title={p.title}>{p.title}</span>
+          {!p.is_active && (
+            <Badge variant="destructive" className="text-[9px] h-4 px-1 rounded-sm shrink-0">Inactive</Badge>
+          )}
+        </div>
       </td>
       <td className="p-4">
         <Badge variant="outline" className="text-[10px] border-white/10 text-muted-foreground bg-secondary/30">
-          {p.delivery_type.replace('_', ' ')}
+          {(p.delivery_type || 'instant_code').replace(/_/g, ' ')}
         </Badge>
       </td>
       <td className="p-4">
