@@ -17,18 +17,24 @@ interface EmailPayload {
  */
 export async function sendOrderEmail(payload: EmailPayload) {
   try {
-    // Get Supabase project URL
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     if (!supabaseUrl) {
       throw new Error('Supabase URL not configured');
     }
 
-    // Call the Edge Function
+    // Use the active session JWT so the Edge Function can verify the caller.
+    // The anon key is intentionally NOT used here — it cannot authenticate a specific user.
+    const { data: { session } } = await supabase.auth.getSession();
+    const authToken = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!authToken) {
+      throw new Error('No auth token available for email dispatch');
+    }
+
     const response = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        'Authorization': `Bearer ${authToken}`,
       },
       body: JSON.stringify(payload),
     });
@@ -42,7 +48,7 @@ export async function sendOrderEmail(payload: EmailPayload) {
     return result;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    // Don't throw - email failure shouldn't break order completion
+    // Don't throw — email failure shouldn't break order completion
     return { success: false, error: message };
   }
 }
