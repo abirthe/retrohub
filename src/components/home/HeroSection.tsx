@@ -53,7 +53,7 @@ export function HeroSection() {
         <img
           src={heroBg}
           alt="Hero Background"
-          className="w-full h-full object-cover object-top opacity-40 animate-pulse [animation-duration:15s]"
+          className="w-full h-full object-cover object-top opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />
@@ -61,14 +61,14 @@ export function HeroSection() {
 
       <div className="container relative z-10 text-center space-y-5 max-w-5xl px-4 py-12 sm:py-16">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-700">
-          <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
           <span className="text-xs font-display font-medium tracking-[0.2em] text-primary uppercase">
             Premium Digital Store
           </span>
         </div>
 
         <h1 className="font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-wider text-white drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.3)] leading-[1.1] animate-in zoom-in-95 duration-700 delay-100 uppercase">
-          Game <span className="text-transparent bg-clip-text bg-[length:200%_auto] bg-gradient-to-r from-primary via-white to-accent filter drop-shadow-none animate-shimmer">Keys</span>{' '}
+          Game <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-accent filter drop-shadow-none">Keys</span>{' '}
           <span className="text-primary">&</span>{' '}<br />
           <span className="text-white">Top-Ups</span>
         </h1>
