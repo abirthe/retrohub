@@ -32,6 +32,16 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ---
 
+## 🤖 The Solo Merchant's Virtual Data Team
+
+For a solo entrepreneur, managing a catalog of thousands of digital products, game variants, and shifting market prices is impossible manually. This scripting suite acts as a virtual data entry and market research team:
+
+* **Automated Market Research**: Pricing scripts (`match_and_update_prices.mjs`) automatically scrape competitor prices and recalibrate RetroHub's sale prices to guarantee target profit margins.
+* **Instant Catalog Expansion**: Seeding scripts instantly spin up entire categories (e.g., 17+ game top-ups or gift card variants) with perfect metadata, bypassing hundreds of hours of manual entry.
+* **Self-Healing Database**: Maintenance scripts routinely audit stock levels, purge dead listings, and resolve duplicates, keeping the storefront pristine with zero manual oversight.
+
+---
+
 ## 1. Catalog Seeding (`scripts/seeding/`)
 
 Scripts in this module ingest structured catalog items, price tiers, and platform metadata into the Supabase `products` and `inventory_keys` tables.

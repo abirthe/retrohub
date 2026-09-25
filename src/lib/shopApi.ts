@@ -20,7 +20,7 @@ export async function fetchProducts(): Promise<Product[]> {
   const { count, error: countError } = await supabase
     .from('products')
     .select('*', { count: 'exact', head: true })
-    .eq('is_active', true);
+    .neq('title', '[CONFIG] Featured Products');
 
   if (countError) throw countError;
   const total = count ?? 0;
@@ -30,7 +30,7 @@ export async function fetchProducts(): Promise<Product[]> {
     const { data, error } = await supabase
       .from('products')
       .select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active')
-      .eq('is_active', true)
+      .neq('title', '[CONFIG] Featured Products')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -43,7 +43,7 @@ export async function fetchProducts(): Promise<Product[]> {
     return supabase
       .from('products')
       .select('id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active')
-      .eq('is_active', true)
+      .neq('title', '[CONFIG] Featured Products')
       .order('created_at', { ascending: false })
       .range(from, to);
   });
@@ -395,6 +395,15 @@ export async function updateProductDetails(id: string, details: Partial<Product>
   return { success: true };
 }
 
+export async function createProduct(details: Omit<Product, 'id' | 'created_at' | 'updated_at'>) {
+  const { error } = await supabase
+    .from('products')
+    .insert(details);
+
+  if (error) throw error;
+  return { success: true };
+}
+
 // Custom Orders API
 
 export interface CustomOrderPayload {
@@ -457,4 +466,47 @@ export async function updateCustomOrderStatus(id: string, status: string) {
 
   if (error) throw error;
   return { success: true };
+}
+
+// Featured Products API
+export async function fetchFeaturedProductIds(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('description')
+      .eq('title', '[CONFIG] Featured Products')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return []; // Row not found
+      throw error;
+    }
+    return JSON.parse(data.description || '[]');
+  } catch (e) {
+    console.error('Error fetching featured products:', e);
+    return [];
+  }
+}
+
+export async function updateFeaturedProductIds(ids: string[]): Promise<void> {
+  const { error } = await supabase
+    .from('products')
+    .update({ description: JSON.stringify(ids) })
+    .eq('title', '[CONFIG] Featured Products');
+
+  if (error) {
+    throw new Error('Failed to update featured products: ' + error.message);
+  }
+}
+
+export async function fetchProductsByIds(ids: string[]): Promise<Product[]> {
+  if (!ids || ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .in('id', ids)
+    .eq('is_active', true);
+    
+  if (error) throw error;
+  return data as unknown as Product[];
 }

@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
-import { Edit2, Save, X, Package, User } from 'lucide-react';
+import { Edit2, Save, X, Package, User, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { updateProductPrice, type Product } from '@/lib/shopApi';
 import { InventoryRow } from './InventoryRow';
-
 import { getProductEffectiveCategory } from '@/lib/productFilters';
+import { AddProductDialog } from './AddProductDialog';
 
 interface InventoryTabProps {
   products: Product[] | undefined;
@@ -30,6 +30,11 @@ const STANDARD_CATEGORIES: Array<{ key: string; label: string; iconType: 'packag
 ];
 
 const InventoryTab = ({ products }: InventoryTabProps) => {
+  const [limits, setLimits] = useState<Record<string, number>>({});
+  const [search, setSearch] = useState('');
+
+  const getLimit = (key: string) => limits[key] || 50;
+  const loadMore = (key: string) => setLimits(prev => ({ ...prev, [key]: getLimit(key) + 50 }));
   const isAccountProduct = (p: Product): boolean => {
     const rawCat = p.category?.toLowerCase() || '';
     if (rawCat === 'accounts' || rawCat === 'account') return true;
@@ -46,7 +51,13 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
     categoryBuckets[key] = [];
   });
 
-  (products || []).forEach((product) => {
+  const filteredProducts = (products || []).filter(product => {
+    if (product.title === '[CONFIG] Featured Products') return false;
+    if (!search) return true;
+    return product.title.toLowerCase().includes(search.toLowerCase());
+  });
+
+  filteredProducts.forEach((product) => {
     if (isAccountProduct(product)) {
       categoryBuckets['accounts'].push(product);
     } else {
@@ -80,13 +91,27 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
       items: categoryBuckets[key] || [],
       icon: <Package className="h-5 w-5 text-primary" />,
     })),
-  ];
+  ].filter(group => search === '' || group.items.length > 0);
 
   return (
     <Card className="bg-card/40 backdrop-blur-xl border-white/10 overflow-hidden shadow-xl">
-      <CardHeader className="bg-white/5 border-b border-white/5">
-        <CardTitle className="font-display text-lg tracking-wider">Inventory Status</CardTitle>
-        <CardDescription>Category-based stock levels and margin analysis</CardDescription>
+      <CardHeader className="bg-white/5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <CardTitle className="font-display text-lg tracking-wider">Inventory Status</CardTitle>
+          <CardDescription>Category-based stock levels and margin analysis</CardDescription>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search inventory..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 bg-background/50 border-white/10"
+            />
+          </div>
+          <AddProductDialog />
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <Accordion type="single" collapsible className="w-full">
@@ -123,9 +148,25 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
                           </td>
                         </tr>
                       ) : (
-                        items.map((p) => (
-                          <InventoryRow key={p.id} product={p} />
-                        ))
+                        <>
+                          {items.slice(0, getLimit(key)).map((p) => (
+                            <InventoryRow key={p.id} product={p} />
+                          ))}
+                          {items.length > getLimit(key) && (
+                            <tr>
+                              <td colSpan={7} className="p-4 text-center">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => loadMore(key)}
+                                  className="border-primary/20 hover:bg-primary/10 w-full max-w-xs"
+                                >
+                                  Load More ({items.length - getLimit(key)} remaining)
+                                </Button>
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       )}
                     </tbody>
                   </table>
