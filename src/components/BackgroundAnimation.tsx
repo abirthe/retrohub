@@ -35,27 +35,65 @@ const BackgroundAnimation: React.FC = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    const forcePlayOnInteraction = async () => {
+      if (video.paused) {
+        try {
+          await video.play();
+        } catch (e) {
+          console.log('Video play error on interaction:', e);
+        }
+      }
+    };
+
+    const setupInteractionListeners = () => {
+      window.addEventListener('click', forcePlayOnInteraction, { once: true });
+      window.addEventListener('touchstart', forcePlayOnInteraction, { once: true });
+      window.addEventListener('scroll', forcePlayOnInteraction, { once: true });
+      window.addEventListener('keydown', forcePlayOnInteraction, { once: true });
+    };
+
     if (Hls.isSupported()) {
       hls = new Hls({
         enableWorker: false,
       });
       hls.loadSource(videoSrc);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, playVideo);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        playVideo();
+        setupInteractionListeners();
+      });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // Native HLS support (Safari/iOS)
       video.src = videoSrc;
       video.load();
-      video.addEventListener('loadedmetadata', playVideo);
-      video.addEventListener('canplay', playVideo);
+      video.addEventListener('loadedmetadata', () => {
+        playVideo();
+        setupInteractionListeners();
+      });
+      video.addEventListener('canplay', () => {
+        playVideo();
+        setupInteractionListeners();
+      });
     }
+
+    // Backup interval to attempt playback if blocked
+    const forcePlayInterval = setInterval(() => {
+      if (video.paused) {
+        playVideo();
+      } else {
+        clearInterval(forcePlayInterval);
+      }
+    }, 2000);
 
     return () => {
       if (hls) {
         hls.destroy();
       }
-      video.removeEventListener('loadedmetadata', playVideo);
-      video.removeEventListener('canplay', playVideo);
+      clearInterval(forcePlayInterval);
+      window.removeEventListener('click', forcePlayOnInteraction);
+      window.removeEventListener('touchstart', forcePlayOnInteraction);
+      window.removeEventListener('scroll', forcePlayOnInteraction);
+      window.removeEventListener('keydown', forcePlayOnInteraction);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
