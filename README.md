@@ -11,6 +11,7 @@ Engineered with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (
 ## ⚡ Core Capabilities & Highlights
 
 * **Multi-Platform Digital Goods**: Steam, Xbox, PlayStation, Nintendo, Epic Games, GOG, and EA App.
+* **Dynamic Ambient UI**: Immersive cyber-neon video backgrounds with HLS streaming (via `hls.js`), real-time color harmonization overlays, and ultra-smooth glassmorphism.
 * **Direct Player UID In-Game Top-Ups**: 17+ curated games with automated Player ID / Server / Zone ID input validation (Valorant, MLBB, PUBG Mobile, Genshin Impact, Honkai: Star Rail, Fortnite, Roblox, etc.).
 * **Verified Gaming Accounts**: Full-access regional and verified accounts isolated into a dedicated category.
 * **Global & Regional Digital Gift Cards**: Apple iTunes, Steam Wallet, PSN, Xbox, Nintendo eShop, Roblox, and Blizzard Battle.net.
@@ -59,7 +60,7 @@ The platform has undergone a comprehensive security hardening audit with zero-co
 | Layer | Technologies & Libraries | Key Responsibility |
 | :--- | :--- | :--- |
 | **Frontend Core** | React 18.3, TypeScript 5.8 | Functional components, zero `any` strict typing, custom hooks |
-| **Styling & Theme** | Tailwind CSS 3.4, PostCSS, Lucide React | Cyber-neon dark aesthetic, glassmorphism, responsive mobile UI |
+| **Styling & Theme** | Tailwind CSS 3.4, PostCSS, Lucide React, hls.js | Cyber-neon dark aesthetic, HLS video backgrounds, glassmorphism, responsive mobile UI |
 | **UI Component Primitives**| Radix UI, shadcn/ui, Sonner, Vaul | Accessible dialogs, dropdowns, sheets, modals, and toasts |
 | **State & Data Fetching** | TanStack Query v5, Context API | Server state caching, optimistic UI updates, localStorage persistent cart |
 | **Routing** | React Router DOM v6 | Client-side routing with guarded admin routes and OAuth callback handlers |

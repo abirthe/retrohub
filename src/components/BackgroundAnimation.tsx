@@ -23,7 +23,7 @@ const BackgroundAnimation: React.FC = () => {
           await video.play();
         }
       } catch (e) {
-        console.log('Video play error (often due to low power mode on mobile):', e);
+        console.warn('Video play error (often due to low power mode on mobile):', e);
       }
     };
 
@@ -40,7 +40,7 @@ const BackgroundAnimation: React.FC = () => {
         try {
           await video.play();
         } catch (e) {
-          console.log('Video play error on interaction:', e);
+          console.warn('Video play error on interaction:', e);
         }
       }
     };
