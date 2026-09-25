@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,9 @@ import { ShopHeader } from '@/components/layout';
 import { ArrowLeft, Send, Sparkles } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
 import { submitCustomOrder } from '@/lib/shopApi';
+import { cn } from '@/lib/utils';
+
+const ROTATING_WORDS = ['Order', 'Support'];
 
 const CustomOrder = () => {
   const navigate = useNavigate();
@@ -55,8 +58,22 @@ const CustomOrder = () => {
   };
 
 
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setWordIndex(prev => (prev + 1) % ROTATING_WORDS.length);
+        setIsVisible(true);
+      }, 250);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background relative selection:bg-primary/20 flex flex-col">
+    <div className="min-h-screen relative selection:bg-primary/20 flex flex-col">
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />
@@ -80,8 +97,18 @@ const CustomOrder = () => {
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <Sparkles className="w-6 h-6 animate-pulse" />
             </div>
-            <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-wider text-white">
-              Request Custom Order
+            <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-wider text-white flex items-center justify-center flex-wrap gap-x-2">
+              <span>Request Custom</span>
+              <span
+                className={cn(
+                  'inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-accent transition-all duration-300 transform',
+                  isVisible
+                    ? 'opacity-100 translate-y-0 scale-100'
+                    : 'opacity-0 -translate-y-2 scale-95'
+                )}
+              >
+                {ROTATING_WORDS[wordIndex]}
+              </span>
             </h1>
             <p className="text-muted-foreground max-w-md">
               Can't find the game or top-up you're looking for? Let us know what you need, and we'll get it for you at the best price.
