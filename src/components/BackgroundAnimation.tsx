@@ -63,14 +63,14 @@ const BackgroundAnimation: React.FC = () => {
         className="absolute inset-0 w-full h-full object-cover scale-[1.15] origin-center opacity-60 [filter:hue-rotate(35deg)_saturate(1.4)_brightness(1.05)]"
       />
 
-      {/* Electric Cyan Color Harmonization Overlay */}
-      <div className="absolute inset-0 bg-cyan-500/10 mix-blend-screen pointer-events-none" />
+      {/* Theme Color Harmonization Overlay */}
+      <div className="absolute inset-0 bg-primary/10 mix-blend-screen pointer-events-none" />
 
       {/* Gradients Overlay for Depth and Contrast (Symmetrical) */}
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-background" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-background/80" />
 
-      {/* Central Soft Ambient Glow in Electric Cyan */}
+      {/* Central Soft Ambient Glow tied to Primary Theme */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] max-w-[800px] h-[300px] pointer-events-none">
         <svg
           viewBox="0 0 800 300"
@@ -83,9 +83,9 @@ const BackgroundAnimation: React.FC = () => {
               <feGaussianBlur stdDeviation="30" />
             </filter>
             <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(6, 182, 212, 0.45)" />
-              <stop offset="60%" stopColor="rgba(14, 165, 233, 0.18)" />
-              <stop offset="100%" stopColor="rgba(6, 182, 212, 0)" />
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.35" />
+              <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
             </radialGradient>
           </defs>
           <ellipse
