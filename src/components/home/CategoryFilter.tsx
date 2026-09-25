@@ -45,7 +45,7 @@ export function CategoryFilter({
   };
 
   return (
-    <div className="relative z-50 bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3.5 sm:p-5 shadow-2xl shadow-black/50">
+    <div className="relative z-50 bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3.5 sm:p-5 shadow-2xl shadow-black/50 max-w-5xl mx-auto w-full">
       <div className="flex flex-col gap-3 sm:gap-4">
 
         {/* Top row: search + sort (responsive side-by-side on all screens) */}
@@ -92,7 +92,7 @@ export function CategoryFilter({
         </div>
 
         {/* Category pills with left/right scroll controls */}
-        <div className="relative group/pills flex items-center">
+        <div className="relative group/pills flex items-center w-full min-w-0">
           <Button
             variant="ghost"
             size="icon"
@@ -105,7 +105,7 @@ export function CategoryFilter({
 
           <div
             ref={categoryScrollRef}
-            className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 scroll-smooth w-full"
+            className="flex flex-1 gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 scroll-smooth"
           >
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
