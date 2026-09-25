@@ -50,7 +50,7 @@ const BackgroundAnimation: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden bg-[#070b0a]">
+    <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden bg-background">
       {/* Background Video Animation */}
       {/* Background Video Animation with Electric Cyan / Neon Teal Color Grading */}
       <video
@@ -60,15 +60,15 @@ const BackgroundAnimation: React.FC = () => {
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-60 [filter:hue-rotate(35deg)_saturate(1.4)_brightness(1.05)]"
+        className="absolute inset-0 w-full h-full object-cover scale-[1.15] origin-center opacity-60 [filter:hue-rotate(35deg)_saturate(1.4)_brightness(1.05)]"
       />
 
       {/* Electric Cyan Color Harmonization Overlay */}
       <div className="absolute inset-0 bg-cyan-500/10 mix-blend-screen pointer-events-none" />
 
-      {/* Gradients Overlay for Depth and Contrast */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/30 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-transparent to-transparent" />
+      {/* Gradients Overlay for Depth and Contrast (Symmetrical) */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-background/80" />
 
       {/* Central Soft Ambient Glow in Electric Cyan */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] max-w-[800px] h-[300px] pointer-events-none">
@@ -76,6 +76,7 @@ const BackgroundAnimation: React.FC = () => {
           viewBox="0 0 800 300"
           className="w-full h-full"
           preserveAspectRatio="none"
+          overflow="visible"
         >
           <defs>
             <filter id="glow-blur" x="-50%" y="-50%" width="200%" height="200%">
