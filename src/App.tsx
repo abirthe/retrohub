@@ -61,7 +61,7 @@ const App = () => (
           <div className="fixed inset-0 z-0 pointer-events-none">
             <BackgroundAnimation />
           </div>
-          <div className="relative z-10 w-full h-full">
+          <div className="relative z-10 flex flex-col w-full min-h-screen">
             <Toaster />
             <Sonner />
             <BrowserRouter>
