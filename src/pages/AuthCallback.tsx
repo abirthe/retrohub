@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,7 +85,7 @@ export default function AuthCallback() {
     };
 
     handleAuthCallback();
-  }, [navigate, location]);
+  }, [navigate]);
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
