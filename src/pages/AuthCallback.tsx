@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,18 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle, Loader2, KeyRound } from 'lucide-react';
 import ShopHeader from '@/components/layout/ShopHeader';
 import heroBg from '@/assets/hero-bg.jpg';
+
+/** Only allow same-origin relative paths to prevent open-redirect attacks. */
+const sanitiseReturnTo = (url: string | null | undefined): string => {
+  if (!url) return '/';
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.origin !== window.location.origin) return '/';
+    return parsed.pathname + parsed.search + parsed.hash;
+  } catch {
+    return url.startsWith('/') ? url : '/';
+  }
+};
 
 export default function AuthCallback() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'recovery'>('loading');
@@ -27,7 +39,7 @@ export default function AuthCallback() {
       const authError = hashParams.get('error_description') || hashParams.get('error') || searchParams.get('error_description') || searchParams.get('error');
       const type = hashParams.get('type') || searchParams.get('type');
       const code = searchParams.get('code');
-      const returnTo = searchParams.get('returnTo') || '/';
+      const returnTo = sanitiseReturnTo(searchParams.get('returnTo'));
 
       if (authError) {
         setStatus('error');

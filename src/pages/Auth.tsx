@@ -11,6 +11,19 @@ import ShopHeader from '@/components/layout/ShopHeader';
 import { Gamepad2, ArrowRight, Loader2 } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
 
+/** Only allow same-origin relative paths to prevent open-redirect attacks. */
+const sanitiseReturnTo = (url: string | null | undefined): string => {
+  if (!url) return '/';
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.origin !== window.location.origin) return '/';
+    return parsed.pathname + parsed.search + parsed.hash;
+  } catch {
+    // url was already a relative path
+    return url.startsWith('/') ? url : '/';
+  }
+};
+
 const Auth = () => {
   const { user, signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
   const navigate = useNavigate();
@@ -20,8 +33,10 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Determine destination after successful authentication
-  const returnTo = (location.state as { from?: string } | null)?.from || searchParams.get('returnTo') || '/';
+  // Sanitise destination to prevent open-redirect attacks
+  const returnTo = sanitiseReturnTo(
+    (location.state as { from?: string } | null)?.from ?? searchParams.get('returnTo')
+  );
 
   // Automatically redirect if already logged in
   useEffect(() => {

@@ -65,6 +65,11 @@ const AdminDashboard = () => {
     enabled: isAdmin === true,
   });
 
+  // Log query errors privately — never expose raw Supabase error objects to the UI
+  useEffect(() => {
+    if (ordersError) console.error('[Admin] Failed to load orders:', ordersError);
+  }, [ordersError]);
+
   const { data: products } = useQuery({
     queryKey: ['admin-products'],
     queryFn: fetchProducts,
@@ -212,8 +217,9 @@ const AdminDashboard = () => {
 
           <TabsContent value="orders" className="space-y-4">
             {ordersError ? (
-              <div className="p-4 bg-destructive/20 text-destructive border border-destructive/50 rounded-lg whitespace-pre-wrap font-mono text-sm">
-                Error loading orders: {JSON.stringify(ordersError, null, 2)}
+              <div className="p-4 bg-destructive/20 text-destructive border border-destructive/50 rounded-lg text-sm flex items-center gap-3">
+                <span className="font-semibold">Failed to load orders.</span>
+                <span className="text-destructive/80">Please refresh the page or contact support if the issue persists.</span>
               </div>
             ) : (
               <OrdersTab

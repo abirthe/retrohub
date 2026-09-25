@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreditCard, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ShopHeader } from '@/components/layout';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { updateOrderTransactionId } from '@/lib/shopApi';
 
-import { BkashPayment, BankPayment } from '@/components/payment';
+import { BkashPayment } from '@/components/payment';
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -19,7 +18,6 @@ const Payment = () => {
     const { toast } = useToast();
     const [transactionId, setTransactionId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedMethod, setSelectedMethod] = useState('bkash');
 
     const { orderIds, totalPrice } = location.state || { orderIds: [], totalPrice: 0 };
 
@@ -27,18 +25,17 @@ const Payment = () => {
 
     const calculateTotal = () => {
         if (!totalPrice) return 0;
-        if (selectedMethod === 'bkash') {
-            return totalPrice * 1.01; // 1% charge
-        }
-        return totalPrice;
+        return totalPrice * 1.01; // 1% bKash charge
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!transactionId.trim()) {
+        const trimmed = transactionId.trim();
+        // Enforce format: 6–30 alphanumeric characters (bKash TrxIDs are typically 10 chars)
+        if (!trimmed || !/^[A-Z0-9]{6,30}$/i.test(trimmed)) {
             toast({
-                title: "Error",
-                description: "Please enter a valid Transaction ID",
+                title: "Invalid Transaction ID",
+                description: "Transaction ID must be 6–30 alphanumeric characters (letters and numbers only).",
                 variant: "destructive",
             });
             return;
@@ -48,7 +45,7 @@ const Payment = () => {
 
         try {
             if (orderIds.length > 0) {
-                await updateOrderTransactionId(orderIds, transactionId);
+                await updateOrderTransactionId(orderIds, trimmed);
             } else {
                 // Fallback simulation if no order IDs (e.g. testing)
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -107,24 +104,7 @@ const Payment = () => {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <Tabs defaultValue="bkash" className="w-full" onValueChange={setSelectedMethod}>
-                                        <TabsList className="grid w-full grid-cols-2 mb-6 bg-secondary/50 p-1">
-                                            <TabsTrigger value="bkash" className="font-display data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
-                                                BKASH
-                                            </TabsTrigger>
-                                            <TabsTrigger value="bank" className="font-display data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all duration-300">
-                                                BANK
-                                            </TabsTrigger>
-                                        </TabsList>
-
-                                        <TabsContent value="bkash" className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                            <BkashPayment />
-                                        </TabsContent>
-
-                                        <TabsContent value="bank" className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                            <BankPayment />
-                                        </TabsContent>
-                                    </Tabs>
+                                    <BkashPayment />
                                 </CardContent>
                             </Card>
                         </div>
@@ -146,9 +126,7 @@ const Payment = () => {
                                         <span className="text-muted-foreground">Amount to Pay</span>
                                         <span className="font-display font-bold text-xl text-primary">৳{calculateTotal().toFixed(2)}</span>
                                     </div>
-                                    {selectedMethod === 'bkash' && (
-                                        <p className="text-xs text-muted-foreground text-right">*Includes 1% charge</p>
-                                    )}
+                                    <p className="text-xs text-muted-foreground text-right">*Includes 1% bKash charge</p>
                                     {orderIds.length > 0 && (
                                         <div className="mt-4 pt-4 border-t border-border/50">
                                             <span className="text-xs text-muted-foreground block mb-1">Order Reference IDs:</span>
