@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,7 +13,7 @@ import { Gamepad2, ArrowRight, Loader2 } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const Auth = () => {
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { user, signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -23,6 +23,13 @@ const Auth = () => {
 
   // Determine destination after successful authentication
   const returnTo = (location.state as { from?: string } | null)?.from || searchParams.get('returnTo') || '/';
+
+  // Automatically redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate(returnTo, { replace: true });
+    }
+  }, [user, navigate, returnTo]);
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
