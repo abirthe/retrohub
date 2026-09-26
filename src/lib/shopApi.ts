@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { sendTelegramNotification } from './telegramService';
+import { sendTelegramNotification, notifyNewOrder, notifyPaymentSubmitted, notifyCustomOrder } from './telegramService';
 
 export type ProductCategory = Database['public']['Enums']['product_category'];
 export type DeliveryType = Database['public']['Enums']['delivery_type'];
@@ -254,25 +254,18 @@ export async function createOrder(
   try {
     const { data: productData } = await supabase.from('products').select('title, in_stock').eq('id', productId).single();
     const productName = productData?.title || 'Unknown Product';
-    
-    await sendTelegramNotification(
-      `🛍️ <b>New Order Created!</b>\n\n` +
-      `📦 <b>Product:</b> ${productName}\n` +
-      `💰 <b>Total:</b> ৳${total}\n` +
-      `🆔 <b>Order ID:</b> <code>${orderData.id}</code>\n` +
-      `👤 <b>User ID:</b> <code>${user.id}</code>\n\n` +
-      `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
-    );
+    const isLowStock = productData?.in_stock !== null && productData?.in_stock !== undefined && productData.in_stock <= 3;
+    const gameId = (customerInput as any)?.game_id || '';
 
-    // Low stock alert
-    if (productData && productData.in_stock !== null && productData.in_stock <= 3) {
-      await sendTelegramNotification(
-        `⚠️ <b>LOW STOCK ALERT!</b>\n\n` +
-        `📦 <b>Product:</b> ${productName}\n` +
-        `📉 <b>Remaining Stock:</b> ${productData.in_stock}\n\n` +
-        `<i>Please restock this product soon!</i>`
-      );
-    }
+    await notifyNewOrder({
+      orderId: orderData.id,
+      productName,
+      total,
+      userId: user.id,
+      gameId,
+      lowStock: isLowStock,
+      remainingStock: productData?.in_stock ?? undefined,
+    });
   } catch (e) {
     console.error('Error sending telegram notification for order:', e);
   }
@@ -398,6 +391,16 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
     throw new Error('Failed to submit payment. Please contact support.');
   }
 
+  // Notify admin via Telegram immediately with Transaction ID
+  try {
+    await notifyPaymentSubmitted({
+      orderIds,
+      transactionId,
+    });
+  } catch (e) {
+    console.error('Error sending payment notification:', e);
+  }
+
   return { success: true };
 }
 
@@ -476,15 +479,13 @@ export async function submitCustomOrder(payload: CustomOrderPayload) {
   
   // Send Telegram Notification
   try {
-    await sendTelegramNotification(
-      `📝 <b>New Custom Order Request!</b>\n\n` +
-      `👤 <b>Name:</b> ${payload.name}\n` +
-      `📧 <b>Email:</b> ${payload.email}\n` +
-      `📦 <b>Product:</b> ${payload.productName}\n` +
-      `💻 <b>Platform:</b> ${payload.platform}\n` +
-      `📋 <b>Details:</b> ${payload.details || 'None'}\n\n` +
-      `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
-    );
+    await notifyCustomOrder({
+      name: payload.name,
+      email: payload.email,
+      productName: payload.productName,
+      platform: payload.platform,
+      details: payload.details,
+    });
   } catch (e) {
     console.error('Error sending telegram notification for custom order:', e);
   }

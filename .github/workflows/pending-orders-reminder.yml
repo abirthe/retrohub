@@ -1,0 +1,17 @@
+name: Pending Orders Telegram Reminder
+
+on:
+  schedule:
+    # Run every 2 hours
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub anytime
+
+jobs:
+  check-pending-orders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Pending Orders Check
+        run: |
+          curl -s -X POST "https://ejglirzvcsshsmnmvxvv.supabase.co/functions/v1/telegram-webhook" \
+            -H "Content-Type: application/json" \
+            -d '{"action": "check_pending"}'
