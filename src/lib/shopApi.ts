@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { sendTelegramNotification } from './telegramService';
 
 export type ProductCategory = Database['public']['Enums']['product_category'];
 export type DeliveryType = Database['public']['Enums']['delivery_type'];
@@ -249,6 +250,33 @@ export async function createOrder(
 
   if (insertError) throw insertError;
 
+  // Send Telegram Notification
+  try {
+    const { data: productData } = await supabase.from('products').select('title, in_stock').eq('id', productId).single();
+    const productName = productData?.title || 'Unknown Product';
+    
+    await sendTelegramNotification(
+      `🛍️ <b>New Order Created!</b>\n\n` +
+      `📦 <b>Product:</b> ${productName}\n` +
+      `💰 <b>Total:</b> ৳${total}\n` +
+      `🆔 <b>Order ID:</b> <code>${orderData.id}</code>\n` +
+      `👤 <b>User ID:</b> <code>${user.id}</code>\n\n` +
+      `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
+    );
+
+    // Low stock alert
+    if (productData && productData.in_stock !== null && productData.in_stock <= 3) {
+      await sendTelegramNotification(
+        `⚠️ <b>LOW STOCK ALERT!</b>\n\n` +
+        `📦 <b>Product:</b> ${productName}\n` +
+        `📉 <b>Remaining Stock:</b> ${productData.in_stock}\n\n` +
+        `<i>Please restock this product soon!</i>`
+      );
+    }
+  } catch (e) {
+    console.error('Error sending telegram notification for order:', e);
+  }
+
   return orderData;
 }
 
@@ -445,6 +473,22 @@ export async function submitCustomOrder(payload: CustomOrderPayload) {
     .single();
 
   if (error) throw error;
+  
+  // Send Telegram Notification
+  try {
+    await sendTelegramNotification(
+      `📝 <b>New Custom Order Request!</b>\n\n` +
+      `👤 <b>Name:</b> ${payload.name}\n` +
+      `📧 <b>Email:</b> ${payload.email}\n` +
+      `📦 <b>Product:</b> ${payload.productName}\n` +
+      `💻 <b>Platform:</b> ${payload.platform}\n` +
+      `📋 <b>Details:</b> ${payload.details || 'None'}\n\n` +
+      `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
+    );
+  } catch (e) {
+    console.error('Error sending telegram notification for custom order:', e);
+  }
+
   return data;
 }
 

@@ -12,8 +12,10 @@ import {
   refundOrder,
   validateOrder,
   startSourcing,
+  fetchAdminStats,
 } from '@/lib/shopApi';
 import { sendOrderCompletionEmail } from '@/lib/emailService';
+import { sendTelegramNotification } from '@/lib/telegramService';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import { ShopHeader } from '@/components/layout';
@@ -26,6 +28,7 @@ import {
   ShieldAlert,
   ExternalLink,
   Sparkles,
+  Send,
 } from 'lucide-react';
 
 // Subcomponents
@@ -159,6 +162,24 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSendSummary = async () => {
+    try {
+      const stats = await fetchAdminStats();
+      await sendTelegramNotification(
+        `📊 <b>Daily Store Summary</b>\n\n` +
+        `💰 <b>Revenue:</b> ৳${stats.revenue}\n` +
+        `📦 <b>Orders:</b> ${stats.orders}\n` +
+        `📈 <b>Profit:</b> ৳${stats.profit}\n` +
+        `⏳ <b>Pending Actions:</b> ${stats.pendingActions}\n\n` +
+        `<i>Generated manually via Admin Dashboard</i>`
+      );
+      toast({ title: 'Summary Sent', description: 'Daily summary sent to Telegram successfully.' });
+    } catch (error) {
+      console.error('Failed to send summary:', error);
+      toast({ title: 'Error', description: 'Failed to send daily summary.', variant: 'destructive' });
+    }
+  };
+
   const openActionDialog = (action: string, order: AdminOrder) => {
     setActionDialog({ open: true, action, order });
   };
@@ -193,9 +214,14 @@ const AdminDashboard = () => {
               Store performance overview and management console.
             </p>
           </div>
-          <Button onClick={() => navigate('/')} variant="outline" className="gap-2 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all">
-            <ExternalLink className="h-4 w-4" /> Live Store
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button onClick={handleSendSummary} variant="outline" className="gap-2 border-accent/20 hover:bg-accent/10 hover:text-accent transition-all">
+              <Send className="h-4 w-4" /> Send Summary
+            </Button>
+            <Button onClick={() => navigate('/')} variant="outline" className="gap-2 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all">
+              <ExternalLink className="h-4 w-4" /> Live Store
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
