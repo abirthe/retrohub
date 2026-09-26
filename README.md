@@ -23,6 +23,7 @@ Engineered with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (
 * **Automated Order Fulfillment**: Immediate delivery code revelation in `/orders` alongside automated HTML receipt emails dispatched via Supabase Edge Functions + Resend API.
 * **AI-Powered Fulfillment Emails**: Integrated xAI Grok API (`grokApi.ts`) for generating personalised, professional fulfillment emails for every completed transaction.
 * **Merchant Back-Office Suite**: Live daily revenue, order counts, and net profit analytics, 8-state order lifecycle management, inline stock/price updates, and custom orders board.
+* **Telegram Admin Bot**: Integrated `@Notifyretro_bot` acts as a 24/7 command center, delivering real-time alerts for new orders, custom requests, and low stock warnings, alongside on-demand `/summary` and `/orders` webhook commands via Supabase Edge Functions.
 
 ---
 
@@ -32,6 +33,7 @@ RetroHub is purpose-built to enable a **solo entrepreneur** to run a highly prof
 
 * **Zero Logistics & Automated Fulfillment**: Operating entirely on digital goods (keys, top-ups, subscriptions) means zero shipping costs, zero warehousing, and 24/7 instant order fulfillment. The `FOR UPDATE SKIP LOCKED` database mechanism guarantees autonomous, error-free digital key delivery while you sleep.
 * **AI-Powered Customer Communication**: Integrated xAI Grok automatically generates polished, professional delivery emails, drastically reducing manual customer service workload.
+* **Telegram-Driven Management**: No need to stay glued to the dashboard. The integrated Telegram bot pushes live alerts for sales and low stock directly to your phone, and responds to slash-commands to fetch daily financial summaries on the go.
 * **Unified Back-Office Command Center**: A single `/admin` dashboard tracks live daily revenue, pending orders, custom requests, and inventory margins. A solo merchant can oversee the entire business health in seconds.
 * **Automated Catalog Intelligence**: The comprehensive `scripts/` suite handles the heavy lifting of a massive catalog—automating market price scraping, competitor margin syncing, image mapping, and duplicate cleaning without manual data entry.
 * **Streamlined Financial Operations**: Direct integration with local mobile wallets (bKash) bypasses expensive enterprise payment gateways, maximizing profit margins and enabling rapid 1-click transaction validation.
@@ -68,6 +70,7 @@ The platform has undergone a comprehensive security hardening audit with zero-co
 | **Backend & Database** | Supabase (PostgreSQL 15+) | RLS policies, views, stored procedures, audit tables |
 | **Email Delivery** | Supabase Edge Functions, Resend API | Automated fulfillment receipts with session-authenticated caller verification |
 | **AI Email Generation** | xAI Grok API (`grokApi.ts`) | Context-aware, personalised customer delivery emails |
+| **Admin Notifications** | Telegram Bot API, Supabase Edge Functions | Real-time sales alerts, low stock warnings, and interactive admin webhooks |
 | **Build & Tooling** | Vite 5.4, SWC, Vitest, ESLint 9 | Dev server on port 3000, optimized production code-splitting |
 
 ---
@@ -201,6 +204,7 @@ VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
 VITE_SUPABASE_PROJECT_ID=your-project-id
 VITE_XAI_API_KEY=your-xai-grok-api-key
+VITE_TELEGRAM_CHAT_ID=your-telegram-chat-id   # Receives live admin alerts
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # seed & maintenance scripts only
 ```
 
