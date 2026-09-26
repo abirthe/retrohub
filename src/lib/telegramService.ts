@@ -2,7 +2,7 @@
 
 export async function sendTelegramNotification(message: string) {
   const token = '8734266809:AAHLMa--CApI_Ssiqpq62jewh0t-QPoSji4';
-  const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID; // Or we can use a hardcoded one once you provide it
+  const chatId = '5605963234'; // Hardcoded for production reliability
 
   if (!chatId) {
     console.warn('Telegram Chat ID is not configured. Skipping notification.');
