@@ -29,13 +29,24 @@ export function CategoryFilter({
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const activeSort = SORT_OPTIONS.find(s => s.value === sort) ?? SORT_OPTIONS[0];
 
-  // Auto-scroll active category into visible area
+  // Auto-scroll active category into visible area without blocking interaction paint
   useEffect(() => {
-    if (!categoryScrollRef.current) return;
-    const activeEl = categoryScrollRef.current.querySelector(`#cat-${activeCategory}`);
-    if (activeEl) {
+    const container = categoryScrollRef.current;
+    if (!container) return;
+    const activeEl = container.querySelector<HTMLElement>(`#cat-${activeCategory}`);
+    if (!activeEl) return;
+
+    // Check if element is already within visible bounds of container
+    const containerRect = container.getBoundingClientRect();
+    const elRect = activeEl.getBoundingClientRect();
+    const isVisible = elRect.left >= containerRect.left && elRect.right <= containerRect.right;
+    if (isVisible) return;
+
+    // Defer smooth scroll to next animation frame so tap interaction is instant (INP < 50ms)
+    const animId = requestAnimationFrame(() => {
       activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+    });
+    return () => cancelAnimationFrame(animId);
   }, [activeCategory]);
 
   const handleScroll = (direction: 'left' | 'right') => {

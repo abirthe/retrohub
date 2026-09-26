@@ -19,11 +19,22 @@ const FeaturedBanner = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const isLoading = isLoadingIds || (featuredIds?.length ? isLoadingProducts : false);
+  // Do not render anything while checking for featured IDs or if none exist.
+  // This prevents layout shift (CLS) from an initial placeholder collapsing to null.
+  if (isLoadingIds || !featuredIds || featuredIds.length === 0) {
+    return null;
+  }
 
-  if (isLoading) {
+  if (isLoadingProducts) {
     return (
-      <div className="w-full h-48 animate-pulse bg-card/40 rounded-xl border border-white/5" />
+      <div className="mb-12 relative">
+        <div className="h-6 w-36 bg-white/5 rounded-md mb-4 animate-pulse" />
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+          {Array.from({ length: Math.min(featuredIds.length, 4) }).map((_, i) => (
+            <div key={i} className="h-64 sm:h-72 rounded-xl bg-card/40 border border-white/5 animate-pulse" />
+          ))}
+        </div>
+      </div>
     );
   }
 

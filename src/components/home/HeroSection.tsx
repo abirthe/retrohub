@@ -1,4 +1,3 @@
-import heroBg from '@/assets/hero-bg.jpg';
 import { Zap, ShieldAlert } from 'lucide-react';
 
 export function HeroSection() {
@@ -12,8 +11,13 @@ export function HeroSection() {
         }}
       >
         <img
-          src={heroBg}
+          src="/hero-bg.jpg"
           alt="Hero Background"
+          width="1440"
+          height="810"
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
           className="w-full h-full object-cover object-top opacity-25"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/80 to-background" />

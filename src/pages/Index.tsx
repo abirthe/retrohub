@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/product';
 import { ShopHeader } from '@/components/layout';
@@ -57,44 +57,50 @@ const Index = () => {
   }, [debouncedSearch, setSearchParams]);
 
   const setActiveCategory = (cat: string, sub: string = '') => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (cat && cat !== 'all') {
-        next.set('category', cat);
-      } else {
-        next.delete('category');
-      }
-      if (sub) {
-        next.set('sub', sub);
-      } else {
-        next.delete('sub');
-      }
-      return next;
-    }, { replace: true });
+    startTransition(() => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (cat && cat !== 'all') {
+          next.set('category', cat);
+        } else {
+          next.delete('category');
+        }
+        if (sub) {
+          next.set('sub', sub);
+        } else {
+          next.delete('sub');
+        }
+        return next;
+      }, { replace: true });
+    });
   };
 
   const setActiveSubcategory = (sub: string) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (sub) {
-        next.set('sub', sub);
-      } else {
-        next.delete('sub');
-      }
-      return next;
-    }, { replace: true });
+    startTransition(() => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (sub) {
+          next.set('sub', sub);
+        } else {
+          next.delete('sub');
+        }
+        return next;
+      }, { replace: true });
+    });
   };
 
   const setSort = (newSort: SortValue) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (newSort && newSort !== 'newest') {
-        next.set('sort', newSort);
-      } else {
-        next.delete('sort');
-      }
-      return next;
-    }, { replace: true });
+    startTransition(() => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (newSort && newSort !== 'newest') {
+          next.set('sort', newSort);
+        } else {
+          next.delete('sort');
+        }
+        return next;
+      }, { replace: true });
+    });
   };
 
   const { 
@@ -151,9 +157,25 @@ const Index = () => {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-32 text-muted-foreground space-y-4">
-              <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="font-display tracking-wider text-muted-foreground">Loading products...</p>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div 
+                  key={i} 
+                  className="rounded-xl bg-card/40 border border-white/5 overflow-hidden animate-pulse flex flex-col h-[280px] sm:h-[340px]"
+                >
+                  <div className="h-32 sm:h-44 bg-white/5 w-full shrink-0" />
+                  <div className="p-2.5 sm:p-4 space-y-3 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="h-2.5 bg-white/10 rounded w-1/3" />
+                      <div className="h-3.5 bg-white/10 rounded w-4/5" />
+                    </div>
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                      <div className="h-4 bg-white/10 rounded w-16" />
+                      <div className="h-7 w-16 rounded-lg bg-white/5" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-8">
