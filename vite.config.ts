@@ -26,11 +26,14 @@ export default defineConfig({
         if (fs.existsSync(indexPath)) {
           fs.copyFileSync(indexPath, fallbackPath);
         }
-        // 2. Guarantee that NO _redirects file exists anywhere in dist
+        // 2. Guarantee that NO _redirects file exists anywhere in dist or public
         const redirectsPath = path.resolve(__dirname, 'dist/_redirects');
         if (fs.existsSync(redirectsPath)) {
           fs.unlinkSync(redirectsPath);
         }
+        // 3. Write .assetsignore to dist so Cloudflare Wrangler never uploads _redirects
+        const assetsIgnorePath = path.resolve(__dirname, 'dist/.assetsignore');
+        fs.writeFileSync(assetsIgnorePath, '_redirects\n_headers\n');
       },
     },
   ],
