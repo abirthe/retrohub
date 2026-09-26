@@ -42,48 +42,59 @@ const Index = () => {
 
   // Update URL search parameter when user types search
   useEffect(() => {
-    const currentUrlSearch = searchParams.get('search') || '';
     const trimmed = debouncedSearch.trim();
-    if (trimmed !== currentUrlSearch) {
-      const nextParams = new URLSearchParams(searchParams);
+    setSearchParams((prev) => {
+      const current = prev.get('search') || '';
+      if (trimmed === current) return prev;
+      const next = new URLSearchParams(prev);
       if (trimmed) {
-        nextParams.set('search', trimmed);
+        next.set('search', trimmed);
       } else {
-        nextParams.delete('search');
+        next.delete('search');
       }
-      setSearchParams(nextParams, { replace: true });
-    }
-  }, [debouncedSearch, searchParams, setSearchParams]);
+      return next;
+    }, { replace: true });
+  }, [debouncedSearch, setSearchParams]);
 
-  const setActiveCategory = (cat: string) => {
-    const nextParams = new URLSearchParams(searchParams);
-    if (cat && cat !== 'all') {
-      nextParams.set('category', cat);
-    } else {
-      nextParams.delete('category');
-    }
-    nextParams.delete('sub');
-    setSearchParams(nextParams, { replace: true });
+  const setActiveCategory = (cat: string, sub: string = '') => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (cat && cat !== 'all') {
+        next.set('category', cat);
+      } else {
+        next.delete('category');
+      }
+      if (sub) {
+        next.set('sub', sub);
+      } else {
+        next.delete('sub');
+      }
+      return next;
+    }, { replace: true });
   };
 
   const setActiveSubcategory = (sub: string) => {
-    const nextParams = new URLSearchParams(searchParams);
-    if (sub) {
-      nextParams.set('sub', sub);
-    } else {
-      nextParams.delete('sub');
-    }
-    setSearchParams(nextParams, { replace: true });
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (sub) {
+        next.set('sub', sub);
+      } else {
+        next.delete('sub');
+      }
+      return next;
+    }, { replace: true });
   };
 
   const setSort = (newSort: SortValue) => {
-    const nextParams = new URLSearchParams(searchParams);
-    if (newSort && newSort !== 'newest') {
-      nextParams.set('sort', newSort);
-    } else {
-      nextParams.delete('sort');
-    }
-    setSearchParams(nextParams, { replace: true });
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (newSort && newSort !== 'newest') {
+        next.set('sort', newSort);
+      } else {
+        next.delete('sort');
+      }
+      return next;
+    }, { replace: true });
   };
 
   const { 
