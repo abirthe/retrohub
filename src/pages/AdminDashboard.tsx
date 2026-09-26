@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,6 +53,7 @@ const AdminDashboard = () => {
   const [actionDialog, setActionDialog] = useState<ActionDialogState>({ open: false, action: '', order: null });
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('orders');
 
   useEffect(() => {
     if (!adminLoading) {
@@ -227,7 +228,7 @@ const AdminDashboard = () => {
         {/* Stats Grid */}
         <AdminStatsGrid />
 
-        <Tabs defaultValue="orders" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(val) => startTransition(() => setActiveTab(val))} className="space-y-6">
           <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 sm:w-auto sm:inline-flex h-auto p-1 bg-secondary/30 rounded-xl border border-white/5 backdrop-blur-md gap-1">
             <TabsTrigger value="orders" className="rounded-lg gap-1.5 sm:gap-2 py-2 px-1.5 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all flex items-center justify-center">
               <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
