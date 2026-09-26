@@ -128,6 +128,18 @@ node scripts/database/apply-migration.cjs supabase/migrations/20260924000003_set
 
 ---
 
+## 6. Build & Deployment Automation Hooks (`package.json`)
+
+To prevent stale artifacts, ensure atomic deployments, and guarantee clean asset uploads across Cloudflare Workers Builds and GitHub Pages:
+
+| Hook / Script | Purpose | Execution Trigger |
+| :--- | :--- | :--- |
+| `npm run prebuild` | Recursively removes the local `./dist` directory before compiling. | Runs automatically prior to `npm run build`. |
+| `npm run build` | Compiles optimized production bundle, generates `200.html` SPA fallback, and creates `dist/.assetsignore`. | Manual build command or triggered by CI pipeline. |
+| `npm run postinstall` | Automatically purges cached redirect files and compiles the Vite application fresh into `./dist`. | Runs automatically upon `npm install` / `npm ci` in Cloudflare build containers. |
+
+---
+
 ## 🛡️ Recommended Execution SOP
 
 When performing catalog maintenance or batch operations:
