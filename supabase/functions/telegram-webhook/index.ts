@@ -39,7 +39,8 @@ serve(async (req) => {
       const helpMsg = `🤖 <b>Admin Notification Bot Commands</b>\n\n` +
         `/summary - View today's stats (revenue, orders, etc.)\n` +
         `/orders - View the 5 most recent pending orders\n` +
-        `/custom - View the 5 most recent custom order requests`
+        `/custom - View the 5 most recent custom order requests\n` +
+        `/deliver [order_id] [message/code] - Fulfill an order`
       await sendMessage(chatId, helpMsg)
     } 
     else if (text === '/summary') {
@@ -98,6 +99,32 @@ serve(async (req) => {
                  `   From: ${req.name}\n\n`
         })
         await sendMessage(chatId, msg)
+      }
+    }
+    else if (text.startsWith('/deliver ')) {
+      const parts = text.substring(9).trim().split(' ')
+      const orderId = parts[0]
+      const output = parts.slice(1).join(' ')
+      
+      if (!orderId || !output) {
+        await sendMessage(chatId, '⚠️ Usage: /deliver [order_id] [message/code]')
+      } else {
+        const { data, error } = await supabase
+          .from('orders')
+          .update({ 
+            status: 'fulfilled', 
+            final_output: output 
+          })
+          .eq('id', orderId)
+          .select('id')
+          
+        if (error) {
+          await sendMessage(chatId, `❌ Failed to fulfill order: ${error.message}`)
+        } else if (!data || data.length === 0) {
+          await sendMessage(chatId, `❌ Order not found: ${orderId}`)
+        } else {
+          await sendMessage(chatId, `✅ Order <code>${orderId}</code> successfully fulfilled! The customer can now see the product code on their dashboard.`)
+        }
       }
     }
     else {
