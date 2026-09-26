@@ -24,58 +24,67 @@ function useDebounce<T>(value: T, delay: number): T {
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Initialize state from URL search params for seamless reverse routing
-  const initialCategory = searchParams.get('category') || 'all';
-  const initialSubcategory = searchParams.get('sub') || '';
-  const initialSearch = searchParams.get('search') || '';
-  const initialSort = (searchParams.get('sort') as SortValue) || 'newest';
+  // Single source of truth: URL search parameters
+  const activeCategory = searchParams.get('category') || 'all';
+  const activeSubcategory = searchParams.get('sub') || '';
+  const sort = (searchParams.get('sort') as SortValue) || 'newest';
+  const urlSearch = searchParams.get('search') || '';
 
-  const [search, setSearch]                             = useState(initialSearch);
-  const [activeCategory, setActiveCategory]             = useState<string>(initialCategory);
-  const [activeSubcategory, setActiveSubcategory]       = useState<string>(initialSubcategory);
-  const [sort, setSort]                                 = useState<SortValue>(initialSort);
-  const [sortOpen, setSortOpen]                         = useState(false);
-
+  const [search, setSearch] = useState(urlSearch);
+  const [sortOpen, setSortOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search, 300);
 
-  // Synchronize state changes to URL search params (enabling reverse routing & shareable URLs)
+  // Sync input text when URL query changes from navigation (e.g. clicking RETROHUB or browser back/forward)
   useEffect(() => {
-    const params: Record<string, string> = {};
-    if (activeCategory && activeCategory !== 'all') params.category = activeCategory;
-    if (activeSubcategory) params.sub = activeSubcategory;
-    if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
-    if (sort && sort !== 'newest') params.sort = sort;
+    setSearch(urlSearch);
+  }, [urlSearch]);
 
-    // Only update if params actually differ from current searchParams to avoid infinite loop
-    const currentCategory = searchParams.get('category') || 'all';
-    const currentSub = searchParams.get('sub') || '';
-    const currentSearch = searchParams.get('search') || '';
-    const currentSort = searchParams.get('sort') || 'newest';
-
-    const hasChanged =
-      (params.category || 'all') !== currentCategory ||
-      (params.sub || '') !== currentSub ||
-      (params.search || '') !== currentSearch ||
-      (params.sort || 'newest') !== currentSort;
-
-    if (hasChanged) {
-      setSearchParams(params, { replace: true });
+  // Update URL search parameter when user types search
+  useEffect(() => {
+    const currentUrlSearch = searchParams.get('search') || '';
+    const trimmed = debouncedSearch.trim();
+    if (trimmed !== currentUrlSearch) {
+      const nextParams = new URLSearchParams(searchParams);
+      if (trimmed) {
+        nextParams.set('search', trimmed);
+      } else {
+        nextParams.delete('search');
+      }
+      setSearchParams(nextParams, { replace: true });
     }
-  }, [activeCategory, activeSubcategory, debouncedSearch, sort, searchParams, setSearchParams]);
+  }, [debouncedSearch, searchParams, setSearchParams]);
 
-  // Synchronize browser history back/forward navigation to state
-  useEffect(() => {
-    const c = searchParams.get('category') || 'all';
-    const s = searchParams.get('sub') || '';
-    const q = searchParams.get('search') || '';
-    const st = (searchParams.get('sort') as SortValue) || 'newest';
+  const setActiveCategory = (cat: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (cat && cat !== 'all') {
+      nextParams.set('category', cat);
+    } else {
+      nextParams.delete('category');
+    }
+    nextParams.delete('sub');
+    setSearchParams(nextParams, { replace: true });
+  };
 
-    setActiveCategory(prev => (c !== prev ? c : prev));
-    setActiveSubcategory(prev => (s !== prev ? s : prev));
-    setSearch(prev => (q !== prev ? q : prev));
-    setSort(prev => (st !== prev ? st : prev));
-  }, [searchParams]);
+  const setActiveSubcategory = (sub: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (sub) {
+      nextParams.set('sub', sub);
+    } else {
+      nextParams.delete('sub');
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const setSort = (newSort: SortValue) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (newSort && newSort !== 'newest') {
+      nextParams.set('sort', newSort);
+    } else {
+      nextParams.delete('sort');
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const { 
     data, 
