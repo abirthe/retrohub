@@ -10,4 +10,6 @@ binding = "ASSETS"
 [observability.logs]
 enabled = true
 invocation_logs = true
-persist = true
+
+[observability.traces]
+enabled = false
