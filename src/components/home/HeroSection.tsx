@@ -11,7 +11,7 @@ export function HeroSection() {
         }}
       >
         <img
-          src="/hero-bg.jpg"
+          src="/hero-bg.webp"
           alt="Hero Background"
           width="1440"
           height="810"

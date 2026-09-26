@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ShopHeader } from '@/components/layout';
 import { ArrowLeft, Send, MessageSquare } from 'lucide-react';
-import heroBg from '@/assets/hero-bg.jpg';
+import heroBg from '@/assets/hero-bg.webp';
 import { submitCustomOrder } from '@/lib/shopApi';
 import { cn } from '@/lib/utils';
 

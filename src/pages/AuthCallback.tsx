@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle, Loader2, KeyRound } from 'lucide-react';
 import ShopHeader from '@/components/layout/ShopHeader';
-import heroBg from '@/assets/hero-bg.jpg';
+import heroBg from '@/assets/hero-bg.webp';
 
 /** Only allow same-origin relative paths to prevent open-redirect attacks. */
 const sanitiseReturnTo = (url: string | null | undefined): string => {

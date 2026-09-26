@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { ShopHeader } from '@/components/layout';
 import { useToast } from '@/hooks/use-toast';
-import heroBg from '@/assets/hero-bg.jpg';
+import heroBg from '@/assets/hero-bg.webp';
 import { CheckoutCartItems, CheckoutSummary } from '@/components/checkout';
 
 const Checkout = () => {

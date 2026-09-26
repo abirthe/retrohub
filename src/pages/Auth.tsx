@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import ShopHeader from '@/components/layout/ShopHeader';
 import { Gamepad2, ArrowRight, Loader2 } from 'lucide-react';
-import heroBg from '@/assets/hero-bg.jpg';
+import heroBg from '@/assets/hero-bg.webp';
 
 /** Only allow same-origin relative paths to prevent open-redirect attacks. */
 const sanitiseReturnTo = (url: string | null | undefined): string => {
