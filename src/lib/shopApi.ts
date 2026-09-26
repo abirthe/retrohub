@@ -247,6 +247,10 @@ export async function createOrder(
     throw new Error('Product not found or unavailable');
   }
 
+  if (productData.in_stock !== null && productData.in_stock !== undefined && productData.in_stock <= 0) {
+    throw new Error(`Sorry, "${productData.title || 'this product'}" is currently out of stock.`);
+  }
+
   const authoritativeTotal = Number(productData.sale_price) || total;
 
   const { data: orderData, error: insertError } = await supabase

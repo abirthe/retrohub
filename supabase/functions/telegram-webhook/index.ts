@@ -125,7 +125,23 @@ serve(async (req: Request) => {
         const orderList = Array.isArray(orderIds) ? orderIds : [orderIds]
         const safeTrx = escapeHtml(transactionId)
 
+        let duplicateWarning = ''
+        try {
+          const { data: duplicateOrders } = await supabase
+            .from('orders')
+            .select('id, status, created_at')
+            .not('id', 'in', `(${orderList.join(',')})`)
+            .contains('customer_input', { transaction_id: transactionId })
+            .limit(2)
+
+          if (duplicateOrders && duplicateOrders.length > 0) {
+            duplicateWarning = `🚨 <b>FRAUD WARNING: DUPLICATE TRANSACTION ID!</b>\n` +
+              `This TrxID was already used on order <code>${escapeHtml(duplicateOrders[0].id)}</code> (${escapeHtml(duplicateOrders[0].status)})!\n\n`
+          }
+        } catch (_) {}
+
         let msg = `💳 <b>Payment Submitted by Customer!</b>\n\n` +
+          duplicateWarning +
           `🧾 <b>Transaction ID:</b> <code>${safeTrx}</code>\n`
         
         if (total) {
