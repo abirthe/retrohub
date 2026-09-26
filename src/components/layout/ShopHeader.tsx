@@ -33,13 +33,19 @@ const ShopHeader = () => {
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/50">
       <div className="container flex h-16 items-center justify-between gap-2">
-        {/* Brand Name */}
+        {/* Brand Name & Logo */}
         <Link 
           to="/" 
           onClick={handleHomeClick} 
-          className="flex items-center group shrink-0 select-none cursor-pointer"
+          className="flex items-center gap-2.5 group shrink-0 select-none cursor-pointer"
         >
-          <span className="font-display text-xl font-extrabold tracking-wider text-foreground transition-transform group-hover:scale-[1.02]">
+          <img
+            src="/images/logo-monogram.jpg"
+            alt="RetroHub"
+            draggable={false}
+            className="h-8 w-8 rounded-lg object-cover ring-1 ring-primary/40 shadow-[0_0_12px_rgba(0,240,255,0.25)] transition-all duration-300 pointer-events-none select-none group-hover:scale-105 group-hover:ring-primary group-hover:shadow-[0_0_16px_rgba(0,240,255,0.4)]"
+          />
+          <span className="font-display text-xl font-extrabold tracking-wider text-foreground transition-transform group-hover:scale-[1.02] pointer-events-none select-none">
             <span className="text-primary">RETRO</span>HUB
           </span>
         </Link>
