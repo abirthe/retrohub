@@ -14,4 +14,5 @@ jobs:
         run: |
           curl -s -X POST "https://ejglirzvcsshsmnmvxvv.supabase.co/functions/v1/telegram-webhook" \
             -H "Content-Type: application/json" \
+            -H "apikey: sb_publishable_fcrxfiKh0OQeS5y9xONqsg_NE27fwVi" \
             -d '{"action": "check_pending"}'
