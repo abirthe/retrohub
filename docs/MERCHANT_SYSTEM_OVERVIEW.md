@@ -148,9 +148,10 @@ RetroHub implements a streamlined mobile payment workflow tailored for the local
 
 ### Payment Submission & Verification Pipeline
 1. **Order Initiation**: Order is created in `orders` with `status: 'pending'`.
-2. **Transaction Submission**: Customer submits their bKash Transaction ID on `/payment`. Input is strictly regex-validated on client and sanitised.
-3. **State Transition**: Order transitions to `status: 'payment_submitted'`.
-4. **Merchant Verification**: Merchant checks the incoming transaction in their bKash statement and clicks **Validate** in the Admin Suite. Order transitions to `status: 'payment_verified'`.
+2. **Transaction Submission**: Customer submits their bKash Transaction ID on `/payment`. Input is strictly regex-validated on client (`/^[A-Z0-9]{6,30}$/i`).
+3. **Atomic State Transition via RPC**: Submission routes through `submit_order_payment` (`SECURITY DEFINER`), which validates order ownership, amount consistency, and atomically updates the order to `status: 'payment_submitted'`.
+4. **Duplicate TrxID Fraud Detection**: The system checks previous orders for the same Transaction ID and flags any duplicate attempts immediately in the merchant's Telegram alert.
+5. **Merchant Verification**: Merchant checks the incoming transaction in their bKash statement and clicks **Validate** in the Admin Suite. Order transitions to `status: 'payment_verified'`.
 
 ---
 
@@ -227,6 +228,11 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 | :--- | :--- | :--- |
 | **Open Redirect Hardening** | `sanitiseReturnTo()` origin checks in `Auth.tsx` & `AuthCallback.tsx` | All post-login targets are constrained to same-origin URLs; external phishing URLs fall back to `/`. |
 | **Transaction ID Sanitization** | Client and server regex validation `/^[A-Z0-9]{6,30}$/i` | Injection payloads and malformed references are rejected prior to database mutation. |
+| **Atomic Payment Submission** | `submit_order_payment` `SECURITY DEFINER` stored procedure | Enforces order ownership, verifies total, and blocks unauthorized direct table updates. |
+| **Duplicate TrxID Detection** | Query cross-check on prior transaction references | Flags reused or fraudulent transaction IDs in real-time Telegram alerts. |
+| **Webhook Secret Header Auth** | `X-Telegram-Bot-Api-Secret-Token` verification in Edge Function | Rejects forged `/deliver` commands or fake payloads with 401 Unauthorized. |
+| **Sliding-Window IP Rate Limit**| In-memory sliding window limiter (30 req/min per IP) | Shields webhook endpoints from brute-force attempts and denial-of-service spikes. |
+| **Dual-Channel Alert Dispatch** | Edge Function webhook with direct client Telegram API fallback | Guarantees critical merchant order notifications are never dropped during edge cold starts. |
 | **Session JWT Authorization** | Bearer token passed in `emailService.ts` via Supabase session | Edge Functions authenticate the caller identity instead of relying solely on anon keys. |
 | **Private Error Masking** | Internal `useEffect` error logging in `AdminDashboard.tsx` | Raw PostgreSQL error payloads and schema hints are shielded from end users and never rendered into the DOM. |
 | **Row Level Security (RLS)** | PostgreSQL RLS enabled on all tables (`orders`, `deliveries`, `profiles`, `custom_orders`). | Customers can strictly only view their own orders and keys. Data leaks are mathematically blocked at the database engine. |

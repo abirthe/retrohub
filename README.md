@@ -74,7 +74,7 @@ Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (Postg
 
 ### 7. 24/7 Telegram Admin Bot (`@Notifyretro_bot`)
 
-Powered by a Supabase Edge Function with server-side secrets and registered Telegram commands:
+Engineered with a **high-availability dual-channel dispatch architecture**: alerts are dispatched via the Supabase Edge Function (`telegram-webhook`) with an automatic direct Telegram Bot API fallback from the client, guaranteeing that merchant alerts are delivered even during edge runtime cold starts.
 
 #### Real-Time Merchant Alerts (Pushed Directly to Phone)
 * 🛍️ **New Order Alert**: Product title, total, customer Game ID, order ID, and a ready-to-use `/deliver` command.
@@ -98,9 +98,13 @@ Powered by a Supabase Edge Function with server-side secrets and registered Tele
 
 ---
 
-### 8. Hardened Security Architecture
+### 8. Hardened Security & Anti-Fraud Architecture
 
 * **Telegram Webhook Secret Authentication**: Rejects incoming webhook calls lacking the matching `X-Telegram-Bot-Api-Secret-Token` header with `401 Unauthorized`, completely preventing forged `/deliver` requests.
+* **IP Rate Limiting**: In-memory sliding-window rate limiter restricts webhook requests to 30 requests/minute per client IP to safeguard against DDoS and brute-force attempts.
+* **Atomic Payment Submission RPC**: Customer payment submission routes through a `SECURITY DEFINER` stored procedure (`submit_order_payment`) that strictly validates user ownership, verifies payment amounts, and atomically transitions status without granting direct table `UPDATE` access to clients.
+* **Duplicate TrxID Fraud Detection**: Scans previous orders for duplicate bKash Transaction IDs, immediately alerting the merchant if an ID is reused across accounts.
+* **Authoritative Catalog Enforcement**: Prices and stock levels are re-verified against the database upon checkout, preventing client-side DOM price tampering.
 * **Internal Action Authorization**: Edge Function notification actions require valid Supabase API keys or bearer tokens.
 * **HTML Sanitization**: Dynamic user input is escaped via `escapeHtml()` prior to Telegram HTML formatting, eliminating entity parsing crashes and injection.
 * **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Digital keys (`inventory_keys`) and internal logs are hidden from non-admin accounts.
@@ -134,8 +138,9 @@ retrohub/
 │   └── workflows/
 │       ├── deploy-pages.yml             # Vite build & deployment to GitHub Pages
 │       └── pending-orders-reminder.yml  # 24/7 automated 2-hour Telegram reminder cron
+├── docs/
+│   └── MERCHANT_SYSTEM_OVERVIEW.md      # Authoritative merchant specification & operational guide
 ├── public/
-│   ├── _redirects                       # Cloudflare Pages / Netlify SPA client rewrites
 │   ├── favicon.png                      # Storefront favicon
 │   └── robots.txt                       # SEO crawler guidelines
 ├── scripts/                             # Catalog automation, seeding & pricing tools
@@ -251,9 +256,13 @@ npm run build        # Build optimized production bundle
 
 The project is pre-configured to deploy seamlessly across modern cloud providers:
 
-* **Vercel**: Push to your repository; `vercel.json` automatically manages client-side SPA routing.
-* **Cloudflare Workers / Pages**: `wrangler.toml`, `wrangler.json`, `worker.js`, and `.nvmrc` handle static asset compilation into `./dist` and SPA routing.
-* **GitHub Pages**: Handled automatically via `.github/workflows/deploy-pages.yml`.
+* **Cloudflare Workers (Static Assets)**:
+  * Static assets are built into `./dist` and bound via `env.ASSETS`.
+  * [worker.js](worker.js) intercepts 404 responses for clean client routes (`/orders`, `/checkout`, `/admin`, etc.) and rewrites them to `/index.html` without external redirect loops.
+  * Wrangler Observability is enabled in [wrangler.json](wrangler.json) and [wrangler.toml](wrangler.toml) with real-time invocation logging (`observability.logs.enabled = true`).
+  * Deployed automatically on push to `main` via Cloudflare Workers Builds.
+* **Vercel**: Push to your repository; `vercel.json` automatically manages client-side SPA rewrite routing (`/*` $\rightarrow$ `/index.html`).
+* **GitHub Pages**: Handled automatically on `push` to `main` via `.github/workflows/deploy-pages.yml`.
 * **Supabase Edge Functions**:
   ```bash
   npx supabase functions deploy telegram-webhook --no-verify-jwt
