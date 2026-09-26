@@ -1,4 +1,4 @@
-import { CreditCard, ShieldCheck } from 'lucide-react';
+import { CreditCard, ShieldCheck, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -12,6 +12,8 @@ export interface CheckoutSummaryProps {
   termsAccepted?: boolean;
   setTermsAccepted?: (val: boolean) => void;
   canCheckout?: boolean;
+  isAuthenticated?: boolean;
+  onSignIn?: () => void;
 }
 
 export const CheckoutSummary = ({ 
@@ -21,7 +23,9 @@ export const CheckoutSummary = ({
   hasTopup = false,
   termsAccepted = false,
   setTermsAccepted,
-  canCheckout = true
+  canCheckout = true,
+  isAuthenticated = true,
+  onSignIn,
 }: CheckoutSummaryProps) => {
   return (
     <Card className="bg-card/80 backdrop-blur-xl border-white/10 border shadow-2xl sticky top-24">
@@ -62,25 +66,37 @@ export const CheckoutSummary = ({
           </div>
         )}
 
-        <Button
-          onClick={onCheckout}
-          className="w-full h-12 gradient-primary font-display text-sm tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 relative overflow-hidden group"
-          size="lg"
-          disabled={loading || !canCheckout}
-        >
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          {loading ? (
-            <>
-              <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <CreditCard className="h-4 w-4" />
-              Proceed to Payment
-            </>
-          )}
-        </Button>
+        {!isAuthenticated ? (
+          <Button
+            onClick={onSignIn}
+            className="w-full h-12 gradient-primary font-display text-sm tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 relative overflow-hidden group"
+            size="lg"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            <LogIn className="h-4 w-4" />
+            Sign In to Complete Order
+          </Button>
+        ) : (
+          <Button
+            onClick={onCheckout}
+            className="w-full h-12 gradient-primary font-display text-sm tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 relative overflow-hidden group"
+            size="lg"
+            disabled={loading || !canCheckout}
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            {loading ? (
+              <>
+                <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="h-4 w-4" />
+                Proceed to Payment
+              </>
+            )}
+          </Button>
+        )}
 
         <div className="rounded-lg bg-secondary/30 p-3 flex gap-3 items-start border border-white/5">
           <ShieldCheck className="w-5 h-5 text-success shrink-0" />

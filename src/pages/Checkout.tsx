@@ -24,22 +24,6 @@ const Checkout = () => {
   const topupsValid = !hasTopup || items.filter(i => i.product.category === 'topup').every(i => customerInput[i.product.id]?.trim());
   const canCheckout = !hasTopup || (termsAccepted && topupsValid);
 
-  if (!user) {
-    return (
-      <div className="min-h-screen">
-        <ShopHeader />
-        <div className="container py-32 text-center flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <h1 className="font-display text-2xl font-bold">Sign in to Checkout</h1>
-          <p className="text-muted-foreground mb-4 max-w-md">You need to have an account to place orders. It's free and takes seconds.</p>
-          <Button onClick={() => navigate('/auth', { state: { from: '/checkout' } })} className="gradient-primary">Sign In / Register</Button>
-        </div>
-      </div>
-    );
-  }
-
   if (items.length === 0) {
     return (
       <div className="min-h-screen">
@@ -61,6 +45,10 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
+    if (!user) {
+      navigate('/auth', { state: { from: '/checkout' } });
+      return;
+    }
     if (!canCheckout) {
       toast({
         title: 'Missing Information',
@@ -138,6 +126,28 @@ const Checkout = () => {
           </h1>
         </div>
 
+        {/* Guest Notification Banner - Only visible to unauthenticated guests */}
+        {!user && (
+          <div className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/20 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Checking out as Guest</p>
+                <p className="text-xs text-muted-foreground">Sign in or create a free account to finalize payment and receive your digital codes.</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => navigate('/auth', { state: { from: '/checkout' } })}
+              size="sm"
+              className="gradient-primary font-display text-xs tracking-wider shrink-0 self-start sm:self-auto"
+            >
+              Sign In / Register
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
@@ -160,6 +170,8 @@ const Checkout = () => {
               termsAccepted={termsAccepted}
               setTermsAccepted={setTermsAccepted}
               canCheckout={canCheckout}
+              isAuthenticated={!!user}
+              onSignIn={() => navigate('/auth', { state: { from: '/checkout' } })}
             />
           </div>
         </div>
