@@ -1,0 +1,2 @@
+# Cloudflare Static Assets configuration
+# Client-side routing SPA fallback is handled natively in worker.js
