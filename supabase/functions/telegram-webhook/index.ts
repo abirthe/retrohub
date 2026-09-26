@@ -1,8 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const TELEGRAM_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') || '8734266809:AAHLMa--CApI_Ssiqpq62jewh0t-QPoSji4'
-const ADMIN_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID') || '5605963234'
+const TELEGRAM_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN')!
+const ADMIN_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
