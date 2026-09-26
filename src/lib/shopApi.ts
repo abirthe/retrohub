@@ -271,7 +271,7 @@ export async function createOrder(
   try {
     const productName = productData.title || 'Unknown Product';
     const isLowStock = productData.in_stock !== null && productData.in_stock !== undefined && productData.in_stock <= 3;
-    const gameId = (customerInput as any)?.game_id || '';
+    const gameId = typeof customerInput?.game_id === 'string' ? customerInput.game_id : '';
 
     await notifyNewOrder({
       orderId: orderData.id,
@@ -388,7 +388,7 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
       p_payment_method: 'manual',
     } as never);
 
-    if (!rpcError && (rpcData as any)?.success) {
+    if (!rpcError && (rpcData as { success?: boolean })?.success) {
       return { success: true };
     }
 
@@ -418,7 +418,7 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
 
   const results = await Promise.all(updates);
 
-  const errors = results.filter(r => (r as any).error);
+  const errors = results.filter(r => 'error' in r && Boolean(r.error));
   if (errors.length > 0) {
     throw new Error('Failed to submit payment. Please contact support.');
   }

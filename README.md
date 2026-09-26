@@ -1,255 +1,263 @@
-# RETROHUB — Game Keys, Top-ups & Digital Commerce Platform 🎮⚡
+# RETROHUB — Digital Goods, Game Keys & In-Game Commerce Platform 🎮⚡
 
-**RETROHUB** is an enterprise-grade digital goods e-commerce platform built for instantaneous fulfillment of digital game keys, in-game currency top-ups, verified gaming accounts, digital gift cards, subscription passes, and software services.
+**RETROHUB** is a high-performance digital commerce platform engineered for instant delivery of digital game keys, in-game currency top-ups, verified gaming accounts, digital gift cards, subscription passes, and software licenses.
 
-Engineered with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL 15+)**, the platform delivers ultra-low latency catalog browsing, real-time merchant margin tracking, local mobile payment workflows, and automated digital delivery pipelines.
+Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL 15+)**, the platform features a cyber-neon ambient UI, local mobile payment workflows (bKash), a 24/7 Telegram admin bot with direct fulfillment commands, and automated background order monitoring.
 
 > **Developer & Architect:** Abir Hossain
 
 ---
 
-## ⚡ Core Capabilities & Highlights
+## ⚡ Current Features & Capabilities
 
-* **Multi-Platform Digital Goods**: Steam, Xbox, PlayStation, Nintendo, Epic Games, GOG, and EA App.
-* **Dynamic Ambient UI**: Immersive cyber-neon video backgrounds with HLS streaming (via `hls.js`), real-time color harmonization overlays, and ultra-smooth glassmorphism.
-* **Direct Player UID In-Game Top-Ups**: 17+ curated games with automated Player ID / Server / Zone ID input validation (Valorant, MLBB, PUBG Mobile, Genshin Impact, Honkai: Star Rail, Fortnite, Roblox, etc.).
-* **Verified Gaming Accounts**: Full-access regional and verified accounts isolated into a dedicated category.
-* **Global & Regional Digital Gift Cards**: Apple iTunes, Steam Wallet, PSN, Xbox, Nintendo eShop, Roblox, and Blizzard Battle.net.
-* **Gaming & Cloud Subscriptions**: Xbox Game Pass (Ultimate/PC), PlayStation Plus (Essential/Extra/Deluxe), EA Play, Discord Nitro, and YouTube Premium.
-* **Software & Digital Services**: Lifetime Microsoft Office/Windows activation licenses, regional PSN/Steam account setup, and Google AI Pro 6-Month plans.
-* **On-Demand Custom Orders**: Dedicated custom request portal (`/custom-order`) with admin queue triage.
-* **Google OAuth & Passwordless Auth**: Instant Google OAuth 2.0 sign-in, magic-link email authentication, and email/password access with dedicated `/privacy` and `/terms` compliance pages.
-* **Streamlined Mobile Payment via bKash**: Integrated bKash checkout (Personal/Merchant) with 1% automated charge calculation. Transaction IDs are strictly validated with an alphanumeric regex (`/^[A-Z0-9]{6,30}$/i`) prior to database storage.
-* **Automated Order Fulfillment**: Immediate delivery code revelation in `/orders` alongside automated HTML receipt emails dispatched via Supabase Edge Functions + Resend API.
-* **AI-Powered Fulfillment Emails**: Integrated xAI Grok API (`grokApi.ts`) for generating personalised, professional fulfillment emails for every completed transaction.
-* **Merchant Back-Office Suite**: Live daily revenue, order counts, and net profit analytics, 8-state order lifecycle management, inline stock/price updates, and custom orders board.
-* **Telegram Admin Bot**: Integrated `@Notifyretro_bot` acts as a 24/7 command center, delivering real-time alerts for new orders, custom requests, and low stock warnings, alongside on-demand `/summary` and `/orders` webhook commands via Supabase Edge Functions.
+### 1. Storefront & Product Discovery
+* **Multi-Category Catalog**: Curated across 8 distinct categories:
+  * 🖥️ **PC Games** (Steam, Epic Games, GOG, EA App)
+  * 🎮 **Console Games** (Xbox, PlayStation, Nintendo eShop)
+  * 💎 **In-Game Top-Ups** (Valorant, MLBB, PUBG Mobile, Genshin Impact, Free Fire, Roblox, etc.)
+  * 🎁 **Digital Gift Cards** (Apple iTunes, Steam Wallet, PSN, Xbox, Nintendo, Google Play)
+  * 🛡️ **Verified Gaming Accounts** (Regional and verified accounts)
+  * 🔄 **Subscriptions & Passes** (Xbox Game Pass, PlayStation Plus, Discord Nitro, Telegram Premium, Spotify, YouTube Premium)
+  * 💻 **Software & Services** (Windows/Office keys, regional account setup, cloud services)
+* **Dynamic Ambient Theme**: Cyber-neon dark interface with ambient video animation overlays, glassmorphism cards, and responsive mobile-first navigation.
+* **Smart Filtering & Regional Taxonomy**: Fast searching and filtering by category, platform, region tag (Global, US, TR, ARG, IN, etc.), and in-stock status.
 
 ---
 
-## 💼 The "Solo-Merchant" Advantage
-
-RetroHub is purpose-built to enable a **solo entrepreneur** to run a highly profitable digital commerce empire without the overhead of customer support teams, data entry clerks, or logistics staff. 
-
-* **Zero Logistics & Automated Fulfillment**: Operating entirely on digital goods (keys, top-ups, subscriptions) means zero shipping costs, zero warehousing, and 24/7 instant order fulfillment. The `FOR UPDATE SKIP LOCKED` database mechanism guarantees autonomous, error-free digital key delivery while you sleep.
-* **AI-Powered Customer Communication**: Integrated xAI Grok automatically generates polished, professional delivery emails, drastically reducing manual customer service workload.
-* **Telegram-Driven Management**: No need to stay glued to the dashboard. The integrated Telegram bot pushes live alerts for sales and low stock directly to your phone, and responds to slash-commands to fetch daily financial summaries on the go.
-* **Unified Back-Office Command Center**: A single `/admin` dashboard tracks live daily revenue, pending orders, custom requests, and inventory margins. A solo merchant can oversee the entire business health in seconds.
-* **Automated Catalog Intelligence**: The comprehensive `scripts/` suite handles the heavy lifting of a massive catalog—automating market price scraping, competitor margin syncing, image mapping, and duplicate cleaning without manual data entry.
-* **Streamlined Financial Operations**: Direct integration with local mobile wallets (bKash) bypasses expensive enterprise payment gateways, maximizing profit margins and enabling rapid 1-click transaction validation.
+### 2. Cart, Checkout & Player UID Capture
+* **Persistent Cart**: Client-side cart backed by `localStorage` with quantity controls and real-time total calculation.
+* **Player UID / Server Input**: For in-game top-up products, checkout prompts and validates the required Player ID, Server, or Zone ID.
+* **Authoritative Price Enforcement**: Product sale prices are validated and enforced directly from the database, preventing client-side price tampering.
+* **Stock Availability Protection**: Real-time validation blocks orders if an item is out of stock.
 
 ---
 
-## 🛡️ Security Architecture
+### 3. Payment Processing (bKash & Manual Mobile Banking)
+* **Integrated bKash Flow**: Dedicated `/payment` portal with automated 1% bKash fee calculation and copy-to-clipboard account numbers.
+* **Transaction ID Validation**: Strict regex verification (`/^[A-Z0-9]{6,30}$/i`) ensures valid alphanumeric Transaction IDs.
+* **Secure Payment RPC**: Uses a `SECURITY DEFINER` PostgreSQL function (`submit_order_payment`) that verifies order ownership and updates the order status to `payment_submitted` without exposing direct table `UPDATE` permissions.
+* **Duplicate TrxID Fraud Detection**: The backend flags and warns the merchant if a customer attempts to reuse a transaction ID from a previous order.
 
-The platform has undergone a comprehensive security hardening audit with zero-compromise protections implemented across both frontend and database layers:
+---
 
-| Protection | Implementation | Operational Guarantee |
-| :--- | :--- | :--- |
-| **Open Redirect Prevention** | `sanitiseReturnTo()` in `Auth.tsx` & `AuthCallback.tsx` | Validates return targets against window origin; non-same-origin URLs fall back safely to `/`. |
-| **Transaction ID Sanitization** | Regex `/^[A-Z0-9]{6,30}$/i` enforced in `Payment.tsx` | Eliminates script injection and malformed references before database submission. |
-| **Session JWT for Edge Functions** | Dynamic caller token in `emailService.ts` | Dispatches calls with `Authorization: Bearer <session.access_token>` so Edge Functions verify the user. |
-| **Private Error Logging** | Secure internal error routing in `AdminDashboard.tsx` | Query failures log via internal effects (`console.error`); raw Supabase schema hints are never rendered in the UI. |
-| **Row-Level Security (RLS)** | PostgreSQL RLS enabled on all tables | Customers strictly query their own orders and keys; data leakage is blocked at the database engine. |
-| **RBAC via Stored Procedures** | `has_role(auth.uid(), 'admin')` | Administrative mutations and financial KPIs are guarded by PostgreSQL `SECURITY DEFINER` functions. |
-| **Concurrency Lock Protection** | `SELECT ... FOR UPDATE SKIP LOCKED` | High-concurrency key distribution prevents two buyers from ever claiming the same digital key. |
-| **Tamper-Proof Audit Trails** | `audit_logs` & `admin_action_logs` | Every order status transition, manual price edit, and stock replenishment is permanently audited. |
+### 4. Customer Dashboard & Digital Delivery
+* **Order History Portal (`/orders`)**: Real-time order tracking showing order status, total price, and timestamps.
+* **Digital Code Reveal**: Instantly reveals the redeemed license key, account credential, or voucher code upon admin fulfillment.
+* **One-Tap Copy & Instructions**: Copy-to-clipboard buttons and platform-specific activation guidance.
+* **Full Order Lifecycle Support**: Tracks orders across all stages: `pending` → `payment_submitted` → `payment_verified` → `sourcing` → `fulfilled` (or `cancelled`/`refunded`).
+
+---
+
+### 5. On-Demand Custom Orders (`/custom-order`)
+* Dedicated request form for unlisted game keys, rare regional accounts, or specialized digital software.
+* Automatically dispatches instant alerts to the merchant's Telegram inbox.
+* Integrated into the merchant dashboard triage queue.
+
+---
+
+### 6. Merchant Back-Office Suite (`/admin`)
+* **Role-Gated Access**: Strictly protected by Supabase RBAC (`public.has_role(auth.uid(), 'admin')`).
+* **Live KPI Dashboard**:
+  * 💰 Today's Gross Revenue (৳)
+  * 📦 Total Orders Placed Today
+  * 📈 Calculated Net Profit (Sale Price − Sourced Cost)
+  * ⏳ Pending Orders Awaiting Action
+* **Order Operations Board**:
+  * **Verify Payment**: Transitions order to `payment_verified` after confirming the bKash/Nagad statement.
+  * **Start Sourcing**: Marks item as `sourcing` during external acquisition.
+  * **Fulfill Order**: Records the delivery code, supplier source, and cost paid, automatically calculating profit and moving the status to `fulfilled`.
+  * **Hold / Cancel / Refund**: Full exception handling with audit trail recording.
+* **Inventory & Catalog Control**: Inline price updating (`sale_price`, `cost_price`) and real-time stock adjustments.
+* **Custom Orders Board**: Manage incoming customer quotes and status.
+
+---
+
+### 7. 24/7 Telegram Admin Bot (`@Notifyretro_bot`)
+
+Powered by a Supabase Edge Function with server-side secrets and registered Telegram commands:
+
+#### Real-Time Merchant Alerts (Pushed Directly to Phone)
+* 🛍️ **New Order Alert**: Product title, total, customer Game ID, order ID, and a ready-to-use `/deliver` command.
+* 💳 **Payment Submitted Alert**: Customer Transaction ID, order IDs, amount, and automatic duplicate TrxID fraud warnings.
+* 📝 **Custom Order Alert**: Customer name, email, platform, and request details.
+* ⚠️ **Low Stock Warning**: Instant notification when product inventory drops to $\le 3$.
+
+#### Interactive Telegram Commands
+| Command | Action |
+| :--- | :--- |
+| `/orders` | View up to 10 latest unfulfilled orders with quick delivery shortcuts |
+| `/deliver <order_id> <code>` | **Fulfill an order directly from Telegram** without opening the dashboard |
+| `/summary` | View today's financial metrics (revenue, orders today, pending items) |
+| `/custom` | View the latest pending custom order requests |
+| `/remind` | Instantly trigger a fresh check of all unfulfilled orders |
+| `/help` | Display all available commands and syntax |
+
+#### Automated 24/7 Background Reminders
+* Scheduled via [`.github/workflows/pending-orders-reminder.yml`](.github/workflows/pending-orders-reminder.yml).
+* Runs in GitHub Actions cloud every 2 hours to scan for unfulfilled orders (`pending`, `payment_submitted`, `payment_verified`) and sends a summary reminder to Telegram.
+
+---
+
+### 8. Hardened Security Architecture
+
+* **Telegram Webhook Secret Authentication**: Rejects incoming webhook calls lacking the matching `X-Telegram-Bot-Api-Secret-Token` header with `401 Unauthorized`, completely preventing forged `/deliver` requests.
+* **Internal Action Authorization**: Edge Function notification actions require valid Supabase API keys or bearer tokens.
+* **HTML Sanitization**: Dynamic user input is escaped via `escapeHtml()` prior to Telegram HTML formatting, eliminating entity parsing crashes and injection.
+* **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Digital keys (`inventory_keys`) and internal logs are hidden from non-admin accounts.
+* **Open Redirect Protection**: `sanitiseReturnTo()` validates OAuth callback destinations against `window.location.origin`.
+* **Zero Client Credential Leakage**: Bot tokens, webhook secrets, and database service keys are stored strictly in server-side Supabase secrets.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies & Libraries | Key Responsibility |
+| Layer | Technologies | Role in Platform |
 | :--- | :--- | :--- |
-| **Frontend Core** | React 18.3, TypeScript 5.8 | Functional components, zero `any` strict typing, custom hooks |
-| **Styling & Theme** | Tailwind CSS 3.4, PostCSS, Lucide React, hls.js | Cyber-neon dark aesthetic, HLS video backgrounds, glassmorphism, responsive mobile UI |
-| **UI Component Primitives**| Radix UI, shadcn/ui, Sonner, Vaul | Accessible dialogs, dropdowns, sheets, modals, and toasts |
-| **State & Data Fetching** | TanStack Query v5, Context API | Server state caching, optimistic UI updates, localStorage persistent cart |
-| **Routing** | React Router DOM v6 | Client-side routing with guarded admin routes and OAuth callback handlers |
-| **Authentication** | Supabase Auth (Google OAuth, Magic Links, Passwords) | Multi-provider authentication with origin-validated redirection |
-| **Backend & Database** | Supabase (PostgreSQL 15+) | RLS policies, views, stored procedures, audit tables |
-| **Email Delivery** | Supabase Edge Functions, Resend API | Automated fulfillment receipts with session-authenticated caller verification |
-| **AI Email Generation** | xAI Grok API (`grokApi.ts`) | Context-aware, personalised customer delivery emails |
-| **Admin Notifications** | Telegram Bot API, Supabase Edge Functions | Real-time sales alerts, low stock warnings, and interactive admin webhooks |
-| **Build & Tooling** | Vite 5.4, SWC, Vitest, ESLint 9 | Dev server on port 3000, optimized production code-splitting |
+| **Frontend Framework** | React 18.3, TypeScript 5.8, Vite 5.4 | Single Page Application with strict type safety |
+| **Styling & Icons** | Tailwind CSS 3.4, Lucide React, PostCSS | Cyber-neon design system, glassmorphism, responsive UI |
+| **UI Primitives** | Radix UI, shadcn/ui, Sonner | Accessible dialogs, drawers, dropdowns, and toast notifications |
+| **State & Caching** | TanStack Query v5, React Context | Server state management, cache invalidation, persistent cart |
+| **Routing** | React Router DOM v6 | SPA navigation with guarded admin routes and OAuth handlers |
+| **Authentication** | Supabase Auth | Google OAuth 2.0, email/password, and session persistence |
+| **Database & Storage** | Supabase (PostgreSQL 15+) | Row Level Security, views, triggers, and `SECURITY DEFINER` RPCs |
+| **Serverless Functions**| Supabase Edge Functions (Deno) | Telegram bot webhook ingestion, notifications, and scheduled triggers |
+| **Automation & Cron** | GitHub Actions | 24/7 background pending order check every 2 hours, automated CI/CD |
+| **Deployment Targets** | Cloudflare Workers / Pages, Vercel, GitHub Pages | Production SPA build with client fallback routing |
 
 ---
 
-## 📁 Repository Structure
+## 📁 Repository Directory Structure
 
 ```
 retrohub/
-├── docs/
-│   └── MERCHANT_SYSTEM_OVERVIEW.md     # Feature specs, capabilities & merchant SOP
+├── .github/
+│   └── workflows/
+│       ├── deploy-pages.yml             # Vite build & deployment to GitHub Pages
+│       └── pending-orders-reminder.yml  # 24/7 automated 2-hour Telegram reminder cron
 ├── public/
-│   └── images/                         # Game, gift card, top-up & service cover art
-├── scripts/                            # Catalog automation, seeding, pricing & maintenance
-│   ├── database/                       # Schema DDL, migrations, compiled seed SQL
-│   ├── images/                         # Cover artwork mapping & watermark cleaners
-│   ├── maintenance/                    # Deduplication, orphan cleanup, stock auditors
-│   ├── pricing/                        # Market scrapers & margin sync algorithms
-│   ├── seeding/                        # Multi-source product catalog seeders
-│   └── README.md                       # Comprehensive tooling & automation guide
+│   ├── _redirects                       # Cloudflare Pages / Netlify SPA client rewrites
+│   ├── favicon.png                      # Storefront favicon
+│   └── robots.txt                       # SEO crawler guidelines
+├── scripts/                             # Catalog automation, seeding & pricing tools
+│   ├── database/                        # Migration runners and seed SQL
+│   ├── images/                          # Image mapping and CDN uploaders
+│   ├── maintenance/                     # Product deduplication and stock auditors
+│   ├── pricing/                         # Market price scrapers and sync tools
+│   ├── seeding/                         # Gift cards, game top-ups, and account seeders
+│   └── README.md                        # Documentation for script toolchain
 ├── src/
 │   ├── components/
-│   │   ├── admin/                      # AdminSuite tabs, order dialogs, stats grid, inventory
-│   │   ├── checkout/                   # Checkout review cards & validation
-│   │   ├── home/                       # Hero banner, category pills, product grid, filters
-│   │   ├── layout/                     # ShopHeader, Footer, navigation drawers
-│   │   ├── orders/                     # Order tables & mobile order cards
-│   │   ├── payment/                    # bKash payment instructions component
-│   │   ├── product/                    # Product details, purchase cards, variant selectors
-│   │   └── ui/                         # Radix UI design system primitives
-│   ├── contexts/                       # CartContext with localStorage persistence
-│   ├── hooks/                          # useAuth, useAdmin, useToast, etc.
-│   ├── integrations/                   # Supabase client & generated database types
+│   │   ├── admin/                       # Dashboard tabs, order dialogs, stats grid, catalog editor
+│   │   ├── checkout/                    # Order review cards and stock feedback
+│   │   ├── home/                        # Hero banner, category pills, product grid, filters
+│   │   ├── layout/                      # ShopHeader, Footer, navigation drawers
+│   │   ├── orders/                      # Customer order table, status badges, code reveal
+│   │   ├── payment/                     # bKash payment instructions and account display
+│   │   ├── product/                     # Product cards, detail modals, variant selectors
+│   │   └── ui/                          # Radix / shadcn accessible component primitives
+│   ├── contexts/                        # CartContext (persisted via localStorage)
+│   ├── hooks/                           # useAdmin, useAuth, useToast custom hooks
+│   ├── integrations/
+│   │   └── supabase/                    # Supabase client with production fallbacks & types
 │   ├── lib/
-│   │   ├── constants.ts                # Category & subcategory taxonomy
-│   │   ├── emailService.ts             # Edge Function email dispatch (session-JWT auth)
-│   │   ├── grokApi.ts                  # xAI Grok API — fulfillment email generation
-│   │   ├── productFilters.ts           # Strict 1-to-1 category isolation
-│   │   ├── regions.ts                  # 28 region codes & flag helpers
-│   │   ├── shopApi.ts                  # Storefront & Admin data layer & RPC wrappers
-│   │   └── utils.ts                    # Class mergers & number formatters
+│   │   ├── constants.ts                 # Category and subcategory taxonomy
+│   │   ├── productFilters.ts            # Strict category isolation rules
+│   │   ├── regions.ts                   # 28 region codes and country flags
+│   │   ├── shopApi.ts                   # Data access layer, order creation & RPC callers
+│   │   ├── telegramService.ts           # Client dispatch to Supabase Edge Function
+│   │   └── utils.ts                     # Classname merging and currency formatters
 │   ├── pages/
-│   │   ├── AdminDashboard.tsx          # Merchant back-office (admin-role gated)
-│   │   ├── Auth.tsx                    # Sign in / Register (open-redirect hardened)
-│   │   ├── AuthCallback.tsx            # Google OAuth & magic-link callback handler
-│   │   ├── Checkout.tsx                # Cart review & order creation
-│   │   ├── CustomOrder.tsx             # On-demand custom quote request portal
-│   │   ├── Index.tsx                   # Storefront homepage & product discovery
-│   │   ├── NotFound.tsx                # 404 error page
-│   │   ├── Orders.tsx                  # Customer order history & instant code delivery
-│   │   ├── Payment.tsx                 # bKash payment portal (TrxID regex validated)
-│   │   ├── Privacy.tsx                 # Privacy Policy (OAuth consent compliance)
-│   │   ├── ProductDetail.tsx           # Product detail page & UID data collection
-│   │   └── Terms.tsx                   # Terms of Service (OAuth consent compliance)
-│   ├── App.tsx                         # Route hierarchy, query client & error boundary
-│   └── main.tsx                        # React client entry point
-├── supabase/migrations/                # Versioned SQL migrations (RLS, views, RPCs)
-├── package.json
-├── tailwind.config.ts
-└── vite.config.ts                      # Port 3000, path aliases, vendor chunking
+│   │   ├── AdminDashboard.tsx           # Merchant back-office (admin-role gated)
+│   │   ├── Auth.tsx                     # Login and registration portal
+│   │   ├── AuthCallback.tsx             # OAuth callback handler (open-redirect secured)
+│   │   ├── Checkout.tsx                 # Cart checkout & Player ID collection
+│   │   ├── CustomOrder.tsx              # Custom quote request form
+│   │   ├── Index.tsx                    # Storefront homepage & product catalog
+│   │   ├── NotFound.tsx                 # 404 handler
+│   │   ├── Orders.tsx                   # Customer order history & code reveal
+│   │   ├── Payment.tsx                  # bKash transaction ID submission
+│   │   ├── Privacy.tsx                  # Privacy policy (OAuth compliance)
+│   │   ├── ProductDetail.tsx            # Full product details page
+│   │   └── Terms.tsx                    # Terms of service (OAuth compliance)
+│   ├── App.tsx                          # Root router, query client, and error boundary
+│   ├── index.css                        # Tailwind directives and cyber-neon design tokens
+│   └── main.tsx                         # React entrypoint
+├── supabase/
+│   ├── functions/
+│   │   ├── telegram-webhook/            # Webhook receiver, notifications & bot commands
+│   │   └── send-order-email/            # Resend email notification function
+│   └── migrations/                      # Version-controlled PostgreSQL schemas, RLS & RPCs
+├── .env.example                         # Environment variable template
+├── .nvmrc                               # Pinned Node.js version 20
+├── package.json                         # Project dependencies and npm scripts
+├── tailwind.config.ts                   # Tailwind theme styling & animations
+├── vercel.json                          # Vercel SPA routing configuration
+├── vite.config.ts                       # Vite compiler config & path aliases
+├── worker.js                            # Cloudflare Worker SPA asset binding handler
+├── wrangler.json                        # Cloudflare Workers configuration
+└── wrangler.toml                        # Cloudflare Workers build and asset configuration
 ```
-
----
-
-## 🔄 End-to-End Order & Delivery Flow
-
-```
-[ Customer Storefront ]
-        │
-        ▼ (Selects Product & enters Player ID / Server if Top-up)
-[ Cart & Checkout ]
-        │
-        ▼ (bKash — primary payment method)
-[ Payment Portal (/payment) ]
-        │  TrxID validated: /^[A-Z0-9]{6,30}$/i
-        ▼ (Submits validated Transaction ID)
-[ Order Status: payment_submitted ]
-        │
-        ▼
-[ Admin Dashboard (/admin) ]
-        │
-        ├─► Merchant checks bKash statement → clicks "Validate" (Status: payment_verified)
-        │
-        ▼
-[ Fulfillment Execution ]
-        ├─► Automated Key Assigned (instant_code with SKIP LOCKED)
-        │    OR
-        └─► Merchant pastes code/credentials (fulfill_order RPC)
-        │
-        ▼ (Status: fulfilled)
-┌────────────────────────────────────────────────────────┐
-│  - Code displayed on Customer /orders page             │
-│  - AI-generated delivery email sent via Resend API     │
-│    (Authorization: Bearer <session JWT>)               │
-│  - Margin logged & financial analytics updated         │
-└────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🗄️ Database Architecture & Key Views
-
-### Core Relational Tables
-* **`products`**: Catalog items (`title`, `sale_price`, `cost_price`, `category`, `platform`, `region`, `delivery_type`, `in_stock`, `is_active`).
-* **`inventory_keys`**: Digital keys (`pin_code`, `serial_number`, `status: available | sold | expired`).
-* **`orders`**: Customer transactions (`user_id`, `product_id`, `total`, `status`, `customer_input`).
-* **`deliveries`**: Fulfillment records (`order_id`, `delivery_code`, `cost_paid`, `sourced_from`, `notes`).
-* **`custom_orders`**: On-demand requests (`name`, `email`, `product_name`, `platform`, `details`, `status`).
-* **`user_roles`**: RBAC (`role: admin | user`).
-* **`audit_logs` & `admin_action_logs`**: Tamper-proof audit trails.
-
-### Real-Time Financial Views
-* **`v_revenue_today`**: Aggregated gross sales for the current calendar day.
-* **`v_orders_today`**: Count of successfully completed orders today.
-* **`v_profit_today`**: Net margin — $\text{Total Sale} - \text{Total Cost}$.
-* **`v_pending_action_count`**: Orders awaiting verification or fulfillment.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* **Node.js** `v18.0.0+`
-* **npm** `v9.0.0+`
+* **Node.js**: `v20.0.0+`
+* **npm**: `v9.0.0+`
 * **Supabase Project** (PostgreSQL 15+)
 
-### Environment Configuration
-Create a `.env` file in the project root:
-
-```env
-VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
-VITE_SUPABASE_PROJECT_ID=your-project-id
-VITE_XAI_API_KEY=your-xai-grok-api-key
-VITE_TELEGRAM_CHAT_ID=your-telegram-chat-id   # Receives live admin alerts
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # seed & maintenance scripts only
+### 1. Clone & Install
+```bash
+git clone https://github.com/abirthe/retrohub.git
+cd retrohub
+npm install
 ```
 
-### Installation & Development
+### 2. Environment Configuration
+Create a `.env` file in the root directory:
+```env
+# Supabase Configuration
+VITE_SUPABASE_PROJECT_ID="your_project_id"
+VITE_SUPABASE_URL="https://your_project_id.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY="your_publishable_anon_key"
+VITE_SUPABASE_ANON_KEY="your_publishable_anon_key"
+
+# Server / Script Variables (Keep Private)
+SUPABASE_URL="https://your_project_id.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
+
+# Telegram Bot (Optional local development overrides)
+VITE_TELEGRAM_CHAT_ID="your_telegram_chat_id"
+VITE_TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
+```
+
+### 3. Run Development Server
 ```bash
-npm install          # Install dependencies
-npm run dev          # Start dev server (http://localhost:3000)
-npx tsc --noEmit     # TypeScript type verification
-npm run test         # Run unit tests
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Build & Verify
+```bash
+npm run lint         # Run ESLint validation
+npx tsc --noEmit     # Check TypeScript types
 npm run build        # Build optimized production bundle
 ```
 
 ---
 
-## 🧰 Catalog Scripts & Automation Toolchain
+## ☁️ Deployment
 
-RetroHub features an automated Node.js toolchain located in [`scripts/`](scripts/README.md):
+The project is pre-configured to deploy seamlessly across modern cloud providers:
 
-```bash
-# Seed curated digital gift cards (Apple, Steam, PlayStation, Xbox, Nintendo, Roblox, Blizzard)
-node scripts/seeding/seed_digital_giftcards.mjs
-
-# Seed 17+ game top-up products and denominations
-node scripts/seeding/seed_game_topups.mjs
-
-# Seed verified gaming accounts
-node scripts/seeding/seed_plati_accounts.mjs
-
-# Preview catalog deduplication (safe dry-run)
-node scripts/maintenance/deduplicate_products_strict.mjs
-
-# Execute catalog deduplication (live mode)
-node scripts/maintenance/deduplicate_products_strict.mjs --execute
-
-# Audit out-of-stock and inactive products
-node scripts/maintenance/check-stock.cjs
-```
-
-See **[scripts/README.md](scripts/README.md)** for full documentation.
-
----
-
-## 📚 Documentation
-* **[Platform & Merchant System Specification](docs/MERCHANT_SYSTEM_OVERVIEW.md)**: Exhaustive reference covering all website features, category taxonomy, payment handling, admin operations, and merchant standard operating procedures.
-* **[Tooling & Scripts Manual](scripts/README.md)**: Developer documentation for seeding, maintenance, database migration, and pricing sync tools.
+* **Vercel**: Push to your repository; `vercel.json` automatically manages client-side SPA routing.
+* **Cloudflare Workers / Pages**: `wrangler.toml`, `wrangler.json`, `worker.js`, and `.nvmrc` handle static asset compilation into `./dist` and SPA routing.
+* **GitHub Pages**: Handled automatically via `.github/workflows/deploy-pages.yml`.
+* **Supabase Edge Functions**:
+  ```bash
+  npx supabase functions deploy telegram-webhook --no-verify-jwt
+  ```
 
 ---
 
