@@ -35,26 +35,25 @@ const BackgroundAnimation: React.FC = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const forcePlayOnInteraction = async () => {
-      if (video.paused) {
-        try {
-          await video.play();
-        } catch (e) {
-          console.warn('Video play error on interaction:', e);
+    const forcePlayOnInteraction = () => {
+      // Defer video play to the next animation frame so user click/touch paint is never blocked (prevents INP delays)
+      requestAnimationFrame(() => {
+        if (video && video.paused) {
+          video.play().catch(() => {});
         }
-      }
+      });
     };
 
     const setupInteractionListeners = () => {
-      window.addEventListener('click', forcePlayOnInteraction, { once: true });
-      window.addEventListener('touchstart', forcePlayOnInteraction, { once: true });
-      window.addEventListener('scroll', forcePlayOnInteraction, { once: true });
+      window.addEventListener('click', forcePlayOnInteraction, { once: true, passive: true });
+      window.addEventListener('touchstart', forcePlayOnInteraction, { once: true, passive: true });
+      window.addEventListener('scroll', forcePlayOnInteraction, { once: true, passive: true });
       window.addEventListener('keydown', forcePlayOnInteraction, { once: true });
     };
 
     if (Hls.isSupported()) {
       hls = new Hls({
-        enableWorker: false,
+        enableWorker: true,
       });
       hls.loadSource(videoSrc);
       hls.attachMedia(video);

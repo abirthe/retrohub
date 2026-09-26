@@ -1,5 +1,5 @@
 import ShopHeader from '@/components/layout/ShopHeader';
-import heroBg from '@/assets/hero-bg.jpg';
+import heroBg from '@/assets/hero-bg.webp';
 
 const sections = [
   {

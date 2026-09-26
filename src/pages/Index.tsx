@@ -143,7 +143,7 @@ const Index = () => {
         />
 
         {/* Products Grid */}
-        <div className="space-y-4">
+        <div className="space-y-4 min-h-[500px]">
           <FeaturedBanner />
 
           <div className="flex items-center justify-between px-1">
