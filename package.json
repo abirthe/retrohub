@@ -11,7 +11,7 @@
     "dev": "vite",
     "prebuild": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true });\"",
     "build": "vite build",
-    "postbuild": "node -e \"const fs = require('fs'); if (fs.existsSync('dist/_redirects')) fs.unlinkSync('dist/_redirects');\"",
+    "postbuild": "node -e \"const fs = require('fs'); ['dist/_redirects', '_redirects', 'public/_redirects'].forEach(f => { if (fs.existsSync(f)) fs.unlinkSync(f); });\"",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
