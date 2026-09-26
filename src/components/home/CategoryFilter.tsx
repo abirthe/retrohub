@@ -14,7 +14,7 @@ interface CategoryFilterProps {
   sortOpen: boolean;
   setSortOpen: React.Dispatch<React.SetStateAction<boolean>>;
   activeCategory: string;
-  setActiveCategory: (val: string) => void;
+  setActiveCategory: (val: string, sub?: string) => void;
   activeSubcategory: string;
   setActiveSubcategory: (val: string) => void;
 }
@@ -120,12 +120,8 @@ export function CategoryFilter({
                       navigate('/custom-order');
                       return;
                     }
-                    setActiveCategory(cat.value);
-                    if (cat.subcategories && cat.subcategories.length > 0) {
-                      setActiveSubcategory(cat.subcategories[0].value);
-                    } else {
-                      setActiveSubcategory('');
-                    }
+                    const defaultSub = (cat.subcategories && cat.subcategories.length > 0) ? cat.subcategories[0].value : '';
+                    setActiveCategory(cat.value, defaultSub);
                   }}
                   className={cn(
                     "rounded-xl gap-1.5 sm:gap-2 font-display text-xs sm:text-sm tracking-wide whitespace-nowrap px-3 sm:px-4 py-3.5 sm:py-5 transition-all duration-300 shrink-0",
