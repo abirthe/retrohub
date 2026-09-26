@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gamepad2, ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles, Zap, Wrench, MessageSquare } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, X, LayoutDashboard, Store, Sparkles, Zap, Wrench, MessageSquare } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,20 +23,30 @@ const ShopHeader = () => {
 
   const closeMobile = () => setMobileOpen(false);
 
+  const handleHomeClick = () => {
+    closeMobile();
+    if (location.pathname === '/' && !location.search) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/50">
       <div className="container flex h-16 items-center justify-between gap-2">
-        {/* Logo */}
-        <Link to="/" onClick={closeMobile} className="flex items-center gap-2 group shrink-0">
-          <Gamepad2 className="h-7 w-7 text-primary transition-transform group-hover:scale-105" />
-          <span className="font-display text-lg font-bold tracking-wider text-foreground">
+        {/* Brand Name */}
+        <Link 
+          to="/" 
+          onClick={handleHomeClick} 
+          className="flex items-center group shrink-0 select-none cursor-pointer"
+        >
+          <span className="font-display text-xl font-extrabold tracking-wider text-foreground transition-transform group-hover:scale-[1.02]">
             <span className="text-primary">RETRO</span>HUB
           </span>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-3">
-          <Link to="/">
+          <Link to="/" onClick={handleHomeClick}>
             <Button
               variant={!isAdminPage && location.pathname === '/' && !location.search ? 'default' : 'ghost'}
               size="sm"
