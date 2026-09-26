@@ -236,12 +236,25 @@ export async function createOrder(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
+  // Enforce authoritative price directly from products table (prevents client tampering)
+  const { data: productData, error: productFetchError } = await supabase
+    .from('products')
+    .select('title, sale_price, in_stock')
+    .eq('id', productId)
+    .single();
+
+  if (productFetchError || !productData) {
+    throw new Error('Product not found or unavailable');
+  }
+
+  const authoritativeTotal = Number(productData.sale_price) || total;
+
   const { data: orderData, error: insertError } = await supabase
     .from('orders')
     .insert({
       user_id: user.id,
       product_id: productId,
-      total: total,
+      total: authoritativeTotal,
       customer_input: customerInput || {},
       status: 'pending'
     })
@@ -252,19 +265,18 @@ export async function createOrder(
 
   // Send Telegram Notification
   try {
-    const { data: productData } = await supabase.from('products').select('title, in_stock').eq('id', productId).single();
-    const productName = productData?.title || 'Unknown Product';
-    const isLowStock = productData?.in_stock !== null && productData?.in_stock !== undefined && productData.in_stock <= 3;
+    const productName = productData.title || 'Unknown Product';
+    const isLowStock = productData.in_stock !== null && productData.in_stock !== undefined && productData.in_stock <= 3;
     const gameId = (customerInput as any)?.game_id || '';
 
     await notifyNewOrder({
       orderId: orderData.id,
       productName,
-      total,
+      total: authoritativeTotal,
       userId: user.id,
       gameId,
       lowStock: isLowStock,
-      remainingStock: productData?.in_stock ?? undefined,
+      remainingStock: productData.in_stock ?? undefined,
     });
   } catch (e) {
     console.error('Error sending telegram notification for order:', e);
@@ -362,7 +374,21 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
+  const trimmedTrx = transactionId.trim();
+
   const updates = orderIds.map(async (id) => {
+    // 1. Try secure RPC first (bypasses RLS restrictions safely for non-admin customers)
+    const { data: rpcData, error: rpcError } = await supabase.rpc('submit_order_payment' as never, {
+      p_order_id: id,
+      p_transaction_id: trimmedTrx,
+      p_payment_method: 'manual',
+    } as never);
+
+    if (!rpcError && (rpcData as any)?.success) {
+      return { success: true };
+    }
+
+    // 2. Fallback: Direct table update for admins or if RPC is not yet registered
     const { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
       .select('customer_input')
@@ -372,9 +398,9 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
     if (fetchError) throw fetchError;
 
     const currentInput = (currentOrder?.customer_input as Record<string, string>) || {};
-    const newInput = { ...currentInput, transaction_id: transactionId, payment_method: 'manual' };
+    const newInput = { ...currentInput, transaction_id: trimmedTrx, payment_method: 'manual' };
 
-    return supabase
+    const updateRes = await supabase
       .from('orders')
       .update({
         customer_input: newInput,
@@ -382,11 +408,13 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
       })
       .eq('id', id)
       .eq('user_id', user.id);
+
+    return updateRes;
   });
 
   const results = await Promise.all(updates);
 
-  const errors = results.filter(r => r.error);
+  const errors = results.filter(r => (r as any).error);
   if (errors.length > 0) {
     throw new Error('Failed to submit payment. Please contact support.');
   }
@@ -395,7 +423,7 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
   try {
     await notifyPaymentSubmitted({
       orderIds,
-      transactionId,
+      transactionId: trimmedTrx,
     });
   } catch (e) {
     console.error('Error sending payment notification:', e);

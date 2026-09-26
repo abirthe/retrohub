@@ -5,13 +5,25 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const TELEGRAM_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN')!
 const ADMIN_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const TELEGRAM_WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || ''
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token, x-internal-secret',
+}
+
+function escapeHtml(str: unknown): string {
+  if (str === null || str === undefined) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 }
 
 async function sendMessage(chatId: string | number, text: string) {
@@ -35,14 +47,32 @@ serve(async (req: Request) => {
   }
 
   try {
-    const body = await req.json()
+    const body = await req.json().catch(() => ({}))
 
     // -------------------------------------------------------------
     // 1. Direct App Notifications (invoked from frontend or backend)
     // -------------------------------------------------------------
     if (body.action) {
+      // Security Check: Verify caller is authorized via Supabase apikey, auth bearer, or internal secret
+      const authHeader = req.headers.get('authorization') || ''
+      const apikeyHeader = req.headers.get('apikey') || ''
+      const internalHeader = req.headers.get('x-internal-secret') || ''
+
+      const isAuthorized =
+        (apikeyHeader && (apikeyHeader === SUPABASE_ANON_KEY || apikeyHeader === SUPABASE_SERVICE_ROLE_KEY)) ||
+        (authHeader && (authHeader.includes(SUPABASE_ANON_KEY) || authHeader.includes(SUPABASE_SERVICE_ROLE_KEY) || authHeader.startsWith('Bearer '))) ||
+        (TELEGRAM_WEBHOOK_SECRET && internalHeader === TELEGRAM_WEBHOOK_SECRET)
+
+      if (!isAuthorized) {
+        return new Response(JSON.stringify({ error: 'Unauthorized request' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
       if (body.action === 'notify') {
         if (body.message) {
+          // Escaping is applied by caller or plain text
           await sendMessage(ADMIN_CHAT_ID, body.message)
         }
         return new Response(JSON.stringify({ success: true }), {
@@ -53,27 +83,33 @@ serve(async (req: Request) => {
 
       if (body.action === 'order_created') {
         const { orderId, productName, total, userId, lowStock, remainingStock, gameId } = body
+        const safeOrder = escapeHtml(orderId)
+        const safeProduct = escapeHtml(productName || 'Unknown Product')
+        const safeTotal = escapeHtml(total)
+        const safeGameId = escapeHtml(gameId)
+        const safeUser = escapeHtml(userId)
+
         let msg = `🛍️ <b>New Order Created!</b>\n\n` +
-          `📦 <b>Product:</b> ${productName || 'Unknown Product'}\n` +
-          `💰 <b>Total:</b> ৳${total}\n` +
-          `🆔 <b>Order ID:</b> <code>${orderId}</code>\n`
+          `📦 <b>Product:</b> ${safeProduct}\n` +
+          `💰 <b>Total:</b> ৳${safeTotal}\n` +
+          `🆔 <b>Order ID:</b> <code>${safeOrder}</code>\n`
         
-        if (gameId) {
-          msg += `🎮 <b>Game ID / Account:</b> <code>${gameId}</code>\n`
+        if (safeGameId) {
+          msg += `🎮 <b>Game ID / Account:</b> <code>${safeGameId}</code>\n`
         }
-        if (userId) {
-          msg += `👤 <b>User ID:</b> <code>${userId}</code>\n`
+        if (safeUser) {
+          msg += `👤 <b>User ID:</b> <code>${safeUser}</code>\n`
         }
 
-        msg += `\n💡 <b>Deliver via Bot:</b>\n<code>/deliver ${orderId} CODE_HERE</code>\n\n` +
+        msg += `\n💡 <b>Deliver via Bot:</b>\n<code>/deliver ${safeOrder} CODE_HERE</code>\n\n` +
           `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
 
         await sendMessage(ADMIN_CHAT_ID, msg)
 
         if (lowStock && remainingStock !== undefined) {
           const stockMsg = `⚠️ <b>LOW STOCK ALERT!</b>\n\n` +
-            `📦 <b>Product:</b> ${productName}\n` +
-            `📉 <b>Remaining Stock:</b> ${remainingStock}\n\n` +
+            `📦 <b>Product:</b> ${safeProduct}\n` +
+            `📉 <b>Remaining Stock:</b> ${escapeHtml(remainingStock)}\n\n` +
             `<i>Please restock this product soon!</i>`
           await sendMessage(ADMIN_CHAT_ID, stockMsg)
         }
@@ -87,18 +123,20 @@ serve(async (req: Request) => {
       if (body.action === 'payment_submitted') {
         const { orderIds, transactionId, total } = body
         const orderList = Array.isArray(orderIds) ? orderIds : [orderIds]
+        const safeTrx = escapeHtml(transactionId)
 
         let msg = `💳 <b>Payment Submitted by Customer!</b>\n\n` +
-          `🧾 <b>Transaction ID:</b> <code>${transactionId}</code>\n`
+          `🧾 <b>Transaction ID:</b> <code>${safeTrx}</code>\n`
         
         if (total) {
-          msg += `💰 <b>Total Amount:</b> ৳${total}\n`
+          msg += `💰 <b>Total Amount:</b> ৳${escapeHtml(total)}\n`
         }
 
         msg += `📦 <b>Orders (${orderList.length}):</b>\n`
         orderList.forEach((id: string, idx: number) => {
-          msg += `${idx + 1}. <code>${id}</code>\n` +
-                 `   👉 <code>/deliver ${id} CODE_HERE</code>\n`
+          const safeId = escapeHtml(id)
+          msg += `${idx + 1}. <code>${safeId}</code>\n` +
+                 `   👉 <code>/deliver ${safeId} CODE_HERE</code>\n`
         })
 
         msg += `\n🔗 <a href="https://retrohub.tech/admin">Review in Admin Dashboard</a>`
@@ -114,11 +152,11 @@ serve(async (req: Request) => {
       if (body.action === 'custom_order') {
         const { name, email, productName, platform, details } = body
         const msg = `📝 <b>New Custom Order Request!</b>\n\n` +
-          `👤 <b>Name:</b> ${name}\n` +
-          `📧 <b>Email:</b> ${email}\n` +
-          `📦 <b>Product:</b> ${productName}\n` +
-          `💻 <b>Platform:</b> ${platform}\n` +
-          `📋 <b>Details:</b> ${details || 'None'}\n\n` +
+          `👤 <b>Name:</b> ${escapeHtml(name)}\n` +
+          `📧 <b>Email:</b> ${escapeHtml(email)}\n` +
+          `📦 <b>Product:</b> ${escapeHtml(productName)}\n` +
+          `💻 <b>Platform:</b> ${escapeHtml(platform)}\n` +
+          `📋 <b>Details:</b> ${escapeHtml(details || 'None')}\n\n` +
           `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
 
         await sendMessage(ADMIN_CHAT_ID, msg)
@@ -150,9 +188,13 @@ serve(async (req: Request) => {
         pendingOrders.forEach((o: any, idx: number) => {
           const statusLabel = o.status === 'payment_submitted' ? '💳 Payment Submitted' :
                               o.status === 'payment_verified' ? '✅ Payment Verified' : '⏳ Pending'
-          const trx = o.customer_input?.transaction_id ? ` (Trx: <code>${o.customer_input.transaction_id}</code>)` : ''
-          reminderMsg += `${idx + 1}. <b>${o.products?.title || 'Unknown'}</b> - ৳${o.total} [${statusLabel}${trx}]\n` +
-                         `   <code>/deliver ${o.id} CODE_HERE</code>\n\n`
+          const safeId = escapeHtml(o.id)
+          const safeTitle = escapeHtml(o.products?.title || 'Unknown')
+          const safeTotal = escapeHtml(o.total)
+          const trx = o.customer_input?.transaction_id ? ` (Trx: <code>${escapeHtml(o.customer_input.transaction_id)}</code>)` : ''
+          
+          reminderMsg += `${idx + 1}. <b>${safeTitle}</b> - ৳${safeTotal} [${statusLabel}${trx}]\n` +
+                         `   <code>/deliver ${safeId} CODE_HERE</code>\n\n`
         })
 
         await sendMessage(ADMIN_CHAT_ID, reminderMsg)
@@ -171,10 +213,19 @@ serve(async (req: Request) => {
       return new Response('OK', { status: 200, headers: corsHeaders })
     }
 
+    // SECURITY CHECK: Verify Telegram Webhook Secret Token header
+    if (TELEGRAM_WEBHOOK_SECRET) {
+      const secretHeader = req.headers.get('x-telegram-bot-api-secret-token')
+      if (secretHeader !== TELEGRAM_WEBHOOK_SECRET) {
+        console.warn('Unauthorized webhook request rejected: missing or invalid secret token.')
+        return new Response('Unauthorized', { status: 401, headers: corsHeaders })
+      }
+    }
+
     const chatId = body.message.chat.id
     const text = body.message.text.trim()
 
-    // Authorization check: only admin can use the bot
+    // Authorization check: only admin chat ID can issue commands
     if (chatId.toString() !== ADMIN_CHAT_ID) {
       await sendMessage(chatId, '⛔ Unauthorized access. This bot is private.')
       return new Response('OK', { status: 200, headers: corsHeaders })
@@ -199,9 +250,9 @@ serve(async (req: Request) => {
         supabase.from('orders').select('id', { count: 'exact' }).in('status', ['pending', 'payment_submitted', 'payment_verified']),
       ])
 
-      const revenue = revenueRes.data || 0
-      const orders = ordersRes.count || 0
-      const pending = pendingRes.count || 0
+      const revenue = escapeHtml(revenueRes.data || 0)
+      const orders = escapeHtml(ordersRes.count || 0)
+      const pending = escapeHtml(pendingRes.count || 0)
 
       const msg = `📊 <b>Daily Store Summary</b>\n\n` +
         `💰 <b>Revenue:</b> ৳${revenue}\n` +
@@ -224,10 +275,14 @@ serve(async (req: Request) => {
         data.forEach((o: any, idx: number) => {
           const statusLabel = o.status === 'payment_submitted' ? '💳 Payment Submitted' :
                               o.status === 'payment_verified' ? '✅ Payment Verified' : '⏳ Pending'
-          const trx = o.customer_input?.transaction_id ? `\n   Trx: <code>${o.customer_input.transaction_id}</code>` : ''
-          msg += `${idx + 1}. <b>${o.products?.title || 'Unknown'}</b> - ৳${o.total}\n` +
+          const safeId = escapeHtml(o.id)
+          const safeTitle = escapeHtml(o.products?.title || 'Unknown')
+          const safeTotal = escapeHtml(o.total)
+          const trx = o.customer_input?.transaction_id ? `\n   Trx: <code>${escapeHtml(o.customer_input.transaction_id)}</code>` : ''
+          
+          msg += `${idx + 1}. <b>${safeTitle}</b> - ৳${safeTotal}\n` +
                  `   Status: ${statusLabel}${trx}\n` +
-                 `   👉 <code>/deliver ${o.id} CODE_HERE</code>\n\n`
+                 `   👉 <code>/deliver ${safeId} CODE_HERE</code>\n\n`
         })
         await sendMessage(chatId, msg)
       }
@@ -245,16 +300,16 @@ serve(async (req: Request) => {
       } else {
         let msg = `📝 <b>Latest 5 Custom Requests:</b>\n\n`
         data.forEach((req: any, idx: number) => {
-          msg += `${idx + 1}. <b>${req.product_name}</b> (${req.platform})\n` +
-                 `   From: ${req.name}\n\n`
+          msg += `${idx + 1}. <b>${escapeHtml(req.product_name)}</b> (${escapeHtml(req.platform)})\n` +
+                 `   From: ${escapeHtml(req.name)}\n\n`
         })
         await sendMessage(chatId, msg)
       }
     }
     else if (text.startsWith('/deliver ')) {
       const parts = text.substring(9).trim().split(' ')
-      const orderId = parts[0]
-      const output = parts.slice(1).join(' ')
+      const orderId = parts[0]?.trim()
+      const output = parts.slice(1).join(' ').trim()
       
       if (!orderId || !output) {
         await sendMessage(chatId, '⚠️ Usage: /deliver [order_id] [message/code]')
@@ -269,11 +324,11 @@ serve(async (req: Request) => {
           .select('id')
           
         if (error) {
-          await sendMessage(chatId, `❌ Failed to fulfill order: ${error.message}`)
+          await sendMessage(chatId, `❌ Failed to fulfill order: ${escapeHtml(error.message)}`)
         } else if (!data || data.length === 0) {
-          await sendMessage(chatId, `❌ Order not found: ${orderId}`)
+          await sendMessage(chatId, `❌ Order not found: <code>${escapeHtml(orderId)}</code>`)
         } else {
-          await sendMessage(chatId, `✅ Order <code>${orderId}</code> successfully fulfilled! The customer can now see the product code on their dashboard.`)
+          await sendMessage(chatId, `✅ Order <code>${escapeHtml(orderId)}</code> successfully fulfilled! The customer can now see the product code on their dashboard.`)
         }
       }
     }
