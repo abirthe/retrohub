@@ -53,25 +53,24 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-ui": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-select",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
-            "lucide-react",
-          ],
-          "vendor-supabase": ["@supabase/supabase-js"],
-          "vendor-tanstack": ["@tanstack/react-query"],
-          "vendor-charts": ["recharts"],
-          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
-          "vendor-carousel": ["embla-carousel-react"],
-          "vendor-utils": ["date-fns", "clsx", "tailwind-merge"],
-          "vendor-video": ["hls.js"]
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-tanstack';
+            }
+            if (id.includes('hls.js')) {
+              return 'vendor-video';
+            }
+          }
         },
       },
     },

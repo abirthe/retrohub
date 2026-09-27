@@ -7,6 +7,40 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
+import BackgroundAnimation from "@/components/BackgroundAnimation";
+
+// Global in-flight reload promise so all simultaneously failing chunks wait together in Suspense
+let chunkReloadPromise: Promise<never> | null = null;
+
+const handleChunkFailure = (error: unknown): Promise<never> => {
+  const msg = error instanceof Error ? error.message : String(error);
+  const isChunkError = /failed to fetch dynamically imported module|importing a module script failed|Chunk loaded without default export|undefined \(reading 'default'\)|Cannot read properties of undefined/i.test(msg);
+
+  // If a reload is already in flight, return the same unresolved promise so Suspense stays active
+  if (chunkReloadPromise) {
+    return chunkReloadPromise;
+  }
+
+  const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_timestamp') || '0', 10);
+  const now = Date.now();
+
+  // If we haven't reloaded recently (within 15s), trigger a cache-busted page replacement
+  if (isChunkError && now - lastReload > 15000) {
+    chunkReloadPromise = new Promise(() => {});
+    window.sessionStorage.setItem('chunk_reload_timestamp', String(now));
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', String(now));
+    window.location.replace(url.toString());
+    return chunkReloadPromise;
+  }
+
+  // If chunk error occurred right after reload, wait silently rather than flashing an error card
+  if (isChunkError) {
+    return new Promise(() => {});
+  }
+
+  throw error;
+};
 
 // Helper to auto-recover seamlessly when a new deployment replaces JS chunk hashes
 const lazyWithRetry = <T extends React.ComponentType<Record<string, unknown>>>(
@@ -16,25 +50,11 @@ const lazyWithRetry = <T extends React.ComponentType<Record<string, unknown>>>(
     try {
       const module = await componentImport();
       if (!module || !module.default) {
-        throw new Error('Chunk loaded without default export, refreshing page');
+        return handleChunkFailure(new Error('Chunk loaded without default export, refreshing page'));
       }
       return module;
     } catch (error) {
-      const msg = error instanceof Error ? error.message : String(error);
-      const isChunkError = /failed to fetch dynamically imported module|importing a module script failed|Chunk loaded without default export|undefined \(reading 'default'\)/i.test(msg);
-      const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_attempted') || '0', 10);
-      const now = Date.now();
-
-      // Automatically reload once with cache buster if a chunk fails due to a new deployment replacing chunk hashes
-      if (isChunkError && now - lastReload > 10000) {
-        window.sessionStorage.setItem('chunk_reload_attempted', String(now));
-        const url = new URL(window.location.href);
-        url.searchParams.set('v', String(now));
-        window.location.replace(url.toString());
-        // Return unresolved promise to hold React Suspense gracefully without throwing to ErrorBoundary
-        return new Promise(() => {});
-      }
-      throw error;
+      return handleChunkFailure(error);
     }
   });
 
@@ -50,7 +70,6 @@ const CustomOrder = lazyWithRetry(() => import("./pages/CustomOrder"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 const Privacy = lazyWithRetry(() => import("./pages/Privacy"));
 const Terms = lazyWithRetry(() => import("./pages/Terms"));
-const BackgroundAnimation = lazyWithRetry(() => import("@/components/BackgroundAnimation"));
 
 const queryClient = new QueryClient();
 
@@ -62,9 +81,11 @@ const PageLoader = () => (
 
 const App = () => {
   useEffect(() => {
-    // Clear chunk reload guard once application successfully mounts
+    // Clear chunk reload guards once application successfully mounts
+    window.sessionStorage.removeItem('chunk_reload_timestamp');
     window.sessionStorage.removeItem('chunk_reload_attempted');
     window.sessionStorage.removeItem('last_chunk_reload');
+    window.sessionStorage.removeItem('eb_auto_reload');
 
     // Remove cache buster parameter from URL bar to keep it clean
     try {
@@ -85,9 +106,7 @@ const App = () => {
         <TooltipProvider>
         <div className="relative w-full min-h-screen">
           <div className="fixed inset-0 z-0 pointer-events-none">
-            <Suspense fallback={null}>
-              <BackgroundAnimation />
-            </Suspense>
+            <BackgroundAnimation />
           </div>
           <div className="relative z-10 flex flex-col w-full min-h-screen">
             <Toaster />

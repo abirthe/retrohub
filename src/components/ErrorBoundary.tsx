@@ -9,28 +9,25 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
 
   React.useEffect(() => {
     if (isChunkLoadError) {
-      const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_attempted') || '0', 10);
-      const now = Date.now();
-      if (now - lastReload > 10000) {
-        window.sessionStorage.setItem('chunk_reload_attempted', String(now));
+      const alreadyTried = window.sessionStorage.getItem('eb_auto_reload');
+      if (!alreadyTried) {
+        window.sessionStorage.setItem('eb_auto_reload', 'true');
         const url = new URL(window.location.href);
-        url.searchParams.set('v', String(now));
+        url.searchParams.set('v', String(Date.now()));
         window.location.replace(url.toString());
       }
     }
   }, [isChunkLoadError]);
 
   const handleTryAgain = () => {
-    window.sessionStorage.removeItem('chunk_reload_attempted');
-    window.sessionStorage.removeItem('last_chunk_reload');
+    window.sessionStorage.clear();
     const url = new URL(window.location.href);
     url.searchParams.set('v', String(Date.now()));
     window.location.replace(url.toString());
   };
 
   const handleGoHome = () => {
-    window.sessionStorage.removeItem('chunk_reload_attempted');
-    window.sessionStorage.removeItem('last_chunk_reload');
+    window.sessionStorage.clear();
     const url = new URL(window.location.origin);
     url.searchParams.set('v', String(Date.now()));
     window.location.replace(url.toString());
