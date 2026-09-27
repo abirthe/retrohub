@@ -1,3 +1,4 @@
+import { startTransition } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -86,7 +87,12 @@ export const CheckoutCartItems = ({ items, updateQuantity, removeFromCart, custo
                       <Input 
                         placeholder="Enter Game ID or Player Tag"
                         value={customerInput[item.product.id] || ''}
-                        onChange={(e) => setCustomerInput(prev => ({ ...prev, [item.product.id]: e.target.value }))}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          startTransition(() => {
+                            setCustomerInput(prev => ({ ...prev, [item.product.id]: val }));
+                          });
+                        }}
                         className="h-8 text-xs bg-background/50 border-white/10 focus:border-primary/50 max-w-sm"
                         required
                       />

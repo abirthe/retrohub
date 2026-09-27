@@ -8,6 +8,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
 ## [Unreleased]
 
 ### Optimized (Core Web Vitals & Performance)
+- **INP Responsiveness (Interaction to Next Paint)**:
+  - Eliminated 300ms mobile tap delay using `touch-action: manipulation` across all buttons, links, inputs, and interactive cards in `index.css`.
+  - Replaced CPU/GPU-intensive SVG `feGaussianBlur` filter with a hardware-accelerated CSS `radial-gradient` in `BackgroundAnimation.tsx`.
+  - Removed full-viewport CSS `filter` on video elements to prevent compositor thread locking on mobile devices.
+  - Disabled video decoding on small mobile viewports (< 768px) to dedicate 100% of mobile GPU/CPU to interaction rendering.
+  - Decoupled `toast()` alerts from pure `CartContext` state updaters via `queueMicrotask` to avoid nested synchronous re-renders.
+  - Wrapped `customerInput` keystrokes and `ProductCard` navigations in React 18 `startTransition` for instant UI feedback.
 - **HLS Background Video**: Decoupled `hls.js` (~595 KB) from initial critical path; lazy-loaded `BackgroundAnimation` on idle and prioritized native HLS on iOS/Safari.
 - **Font Delivery**: Removed render-blocking `@import` from `index.css`; added preconnect and asynchronous font stylesheet in `index.html`.
 - **Edge Caching**: Configured `Cache-Control: public, max-age=31536000, immutable` for hashed assets in `worker.js` and stale-while-revalidate for static media.

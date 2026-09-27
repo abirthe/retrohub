@@ -41,22 +41,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
+    let result: 'stock_error' | 'updated' | 'added' = 'added';
+    const availableStock = product.in_stock;
+
     setItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
         const newQuantity = existing.quantity + quantity;
         if (newQuantity > product.in_stock) {
-          toast({
-            title: 'Insufficient stock',
-            description: `Only ${product.in_stock} items available`,
-            variant: 'destructive',
-          });
+          result = 'stock_error';
           return prev;
         }
-        toast({
-          title: 'Added to cart',
-          description: `${product.title} quantity updated`,
-        });
+        result = 'updated';
         return prev.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: newQuantity }
@@ -64,26 +60,42 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       }
       if (quantity > product.in_stock) {
-        toast({
-          title: 'Insufficient stock',
-          description: `Only ${product.in_stock} items available`,
-          variant: 'destructive',
-        });
+        result = 'stock_error';
         return prev;
       }
-      toast({
-        title: 'Added to cart',
-        description: `${product.title} added to your cart`,
-      });
+      result = 'added';
       return [...prev, { product, quantity }];
+    });
+
+    // Schedule toast outside of state updater to keep interaction latency < 50ms (Good INP)
+    queueMicrotask(() => {
+      if (result === 'stock_error') {
+        toast({
+          title: 'Insufficient stock',
+          description: `Only ${availableStock} items available`,
+          variant: 'destructive',
+        });
+      } else if (result === 'updated') {
+        toast({
+          title: 'Added to cart',
+          description: `${product.title} quantity updated`,
+        });
+      } else {
+        toast({
+          title: 'Added to cart',
+          description: `${product.title} added to your cart`,
+        });
+      }
     });
   };
 
   const removeFromCart = (productId: string) => {
     setItems((prev) => prev.filter((item) => item.product.id !== productId));
-    toast({
-      title: 'Removed from cart',
-      description: 'Item removed from your cart',
+    queueMicrotask(() => {
+      toast({
+        title: 'Removed from cart',
+        description: 'Item removed from your cart',
+      });
     });
   };
 
@@ -92,21 +104,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeFromCart(productId);
       return;
     }
+    let stockError = false;
+    let availableStock = 0;
+
     setItems((prev) => {
       const item = prev.find((item) => item.product.id === productId);
       if (!item) return prev;
       if (quantity > item.product.in_stock) {
-        toast({
-          title: 'Insufficient stock',
-          description: `Only ${item.product.in_stock} items available`,
-          variant: 'destructive',
-        });
+        stockError = true;
+        availableStock = item.product.in_stock;
         return prev;
       }
       return prev.map((item) =>
         item.product.id === productId ? { ...item, quantity } : item
       );
     });
+
+    if (stockError) {
+      queueMicrotask(() => {
+        toast({
+          title: 'Insufficient stock',
+          description: `Only ${availableStock} items available`,
+          variant: 'destructive',
+        });
+      });
+    }
   };
 
   const clearCart = () => {
