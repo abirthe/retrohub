@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Ghost, ArrowLeft, Home } from "lucide-react";
-import heroBg from "@/assets/hero-bg.webp";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -10,7 +9,6 @@ const NotFound = () => {
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.05] grayscale" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/50" />
       </div>
 
