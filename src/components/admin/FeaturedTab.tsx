@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchProducts, fetchFeaturedProductIds, updateFeaturedProductIds, Product } from '@/lib/shopApi';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/hooks/use-toast';
-import { Loader2, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchProducts,
+  fetchFeaturedProductIds,
+  updateFeaturedProductIds,
+  Product,
+} from "@/lib/shopApi";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/hooks/use-toast";
+import { Loader2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface FeaturedTabProps {
   products: Product[] | undefined;
@@ -13,15 +18,15 @@ interface FeaturedTabProps {
 
 export const FeaturedTab = ({ products }: FeaturedTabProps) => {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [displayLimit, setDisplayLimit] = useState(50);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   const { data: featuredIds, isLoading: isLoadingIds } = useQuery({
-    queryKey: ['adminFeaturedProductIds'],
+    queryKey: ["adminFeaturedProductIds"],
     queryFn: fetchFeaturedProductIds,
   });
 
@@ -36,19 +41,27 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
     mutationFn: (newIds: string[]) => updateFeaturedProductIds(newIds),
     onSuccess: () => {
       setIsDirty(false);
-      queryClient.setQueryData(['adminFeaturedProductIds'], selectedIds);
-      queryClient.invalidateQueries({ queryKey: ['adminFeaturedProductIds'] });
-      queryClient.invalidateQueries({ queryKey: ['featuredProductIds'] });
-      queryClient.invalidateQueries({ queryKey: ['featuredProducts'] });
-      toast({ title: 'Success', description: 'Featured products updated.' });
+      queryClient.setQueryData(["adminFeaturedProductIds"], selectedIds);
+      queryClient.invalidateQueries({ queryKey: ["adminFeaturedProductIds"] });
+      queryClient.invalidateQueries({ queryKey: ["featuredProductIds"] });
+      queryClient.invalidateQueries({ queryKey: ["featuredProducts"] });
+      toast({ title: "Success", description: "Featured products updated." });
     },
     onError: (error) => {
-      toast({ title: 'Error', description: error.message || 'Failed to update featured products.', variant: 'destructive' });
-    }
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update featured products.",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoadingIds || !products) {
-    return <div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /></div>;
+    return (
+      <div className="p-8 text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+      </div>
+    );
   }
 
   const handleSave = () => {
@@ -58,15 +71,19 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
   const handleToggle = (id: string, checked: boolean) => {
     setIsDirty(true);
     if (checked) {
-      setSelectedIds(prev => [...prev, id]);
+      setSelectedIds((prev) => [...prev, id]);
     } else {
-      setSelectedIds(prev => prev.filter(pId => pId !== id));
+      setSelectedIds((prev) => prev.filter((pId) => pId !== id));
     }
   };
 
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = (p.title || '').toLowerCase().includes(search.toLowerCase());
-    const matchesSelected = showOnlySelected ? selectedIds.includes(p.id) : true;
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = (p.title || "")
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesSelected = showOnlySelected
+      ? selectedIds.includes(p.id)
+      : true;
     return matchesSearch && matchesSelected;
   });
   const displayedProducts = filteredProducts.slice(0, displayLimit);
@@ -77,10 +94,19 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl font-display font-bold">Featured Products</h2>
-          <p className="text-sm text-muted-foreground">Select products to show in the "Special Offers" banner on the homepage with a discount tag.</p>
+          <p className="text-sm text-muted-foreground">
+            Select products to show in the "Special Offers" banner on the
+            homepage with a discount tag.
+          </p>
         </div>
-        <Button onClick={handleSave} disabled={updateFeaturedMutation.isPending} className="w-full sm:w-auto">
-          {updateFeaturedMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Button
+          onClick={handleSave}
+          disabled={updateFeaturedMutation.isPending}
+          className="w-full sm:w-auto"
+        >
+          {updateFeaturedMutation.isPending && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
           Save Changes ({selectedIds.length} selected)
         </Button>
       </div>
@@ -88,8 +114,8 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[240px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search products..." 
+          <Input
+            placeholder="Search products..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -104,12 +130,18 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
           variant={showOnlySelected ? "default" : "outline"}
           size="sm"
           onClick={() => {
-            setShowOnlySelected(prev => !prev);
+            setShowOnlySelected((prev) => !prev);
             setDisplayLimit(50);
           }}
-          className={showOnlySelected ? "border-primary/40 bg-primary/20 text-primary hover:bg-primary/30" : "border-white/10 text-muted-foreground hover:text-white"}
+          className={
+            showOnlySelected
+              ? "border-primary/40 bg-primary/20 text-primary hover:bg-primary/30"
+              : "border-white/10 text-muted-foreground hover:text-white"
+          }
         >
-          {showOnlySelected ? `Showing Selected (${selectedIds.length})` : `Show Selected Only (${selectedIds.length})`}
+          {showOnlySelected
+            ? `Showing Selected (${selectedIds.length})`
+            : `Show Selected Only (${selectedIds.length})`}
         </Button>
 
         {isDirty && (
@@ -131,23 +163,40 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
               </tr>
             </thead>
             <tbody>
-              {displayedProducts.map(product => {
+              {displayedProducts.map((product) => {
                 const isSelected = selectedIds.includes(product.id);
                 return (
-                  <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr
+                    key={product.id}
+                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                  >
                     <td className="px-4 py-3">
-                      <Checkbox 
+                      <Checkbox
                         checked={isSelected}
-                        onCheckedChange={(checked) => handleToggle(product.id, checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          handleToggle(product.id, checked as boolean)
+                        }
                       />
                     </td>
                     <td className="px-4 py-3 font-medium flex items-center gap-3">
-                      {product.image_url && <img src={product.image_url} alt="" className="w-8 h-8 rounded object-cover" />}
+                      {product.image_url && (
+                        <img
+                          src={product.image_url}
+                          alt=""
+                          className="w-8 h-8 rounded object-cover"
+                        />
+                      )}
                       <span className="line-clamp-1">{product.title}</span>
                     </td>
                     <td className="px-4 py-3">৳{product.sale_price}</td>
                     <td className="px-4 py-3">
-                      <span className={product.in_stock === 0 ? 'text-destructive' : 'text-green-400'}>
+                      <span
+                        className={
+                          product.in_stock === 0
+                            ? "text-destructive"
+                            : "text-green-400"
+                        }
+                      >
                         {product.in_stock}
                       </span>
                     </td>
@@ -156,7 +205,7 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
               })}
             </tbody>
           </table>
-          
+
           {filteredProducts.length === 0 && (
             <div className="p-8 text-center text-muted-foreground">
               No products found matching "{search}"
@@ -165,10 +214,10 @@ export const FeaturedTab = ({ products }: FeaturedTabProps) => {
 
           {hasMore && (
             <div className="flex justify-center mt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={() => setDisplayLimit(prev => prev + 50)}
+                onClick={() => setDisplayLimit((prev) => prev + 50)}
                 className="w-full max-w-xs border-primary/20 hover:bg-primary/10"
               >
                 Load More

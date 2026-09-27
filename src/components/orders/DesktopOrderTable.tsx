@@ -1,17 +1,33 @@
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, CheckCircle2, Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { Delivery, Order } from '@/lib/shopApi';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Calendar, CheckCircle2, Copy, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { Delivery, Order } from "@/lib/shopApi";
+import { Button } from "@/components/ui/button";
 
 export interface DesktopOrderTableProps {
-  orders: (Order & { products?: { platform?: string; title?: string }; deliveries?: Delivery[] })[];
-  statusStyles: Record<string, { className: string; icon: React.ReactNode; label: string }>;
+  orders: (Order & {
+    products?: { platform?: string; title?: string };
+    deliveries?: Delivery[];
+  })[];
+  statusStyles: Record<
+    string,
+    { className: string; icon: React.ReactNode; label: string }
+  >;
 }
 
-export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTableProps) => {
+export const DesktopOrderTable = ({
+  orders,
+  statusStyles,
+}: DesktopOrderTableProps) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (id: string, text: string) => {
@@ -25,42 +41,69 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
       <Table>
         <TableHeader className="bg-secondary/40 border-b border-white/5">
           <TableRow className="border-white/5 hover:bg-transparent">
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pl-6">Order ID</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Product</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Status</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Total</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Date</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pr-6">Delivery & Keys</TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pl-6">
+              Order ID
+            </TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">
+              Product
+            </TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">
+              Status
+            </TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">
+              Total
+            </TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">
+              Date
+            </TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pr-6">
+              Delivery & Keys
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orders.map((order) => {
-            const status = statusStyles[order.status || 'pending'] || statusStyles.pending;
-            const orderDate = new Date(order.created_at || '').toLocaleDateString(undefined, {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
+            const status =
+              statusStyles[order.status || "pending"] || statusStyles.pending;
+            const orderDate = new Date(
+              order.created_at || "",
+            ).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
             });
-            const orderDeliveries = (order.deliveries as unknown as Delivery[]) || [];
+            const orderDeliveries =
+              (order.deliveries as unknown as Delivery[]) || [];
             const shortId = order.id.slice(0, 8);
 
             return (
-              <TableRow key={order.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
+              <TableRow
+                key={order.id}
+                className="border-white/5 hover:bg-white/[0.02] transition-colors group"
+              >
                 <TableCell className="font-mono text-xs text-muted-foreground pl-6">
                   <div className="flex flex-col">
-                    <span className="font-bold text-foreground">#{shortId}</span>
-                    <span className="text-[10px] text-muted-foreground opacity-60">ID prefix</span>
+                    <span className="font-bold text-foreground">
+                      #{shortId}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground opacity-60">
+                      ID prefix
+                    </span>
                   </div>
                 </TableCell>
 
                 <TableCell className="text-sm font-medium text-foreground">
                   <div className="flex items-center gap-2.5">
                     <span className="w-8 h-8 rounded-lg bg-secondary/80 border border-white/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                      {order.products?.platform?.charAt(0) || '🎮'}
+                      {order.products?.platform?.charAt(0) || "🎮"}
                     </span>
                     <div>
-                      <p className="line-clamp-1">{order.products?.title || 'Unknown Product'}</p>
-                      <p className="text-[10px] text-muted-foreground font-normal">{order.products?.platform || 'Global'}</p>
+                      <p className="line-clamp-1">
+                        {order.products?.title || "Unknown Product"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-normal">
+                        {order.products?.platform || "Global"}
+                      </p>
                     </div>
                   </div>
                 </TableCell>
@@ -69,8 +112,8 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
                   <Badge
                     variant="outline"
                     className={cn(
-                      'text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit transition-colors',
-                      status.className
+                      "text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit transition-colors",
+                      status.className,
                     )}
                   >
                     {status.icon}
@@ -103,7 +146,9 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleCopy(delivery.id, delivery.delivery_code)}
+                            onClick={() =>
+                              handleCopy(delivery.id, delivery.delivery_code)
+                            }
                             className="h-6 w-6 p-0 shrink-0 text-success hover:bg-success/20 hover:text-success"
                             title="Copy code"
                           >
@@ -122,7 +167,9 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
                     </div>
                   ) : (
                     <div className="text-xs text-muted-foreground italic opacity-60">
-                      {order.status === 'sourcing' ? '⚡ Sourcing key...' : '⏳ Awaiting verification...'}
+                      {order.status === "sourcing"
+                        ? "⚡ Sourcing key..."
+                        : "⏳ Awaiting verification..."}
                     </div>
                   )}
                 </TableCell>

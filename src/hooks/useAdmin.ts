@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { checkIsAdmin } from '@/lib/shopApi';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { checkIsAdmin } from "@/lib/shopApi";
 
 export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -26,7 +26,9 @@ export function useAdmin() {
 
     verifyAdmin();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       verifyAdmin();
     });
 
@@ -38,5 +40,3 @@ export function useAdmin() {
 
   return { isAdmin, loading };
 }
-
-

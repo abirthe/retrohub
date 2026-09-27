@@ -1,5 +1,5 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { fetchStoreProducts } from '@/lib/shopApi';
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchStoreProducts } from "@/lib/shopApi";
 
 interface FilterOptions {
   search?: string;
@@ -10,8 +10,9 @@ interface FilterOptions {
 
 export function useProducts(filters: FilterOptions = {}) {
   return useInfiniteQuery({
-    queryKey: ['products', filters],
-    queryFn: ({ pageParam = 0 }) => fetchStoreProducts({ ...filters, pageParam }),
+    queryKey: ["products", filters],
+    queryFn: ({ pageParam = 0 }) =>
+      fetchStoreProducts({ ...filters, pageParam }),
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
   });

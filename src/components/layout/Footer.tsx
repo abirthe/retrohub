@@ -1,12 +1,20 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Zap, ShieldCheck, Smartphone, Send, Sparkles, ExternalLink, Lock } from 'lucide-react';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  Zap,
+  ShieldCheck,
+  Smartphone,
+  Send,
+  Sparkles,
+  ExternalLink,
+  Lock,
+} from "lucide-react";
 
 export const Footer: React.FC = () => {
   const location = useLocation();
 
   // Hide footer on administrative console to maintain a distraction-free management workspace
-  if (location.pathname.startsWith('/admin')) {
+  if (location.pathname.startsWith("/admin")) {
     return null;
   }
 
@@ -22,9 +30,12 @@ export const Footer: React.FC = () => {
                 <Zap className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-display text-sm font-bold text-white tracking-wide">Instant Delivery</h4>
+                <h4 className="font-display text-sm font-bold text-white tracking-wide">
+                  Instant Delivery
+                </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Automated digital keys & credentials dispatched straight to your Customer Console.
+                  Automated digital keys & credentials dispatched straight to
+                  your Customer Console.
                 </p>
               </div>
             </div>
@@ -35,9 +46,12 @@ export const Footer: React.FC = () => {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-display text-sm font-bold text-white tracking-wide">100% Verified Valid</h4>
+                <h4 className="font-display text-sm font-bold text-white tracking-wide">
+                  100% Verified Valid
+                </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Genuine distributor wholesale keys backed by our full replacement guarantee.
+                  Genuine distributor wholesale keys backed by our full
+                  replacement guarantee.
                 </p>
               </div>
             </div>
@@ -48,9 +62,12 @@ export const Footer: React.FC = () => {
                 <Smartphone className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-display text-sm font-bold text-white tracking-wide">bKash Exclusive Pay</h4>
+                <h4 className="font-display text-sm font-bold text-white tracking-wide">
+                  bKash Exclusive Pay
+                </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Fast, secure local payments with bKash Send Money & instant TrxID submission.
+                  Fast, secure local payments with bKash Send Money & instant
+                  TrxID submission.
                 </p>
               </div>
             </div>
@@ -62,11 +79,14 @@ export const Footer: React.FC = () => {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5">
-                  <h4 className="font-display text-sm font-bold text-white tracking-wide">Telegram Concierge</h4>
+                  <h4 className="font-display text-sm font-bold text-white tracking-wide">
+                    Telegram Concierge
+                  </h4>
                   <Sparkles className="w-3 h-3 text-cyan-300 animate-pulse" />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  24/7 dedicated live assistance and custom product sourcing via @retrochanbot.
+                  24/7 dedicated live assistance and custom product sourcing via
+                  @retrochanbot.
                 </p>
               </div>
             </div>
@@ -91,7 +111,9 @@ export const Footer: React.FC = () => {
             </Link>
 
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">
-              The premier digital gaming storefront for PC & console keys, gift cards, subscriptions, and gaming balances with instant automated delivery.
+              The premier digital gaming storefront for PC & console keys, gift
+              cards, subscriptions, and gaming balances with instant automated
+              delivery.
             </p>
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
@@ -102,30 +124,47 @@ export const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h5 className="font-display text-xs font-bold uppercase tracking-widest text-white">Storefront</h5>
+            <h5 className="font-display text-xs font-bold uppercase tracking-widest text-white">
+              Storefront
+            </h5>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   All Products
                 </Link>
               </li>
               <li>
-                <Link to="/?category=games" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/?category=games"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Game Keys
                 </Link>
               </li>
               <li>
-                <Link to="/?category=topup" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/?category=topup"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   In-Game Top-Ups
                 </Link>
               </li>
               <li>
-                <Link to="/?category=subscriptions" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/?category=subscriptions"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Subscriptions
                 </Link>
               </li>
               <li>
-                <Link to="/?category=giftcards" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/?category=giftcards"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Gift Cards
                 </Link>
               </li>
@@ -134,17 +173,27 @@ export const Footer: React.FC = () => {
 
           {/* Customer Care */}
           <div className="space-y-3">
-            <h5 className="font-display text-xs font-bold uppercase tracking-widest text-white">Customer Hub</h5>
+            <h5 className="font-display text-xs font-bold uppercase tracking-widest text-white">
+              Customer Hub
+            </h5>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/orders" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/orders"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Customer Console
                 </Link>
               </li>
               <li>
-                <Link to="/custom-order" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                <Link
+                  to="/custom-order"
+                  className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                >
                   <span>Custom Order Request</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono">15m</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono">
+                    15m
+                  </span>
                 </Link>
               </li>
               <li>
@@ -159,7 +208,10 @@ export const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/auth"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Sign In / Register
                 </Link>
               </li>
@@ -168,26 +220,40 @@ export const Footer: React.FC = () => {
 
           {/* Legal & Payment */}
           <div className="space-y-3">
-            <h5 className="font-display text-xs font-bold uppercase tracking-widest text-white">Security & Policies</h5>
+            <h5 className="font-display text-xs font-bold uppercase tracking-widest text-white">
+              Security & Policies
+            </h5>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/terms"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/privacy"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
                 <span className="text-muted-foreground/80 block">
-                  Accepted Payment: <strong className="text-pink-400 font-semibold">bKash Only</strong>
+                  Accepted Payment:{" "}
+                  <strong className="text-pink-400 font-semibold">
+                    bKash Only
+                  </strong>
                 </span>
               </li>
               <li>
                 <span className="text-muted-foreground/80 block">
-                  Support: <span className="font-mono text-foreground">@retrochanbot</span>
+                  Support:{" "}
+                  <span className="font-mono text-foreground">
+                    @retrochanbot
+                  </span>
                 </span>
               </li>
             </ul>
@@ -196,11 +262,18 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} RETROHUB. All rights reserved. Dev by ABIR HOSSAIN.</p>
+          <p>
+            © {new Date().getFullYear()} RETROHUB. All rights reserved. Dev by
+            ABIR HOSSAIN.
+          </p>
           <div className="flex items-center gap-4 text-[11px]">
-            <span className="text-muted-foreground/60">Instant Auto Delivery</span>
+            <span className="text-muted-foreground/60">
+              Instant Auto Delivery
+            </span>
             <span className="text-white/10">•</span>
-            <span className="text-muted-foreground/60">100% Genuine Working Codes</span>
+            <span className="text-muted-foreground/60">
+              100% Genuine Working Codes
+            </span>
             <span className="text-white/10">•</span>
             <span className="text-muted-foreground/60">bKash Verified</span>
           </div>

@@ -1,15 +1,19 @@
-import { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Package } from 'lucide-react';
-import { ShopHeader } from '@/components/layout';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { ProductImageArea, ProductFeatures, ProductPurchaseCard } from '@/components/product';
-import type { Product } from '@/lib/shopApi';
+import { useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Package } from "lucide-react";
+import { ShopHeader } from "@/components/layout";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ProductImageArea,
+  ProductFeatures,
+  ProductPurchaseCard,
+} from "@/components/product";
+import type { Product } from "@/lib/shopApi";
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -21,30 +25,28 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
 
   // Robust reverse routing: Extract UUID from slug or use direct ID
-  const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const uuidRegex =
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
   const match = slug?.match(uuidRegex);
-  const id = match ? match[0] : (slug || '');
+  const id = match ? match[0] : slug || "";
 
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('/');
+      navigate("/");
     }
   };
 
   const { data: product, isLoading } = useQuery({
-    queryKey: ['product', id],
+    queryKey: ["product", id],
     queryFn: async () => {
-      const query = supabase
-        .from('products')
-        .select('*')
-        .eq('is_active', true);
+      const query = supabase.from("products").select("*").eq("is_active", true);
 
       if (match) {
-        query.eq('id', id);
+        query.eq("id", id);
       } else {
-        query.ilike('title', `%${slug?.replace(/-/g, ' ')}%`);
+        query.ilike("title", `%${slug?.replace(/-/g, " ")}%`);
       }
 
       const { data, error } = await query.limit(1).maybeSingle();
@@ -55,31 +57,31 @@ const ProductDetail = () => {
   });
 
   const { data: variants } = useQuery({
-    queryKey: ['product_variants', product?.title?.split(' | ')[0]],
+    queryKey: ["product_variants", product?.title?.split(" | ")[0]],
     queryFn: async () => {
-      if (!product || !product.title.includes(' | ')) return null;
-      const baseName = product.title.split(' | ')[0];
+      if (!product || !product.title.includes(" | ")) return null;
+      const baseName = product.title.split(" | ")[0];
       const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .ilike('title', `${baseName} | %`)
-        .eq('is_active', true)
-        .order('sale_price', { ascending: true });
+        .from("products")
+        .select("*")
+        .ilike("title", `${baseName} | %`)
+        .eq("is_active", true)
+        .order("sale_price", { ascending: true });
       if (error) throw error;
       return data;
     },
-    enabled: !!product?.title?.includes(' | '),
+    enabled: !!product?.title?.includes(" | "),
   });
 
   const handleAddToCart = () => {
     if (!product) return;
     if (!user) {
       toast({
-        title: 'Sign in required',
-        description: 'Please sign in to add items to your cart',
-        variant: 'destructive',
+        title: "Sign in required",
+        description: "Please sign in to add items to your cart",
+        variant: "destructive",
       });
-      navigate('/auth', { state: { from: location.pathname } });
+      navigate("/auth", { state: { from: location.pathname } });
       return;
     }
     addToCart(product, quantity);
@@ -131,9 +133,17 @@ const ProductDetail = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 text-destructive mb-4">
             <Package className="w-8 h-8" />
           </div>
-          <h1 className="font-display tracking-wider text-xl font-bold mb-2">Product not found</h1>
-          <p className="text-muted-foreground mb-6">The product you are looking for does not exist or has been removed.</p>
-          <Button onClick={handleBack} variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+          <h1 className="font-display tracking-wider text-xl font-bold mb-2">
+            Product not found
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            The product you are looking for does not exist or has been removed.
+          </p>
+          <Button
+            onClick={handleBack}
+            variant="outline"
+            className="border-primary/30 text-primary hover:bg-primary/10"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Shop
           </Button>
@@ -168,12 +178,12 @@ const ProductDetail = () => {
 
           {/* Right Column: Sticky Purchasing Card */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
-            <ProductPurchaseCard 
-              product={product as Product} 
+            <ProductPurchaseCard
+              product={product as Product}
               variants={variants as Product[]}
-              quantity={quantity} 
-              setQuantity={setQuantity} 
-              onAddToCart={handleAddToCart} 
+              quantity={quantity}
+              setQuantity={setQuantity}
+              onAddToCart={handleAddToCart}
             />
           </div>
         </div>

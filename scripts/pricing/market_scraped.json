@@ -117,10 +117,7 @@
     "form": {
       "id": 5,
       "desc": "",
-      "json_form": [
-        "Discord Username",
-        "WhatsApp Number"
-      ]
+      "json_form": ["Discord Username", "WhatsApp Number"]
     },
     "created_at": "2024-02-08T19:01:19.999Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -182,10 +179,7 @@
         "form": {
           "id": 5,
           "desc": "",
-          "json_form": [
-            "Discord Username",
-            "WhatsApp Number"
-          ]
+          "json_form": ["Discord Username", "WhatsApp Number"]
         },
         "created_at": "2024-06-08T18:58:25.916936+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -218,10 +212,7 @@
         "form": {
           "id": 5,
           "desc": "",
-          "json_form": [
-            "Discord Username",
-            "WhatsApp Number"
-          ]
+          "json_form": ["Discord Username", "WhatsApp Number"]
         },
         "created_at": "2024-06-08T18:58:25.916936+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -484,9 +475,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-09T13:09:39.401Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -638,10 +627,7 @@
     "form": {
       "id": 9,
       "desc": "",
-      "json_form": [
-        "1st Name",
-        "Last Name"
-      ]
+      "json_form": ["1st Name", "Last Name"]
     },
     "created_at": "2024-02-09T13:34:31.909Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -1059,10 +1045,7 @@
     "form": {
       "id": 33,
       "desc": "",
-      "json_form": [
-        "Youtube Email : ",
-        "WhatsApp Number : "
-      ]
+      "json_form": ["Youtube Email : ", "WhatsApp Number : "]
     },
     "created_at": "2024-05-13T14:55:20.966Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -1413,9 +1396,7 @@
     "form": {
       "id": 8,
       "desc": "",
-      "json_form": [
-        "Your Email"
-      ]
+      "json_form": ["Your Email"]
     },
     "created_at": "2024-09-17T06:54:48.466Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -1448,9 +1429,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-09-17T06:56:15.964475+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1483,9 +1462,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-09-17T06:56:15.964475+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1518,9 +1495,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-09-17T06:56:15.964475+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1556,10 +1531,7 @@
     "form": {
       "id": 10,
       "desc": "",
-      "json_form": [
-        "Email",
-        "Passward"
-      ]
+      "json_form": ["Email", "Passward"]
     },
     "created_at": "2024-10-12T14:24:11.353Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -1592,9 +1564,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-12T14:26:02.000623+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1627,9 +1597,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-12T14:26:02.000623+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1662,9 +1630,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-12T14:26:02.000623+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1700,9 +1666,7 @@
     "form": {
       "id": 31,
       "desc": "",
-      "json_form": [
-        "Username "
-      ]
+      "json_form": ["Username "]
     },
     "created_at": "2025-05-07T16:01:19.627Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -1735,9 +1699,7 @@
         "form": {
           "id": 31,
           "desc": "",
-          "json_form": [
-            "Username "
-          ]
+          "json_form": ["Username "]
         },
         "created_at": "2025-05-07T16:03:50.757371+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1770,9 +1732,7 @@
         "form": {
           "id": 31,
           "desc": "",
-          "json_form": [
-            "Username "
-          ]
+          "json_form": ["Username "]
         },
         "created_at": "2025-05-07T16:03:50.757371+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1805,9 +1765,7 @@
         "form": {
           "id": 31,
           "desc": "",
-          "json_form": [
-            "Username "
-          ]
+          "json_form": ["Username "]
         },
         "created_at": "2025-05-07T16:03:50.757371+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1843,9 +1801,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-09T13:23:03.415Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -1878,9 +1834,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2024-02-09T13:26:33.103387+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1913,9 +1867,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2024-02-09T13:26:33.103387+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1948,9 +1900,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2024-02-09T13:26:33.103387+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -1983,9 +1933,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2024-02-09T13:26:33.103387+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2021,11 +1969,7 @@
     "form": {
       "id": 23,
       "desc": "",
-      "json_form": [
-        "Adobe Email",
-        "Adobe Password",
-        "WhatsApp No "
-      ]
+      "json_form": ["Adobe Email", "Adobe Password", "WhatsApp No "]
     },
     "created_at": "2024-02-09T12:57:16.261Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -2058,9 +2002,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-24T12:58:46.33242+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2093,9 +2035,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-24T12:58:46.33242+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2128,9 +2068,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-24T12:58:46.33242+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2163,9 +2101,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-10-24T12:58:46.33242+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2201,9 +2137,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-10-12T15:34:31.906Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -2236,10 +2170,7 @@
         "form": {
           "id": 10,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Passward"
-          ]
+          "json_form": ["Email", "Passward"]
         },
         "created_at": "2024-10-12T15:35:16.111138+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2272,9 +2203,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2024-10-12T15:35:16.111138+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2310,9 +2239,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-05-13T10:21:41.045Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -2754,10 +2681,7 @@
     "form": {
       "id": 3,
       "desc": "",
-      "json_form": [
-        "UID",
-        "Server"
-      ]
+      "json_form": ["UID", "Server"]
     },
     "created_at": "2024-06-10T06:13:45.710Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -2790,10 +2714,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2826,10 +2747,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2862,10 +2780,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2898,10 +2813,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2934,10 +2846,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -2970,10 +2879,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3006,10 +2912,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2026-06-23T06:38:33.578704+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3243,9 +3146,7 @@
     "form": {
       "id": 17,
       "desc": "",
-      "json_form": [
-        "UID"
-      ]
+      "json_form": ["UID"]
     },
     "created_at": "2025-01-13T08:34:33.161Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -3278,9 +3179,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-06-23T16:41:31.440531+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3313,9 +3212,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-06-23T16:41:31.440531+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3348,9 +3245,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-06-23T16:41:31.440531+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3383,9 +3278,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-06-23T16:41:31.440531+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3418,9 +3311,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-06-23T16:41:31.440531+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3453,9 +3344,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-06-23T16:41:31.440531+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3491,10 +3380,7 @@
     "form": {
       "id": 26,
       "desc": "",
-      "json_form": [
-        "Ingame Name",
-        "UID"
-      ]
+      "json_form": ["Ingame Name", "UID"]
     },
     "created_at": "2025-01-17T15:19:10.236Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -3527,10 +3413,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3563,10 +3446,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3599,10 +3479,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3635,10 +3512,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3671,10 +3545,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3707,10 +3578,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3743,10 +3611,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-01-17T15:20:09.498052+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -3782,11 +3647,7 @@
     "form": {
       "id": 7,
       "desc": "",
-      "json_form": [
-        "Player Name",
-        "User ID",
-        "Zone ID"
-      ]
+      "json_form": ["Player Name", "User ID", "Zone ID"]
     },
     "created_at": "2024-02-08T20:40:43.081Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -4054,11 +3915,7 @@
     "form": {
       "id": 34,
       "desc": "",
-      "json_form": [
-        "Roblox ID",
-        "Roblox Pass",
-        "WhatsApp Number"
-      ]
+      "json_form": ["Roblox ID", "Roblox Pass", "WhatsApp Number"]
     },
     "created_at": "2025-09-17T06:55:30.611Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -4326,9 +4183,7 @@
     "form": {
       "id": 17,
       "desc": "",
-      "json_form": [
-        "UID"
-      ]
+      "json_form": ["UID"]
     },
     "created_at": "2026-07-27T06:44:41.926Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -4361,9 +4216,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4396,9 +4249,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4431,9 +4282,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4466,9 +4315,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4501,9 +4348,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4536,9 +4381,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4571,9 +4414,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4606,9 +4447,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2026-07-27T06:46:38.802934+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4682,9 +4521,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2025-01-29T09:37:38.064791+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4717,9 +4554,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2025-01-29T09:37:38.064791+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4752,9 +4587,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2025-01-29T09:37:38.064791+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4787,9 +4620,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2025-01-29T09:37:38.064791+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4822,9 +4653,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2025-01-29T09:37:38.064791+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4860,10 +4689,7 @@
     "form": {
       "id": 26,
       "desc": "",
-      "json_form": [
-        "Ingame Name",
-        "UID"
-      ]
+      "json_form": ["Ingame Name", "UID"]
     },
     "created_at": "2025-12-03T19:22:34.682Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -4896,10 +4722,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4932,10 +4755,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -4968,10 +4788,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5004,10 +4821,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5040,10 +4854,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5076,10 +4887,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5112,10 +4920,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5148,10 +4953,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5184,10 +4986,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5220,10 +5019,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5256,10 +5052,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5292,10 +5085,7 @@
         "form": {
           "id": 26,
           "desc": "",
-          "json_form": [
-            "Ingame Name",
-            "UID"
-          ]
+          "json_form": ["Ingame Name", "UID"]
         },
         "created_at": "2025-12-03T19:23:27.483814+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5331,12 +5121,7 @@
     "form": {
       "id": 38,
       "desc": "",
-      "json_form": [
-        "Email",
-        "Password",
-        "User ID",
-        "WhatsApp"
-      ]
+      "json_form": ["Email", "Password", "User ID", "WhatsApp"]
     },
     "created_at": "2026-02-28T14:40:18.382Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -5369,12 +5154,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5407,12 +5187,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5445,12 +5220,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5483,12 +5253,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5521,12 +5286,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5559,12 +5319,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5597,12 +5352,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5635,12 +5385,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5673,12 +5418,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5711,12 +5451,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5749,12 +5484,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5787,12 +5517,7 @@
         "form": {
           "id": 38,
           "desc": "",
-          "json_form": [
-            "Email",
-            "Password",
-            "User ID",
-            "WhatsApp"
-          ]
+          "json_form": ["Email", "Password", "User ID", "WhatsApp"]
         },
         "created_at": "2026-02-28T14:43:13.244423+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5828,10 +5553,7 @@
     "form": {
       "id": 3,
       "desc": "",
-      "json_form": [
-        "UID",
-        "Server"
-      ]
+      "json_form": ["UID", "Server"]
     },
     "created_at": "2025-03-18T20:01:24.047Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -5864,9 +5586,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5899,9 +5619,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5934,9 +5652,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -5969,9 +5685,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6004,9 +5718,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6039,9 +5751,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6074,9 +5784,7 @@
         "form": {
           "id": 17,
           "desc": "",
-          "json_form": [
-            "UID"
-          ]
+          "json_form": ["UID"]
         },
         "created_at": "2025-03-18T20:16:00.868293+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6112,10 +5820,7 @@
     "form": {
       "id": 3,
       "desc": "",
-      "json_form": [
-        "UID",
-        "Server"
-      ]
+      "json_form": ["UID", "Server"]
     },
     "created_at": "2024-02-07T08:44:26.845Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -6148,10 +5853,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6184,10 +5886,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6220,10 +5919,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6256,10 +5952,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6292,10 +5985,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6328,10 +6018,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6364,10 +6051,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2025-04-13T09:38:29.772595+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6400,10 +6084,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2025-04-13T18:09:57.738775+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6436,10 +6117,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-07T08:49:31.530265+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6475,9 +6153,7 @@
     "form": {
       "id": 39,
       "desc": "",
-      "json_form": [
-        "Player ID :"
-      ]
+      "json_form": ["Player ID :"]
     },
     "created_at": "2026-08-01T10:18:13.499Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -6510,9 +6186,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6545,9 +6219,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6580,9 +6252,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6615,9 +6285,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6650,9 +6318,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6685,9 +6351,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6720,9 +6384,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6755,9 +6417,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6790,9 +6450,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6825,9 +6483,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6860,9 +6516,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6895,9 +6549,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6930,9 +6582,7 @@
         "form": {
           "id": 39,
           "desc": "",
-          "json_form": [
-            "Player ID :"
-          ]
+          "json_form": ["Player ID :"]
         },
         "created_at": "2026-08-01T10:18:43.737735+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -6968,9 +6618,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2026-07-19T09:19:45.247Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -7003,9 +6651,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7038,9 +6684,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7073,9 +6717,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7108,9 +6750,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7143,9 +6783,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7178,9 +6816,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7213,9 +6849,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-19T09:21:44.461004+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -7654,9 +7288,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-06T20:21:37.940Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -8037,9 +7669,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-08-19T06:43:15.060949+00:00",
         "updated_at": "2026-09-20T09:36:50.125192+00:00"
@@ -8075,12 +7705,7 @@
     "form": {
       "id": 25,
       "desc": "",
-      "json_form": [
-        "Riot UserName",
-        "Riot Pass",
-        "IGN#TAG",
-        "WhatsApp Number"
-      ]
+      "json_form": ["Riot UserName", "Riot Pass", "IGN#TAG", "WhatsApp Number"]
     },
     "created_at": "2025-01-12T14:53:12.662Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -8610,10 +8235,7 @@
     "form": {
       "id": 2,
       "desc": "",
-      "json_form": [
-        "IGN#TAG",
-        "WhatsApp Number"
-      ]
+      "json_form": ["IGN#TAG", "WhatsApp Number"]
     },
     "created_at": "2024-02-07T19:00:41.250Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -8646,10 +8268,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-02-07T19:06:24.324844+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8682,10 +8301,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-02-07T19:06:24.324844+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8718,10 +8334,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2025-09-05T06:21:20.810546+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8754,10 +8367,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-02-07T19:06:24.324844+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8790,10 +8400,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-02-07T19:06:24.324844+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8826,10 +8433,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-02-07T19:06:24.324844+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8862,10 +8466,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-02-07T19:06:24.324844+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8898,10 +8499,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2025-03-10T17:28:01.051209+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8934,10 +8532,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2025-03-10T17:28:01.051209+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -8970,10 +8565,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2025-03-10T17:28:01.051209+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9006,10 +8598,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2025-03-10T17:28:01.051209+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9042,10 +8631,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2025-03-10T17:28:01.051209+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9078,9 +8664,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-08-19T07:22:32.342065+00:00",
         "updated_at": "2026-09-20T09:20:00.548167+00:00"
@@ -9116,10 +8700,7 @@
     "form": {
       "id": 2,
       "desc": "",
-      "json_form": [
-        "IGN#TAG",
-        "WhatsApp Number"
-      ]
+      "json_form": ["IGN#TAG", "WhatsApp Number"]
     },
     "created_at": "2026-08-02T08:21:26.049Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -9152,10 +8733,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-02T08:21:38.470646+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9188,10 +8766,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-02T08:21:38.470646+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9224,10 +8799,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-02T08:21:38.470646+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9260,10 +8832,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-02T08:21:38.470646+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9296,10 +8865,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-02T08:21:38.470646+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9332,10 +8898,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-02T08:21:38.470646+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9371,10 +8934,7 @@
     "form": {
       "id": 2,
       "desc": "",
-      "json_form": [
-        "IGN#TAG",
-        "WhatsApp Number"
-      ]
+      "json_form": ["IGN#TAG", "WhatsApp Number"]
     },
     "created_at": "2024-02-07T05:57:03.684Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -9407,10 +8967,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9443,10 +9000,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9479,10 +9033,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9515,10 +9066,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9551,10 +9099,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9587,10 +9132,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9623,10 +9165,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9659,10 +9198,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9695,10 +9231,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9731,10 +9264,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9767,10 +9297,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9803,10 +9330,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2024-09-19T13:18:23.053957+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9839,10 +9363,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-27T04:21:42.523974+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9875,10 +9396,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-27T04:21:42.523974+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9911,10 +9429,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-27T04:21:42.523974+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9947,10 +9462,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-27T04:21:42.523974+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -9983,10 +9495,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-27T04:21:42.523974+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10019,10 +9528,7 @@
         "form": {
           "id": 2,
           "desc": "",
-          "json_form": [
-            "IGN#TAG",
-            "WhatsApp Number"
-          ]
+          "json_form": ["IGN#TAG", "WhatsApp Number"]
         },
         "created_at": "2026-08-27T04:21:42.523974+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10177,9 +9683,7 @@
     "form": {
       "id": 8,
       "desc": "",
-      "json_form": [
-        "Your Email"
-      ]
+      "json_form": ["Your Email"]
     },
     "created_at": "2024-02-09T08:57:32.507Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -10212,9 +9716,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-02-09T13:02:16.992352+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10247,9 +9749,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2025-02-25T06:38:05.741464+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10437,9 +9937,7 @@
     "form": {
       "id": 8,
       "desc": "",
-      "json_form": [
-        "Your Email"
-      ]
+      "json_form": ["Your Email"]
     },
     "created_at": "2026-01-17T09:47:14.017Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -10472,9 +9970,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2026-01-17T09:50:23.234149+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10507,9 +10003,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2026-01-17T09:50:23.234149+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10542,9 +10036,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2026-01-17T09:50:23.234149+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10577,9 +10069,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2026-01-17T09:50:23.234149+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10612,9 +10102,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2026-01-17T09:50:23.234149+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10647,9 +10135,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2026-01-17T09:50:23.234149+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -10685,9 +10171,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-05-29T08:14:24.370Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -10810,9 +10294,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-08T18:39:11.864Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -10964,9 +10446,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2026-01-13T08:44:54.066Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -10999,9 +10479,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-01-13T09:17:31.495015+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -11034,9 +10512,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-01-13T09:17:31.495015+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -11072,9 +10548,7 @@
     "form": {
       "id": 8,
       "desc": "",
-      "json_form": [
-        "Your Email"
-      ]
+      "json_form": ["Your Email"]
     },
     "created_at": "2024-05-05T08:36:59.527Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -11107,9 +10581,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-05-05T08:37:34.16494+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -11142,9 +10614,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2024-05-05T08:37:34.16494+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -11180,9 +10650,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2025-06-13T06:21:23.753Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -11215,9 +10683,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2025-06-13T06:23:26.174628+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -11250,9 +10716,7 @@
         "form": {
           "id": 8,
           "desc": "",
-          "json_form": [
-            "Your Email"
-          ]
+          "json_form": ["Your Email"]
         },
         "created_at": "2025-06-13T06:23:26.174628+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -11288,9 +10752,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-08T07:10:18.243Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -11555,10 +11017,7 @@
         "form": {
           "id": 3,
           "desc": "",
-          "json_form": [
-            "UID",
-            "Server"
-          ]
+          "json_form": ["UID", "Server"]
         },
         "created_at": "2024-02-08T07:11:01.279602+00:00",
         "updated_at": "2026-09-20T07:59:08.713657+00:00"
@@ -11652,9 +11111,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-08T20:17:13.270Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -11983,9 +11440,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2025-07-28T08:25:30.767Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -12166,9 +11621,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-08T11:46:30.846Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -12201,9 +11654,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-27T03:48:33.213008+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12236,9 +11687,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-27T03:48:33.213008+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12271,9 +11720,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-27T03:48:33.213008+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12306,9 +11753,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-08-09T08:46:27.776923+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12341,9 +11786,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-27T03:48:33.213008+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12405,9 +11848,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-08-01T06:50:02.07847+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12440,9 +11881,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-08-01T06:50:02.07847+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -12478,9 +11917,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2025-02-12T18:04:53.060Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -12661,9 +12098,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-08T11:36:33.695Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -12812,9 +12247,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-09-07T17:36:20.739741+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13082,9 +12515,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-12-19T15:28:41.177Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -13117,9 +12548,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13152,9 +12581,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13187,9 +12614,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13222,9 +12647,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13257,9 +12680,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13292,9 +12713,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13327,9 +12746,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13362,9 +12779,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13397,9 +12812,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13432,9 +12845,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-26T11:54:00.911835+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13470,9 +12881,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-09-14T17:36:59.817Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -13798,9 +13207,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-08-09T17:32:10.074Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -13833,9 +13240,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13868,9 +13273,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13903,9 +13306,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13938,9 +13339,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -13973,9 +13372,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -14008,9 +13405,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -14043,9 +13438,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -14078,9 +13471,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-06-22T13:09:37.703639+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -14392,9 +13783,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2024-02-08T17:41:17.299Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -14717,9 +14106,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-09-03T13:01:56.36519+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -14900,9 +14287,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2026-04-21T12:59:09.293Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -14935,9 +14320,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -14970,9 +14353,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15005,9 +14386,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15040,9 +14419,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15075,9 +14452,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15110,9 +14485,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15145,9 +14518,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15180,9 +14551,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15215,9 +14584,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15250,9 +14617,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T13:00:08.099783+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15288,9 +14653,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2026-04-21T14:20:43.018Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -15323,9 +14686,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15358,9 +14719,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15393,9 +14752,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15428,9 +14785,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15463,9 +14818,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15498,9 +14851,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15533,9 +14884,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15568,9 +14917,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-04-21T14:21:46.826366+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15606,9 +14953,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2026-07-30T17:10:28.453Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -15641,9 +14986,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-30T17:11:32.551191+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15676,9 +15019,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-30T17:11:32.551191+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15711,9 +15052,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-30T17:11:32.551191+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15746,9 +15085,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-30T17:11:32.551191+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15781,9 +15118,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-30T17:11:32.551191+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15816,9 +15151,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2026-07-30T17:11:32.551191+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -15854,9 +15187,7 @@
     "form": {
       "id": 28,
       "desc": "",
-      "json_form": [
-        "WhatsApp Number"
-      ]
+      "json_form": ["WhatsApp Number"]
     },
     "created_at": "2025-05-14T13:09:39.103Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -16130,9 +15461,7 @@
         "form": {
           "id": 28,
           "desc": "",
-          "json_form": [
-            "WhatsApp Number"
-          ]
+          "json_form": ["WhatsApp Number"]
         },
         "created_at": "2025-05-13T06:01:45.632489+00:00",
         "updated_at": "2026-09-19T07:36:04.678261+00:00"
@@ -16257,10 +15586,7 @@
     "form": {
       "id": 29,
       "desc": "",
-      "json_form": [
-        "E-mail",
-        "Name"
-      ]
+      "json_form": ["E-mail", "Name"]
     },
     "created_at": "2025-02-12T12:46:10.263Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -16295,10 +15621,7 @@
     "form": {
       "id": 29,
       "desc": "",
-      "json_form": [
-        "E-mail",
-        "Name"
-      ]
+      "json_form": ["E-mail", "Name"]
     },
     "created_at": "2025-02-12T13:28:54.212Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -16333,10 +15656,7 @@
     "form": {
       "id": 29,
       "desc": "",
-      "json_form": [
-        "E-mail",
-        "Name"
-      ]
+      "json_form": ["E-mail", "Name"]
     },
     "created_at": "2025-02-12T13:30:05.037Z",
     "updated_at": "2026-09-19T07:36:04.678Z",
@@ -16371,10 +15691,7 @@
     "form": {
       "id": 29,
       "desc": "",
-      "json_form": [
-        "E-mail",
-        "Name"
-      ]
+      "json_form": ["E-mail", "Name"]
     },
     "created_at": "2025-02-12T13:31:05.600Z",
     "updated_at": "2026-09-19T07:36:04.678Z",

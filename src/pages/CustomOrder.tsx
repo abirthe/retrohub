@@ -1,19 +1,35 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { ShopHeader } from '@/components/layout';
-import { ArrowLeft, Send, MessageSquare, CheckCircle2, Sparkles, PlusCircle } from 'lucide-react';
-import { submitCustomOrder } from '@/lib/shopApi';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { ShopHeader } from "@/components/layout";
+import {
+  ArrowLeft,
+  Send,
+  MessageSquare,
+  CheckCircle2,
+  Sparkles,
+  PlusCircle,
+} from "lucide-react";
+import { submitCustomOrder } from "@/lib/shopApi";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
-const ROTATING_WORDS = ['Order', 'Game Key', 'Support', 'Subscription'];
-const POPULAR_PLATFORMS = ['Steam', 'Epic Games', 'PlayStation', 'Xbox', 'Nintendo', 'Riot Games', 'EA App', 'Mobile'];
+const ROTATING_WORDS = ["Order", "Game Key", "Support", "Subscription"];
+const POPULAR_PLATFORMS = [
+  "Steam",
+  "Epic Games",
+  "PlayStation",
+  "Xbox",
+  "Nintendo",
+  "Riot Games",
+  "EA App",
+  "Mobile",
+];
 
 const CustomOrder = () => {
   const navigate = useNavigate();
@@ -29,52 +45,64 @@ const CustomOrder = () => {
   } | null>(null);
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    productName: '',
-    platform: '',
-    details: ''
+    name: "",
+    email: "",
+    productName: "",
+    platform: "",
+    details: "",
   });
 
   // Auto-fill from authenticated user profile
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        name: prev.name || user.user_metadata?.full_name || user.user_metadata?.name || '',
-        email: prev.email || user.email || ''
+        name:
+          prev.name ||
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          "",
+        email: prev.email || user.email || "",
       }));
     }
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   const handleSelectPlatform = (platform: string) => {
-    setFormData(prev => ({ ...prev, platform }));
+    setFormData((prev) => ({ ...prev, platform }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.productName.trim() || !formData.platform.trim()) {
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.productName.trim() ||
+      !formData.platform.trim()
+    ) {
       toast({
         title: "Required Fields Missing",
-        description: "Please fill in your name, email, product name, and platform.",
-        variant: "destructive"
+        description:
+          "Please fill in your name, email, product name, and platform.",
+        variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
-    
+
     try {
       await submitCustomOrder(formData);
-      queryClient.invalidateQueries({ queryKey: ['admin-custom-orders'] });
-      
+      queryClient.invalidateQueries({ queryKey: ["admin-custom-orders"] });
+
       setSubmittedData({
         name: formData.name,
         email: formData.email,
@@ -84,14 +112,16 @@ const CustomOrder = () => {
 
       toast({
         title: "Request Submitted! 🎮",
-        description: "Our sourcing team has been notified. We will reach out to you via email shortly.",
+        description:
+          "Our sourcing team has been notified. We will reach out to you via email shortly.",
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      const message =
+        error instanceof Error ? error.message : "Unknown error occurred";
       toast({
         title: "Submission Failed",
         description: message || "Something went wrong. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -105,7 +135,7 @@ const CustomOrder = () => {
     const timer = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setWordIndex(prev => (prev + 1) % ROTATING_WORDS.length);
+        setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
         setIsVisible(true);
       }, 250);
     }, 2800);
@@ -120,12 +150,15 @@ const CustomOrder = () => {
       </div>
 
       <ShopHeader />
-      
+
       <div className="container relative z-10 flex-1 py-8 sm:py-12 max-w-3xl flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <Button
             variant="ghost"
-            onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/'); }}
+            onClick={() => {
+              if (window.history.length > 1) navigate(-1);
+              else navigate("/");
+            }}
             className="font-display text-xs tracking-wider text-muted-foreground hover:text-white p-0 h-auto hover:bg-transparent"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -156,38 +189,52 @@ const CustomOrder = () => {
                 Request <span className="text-primary">Received!</span>
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Thank you, <span className="text-foreground font-semibold">{submittedData.name}</span>. Our sourcing specialists are actively hunting for your requested product:
+                Thank you,{" "}
+                <span className="text-foreground font-semibold">
+                  {submittedData.name}
+                </span>
+                . Our sourcing specialists are actively hunting for your
+                requested product:
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-background/50 border border-white/5 max-w-md mx-auto text-left space-y-2 text-xs">
               <div className="flex justify-between border-b border-white/5 pb-1.5">
                 <span className="text-muted-foreground">Item:</span>
-                <span className="font-bold text-foreground">{submittedData.productName}</span>
+                <span className="font-bold text-foreground">
+                  {submittedData.productName}
+                </span>
               </div>
               <div className="flex justify-between border-b border-white/5 pb-1.5">
-                <span className="text-muted-foreground">Platform / Region:</span>
-                <span className="font-mono text-primary">{submittedData.platform}</span>
+                <span className="text-muted-foreground">
+                  Platform / Region:
+                </span>
+                <span className="font-mono text-primary">
+                  {submittedData.platform}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Contact Email:</span>
-                <span className="text-foreground font-mono">{submittedData.email}</span>
+                <span className="text-foreground font-mono">
+                  {submittedData.email}
+                </span>
               </div>
             </div>
 
             <p className="text-xs text-muted-foreground">
-              We typically verify inventory pricing and reply within <span className="text-primary font-medium">15–60 minutes</span>.
+              We typically verify inventory pricing and reply within{" "}
+              <span className="text-primary font-medium">15–60 minutes</span>.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
               <Button
                 onClick={() => {
                   setSubmittedData(null);
-                  setFormData(prev => ({
+                  setFormData((prev) => ({
                     ...prev,
-                    productName: '',
-                    platform: '',
-                    details: ''
+                    productName: "",
+                    platform: "",
+                    details: "",
                   }));
                 }}
                 variant="outline"
@@ -198,7 +245,7 @@ const CustomOrder = () => {
               </Button>
 
               <Button
-                onClick={() => navigate('/orders')}
+                onClick={() => navigate("/orders")}
                 className="w-full sm:w-auto gradient-primary font-display text-xs tracking-wider shadow-lg shadow-primary/20"
               >
                 Open Customer Console
@@ -216,25 +263,34 @@ const CustomOrder = () => {
                 <span>Request Custom</span>
                 <span
                   className={cn(
-                    'inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-accent transition-all duration-300 transform',
+                    "inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-accent transition-all duration-300 transform",
                     isVisible
-                      ? 'opacity-100 translate-y-0 scale-100'
-                      : 'opacity-0 -translate-y-2 scale-95'
+                      ? "opacity-100 translate-y-0 scale-100"
+                      : "opacity-0 -translate-y-2 scale-95",
                   )}
                 >
                   {ROTATING_WORDS[wordIndex]}
                 </span>
               </h1>
               <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
-                Can't find the game, subscription, or top-up you're looking for? Submit your request below. We source directly from authorized digital distributors at wholesale rates with rapid 15–60 minute turnaround, exclusive bKash payment, and 100% valid key guarantees.
+                Can't find the game, subscription, or top-up you're looking for?
+                Submit your request below. We source directly from authorized
+                digital distributors at wholesale rates with rapid 15–60 minute
+                turnaround, exclusive bKash payment, and 100% valid key
+                guarantees.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-muted-foreground text-xs font-medium">Your Name</Label>
-                  <Input 
+                  <Label
+                    htmlFor="name"
+                    className="text-muted-foreground text-xs font-medium"
+                  >
+                    Your Name
+                  </Label>
+                  <Input
                     id="name"
                     name="name"
                     required
@@ -244,10 +300,15 @@ const CustomOrder = () => {
                     className="bg-background/50 border-white/10 focus:border-primary/50 transition-colors h-11"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-muted-foreground text-xs font-medium">Email Address (for quote & delivery)</Label>
-                  <Input 
+                  <Label
+                    htmlFor="email"
+                    className="text-muted-foreground text-xs font-medium"
+                  >
+                    Email Address (for quote & delivery)
+                  </Label>
+                  <Input
                     id="email"
                     name="email"
                     type="email"
@@ -262,8 +323,13 @@ const CustomOrder = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="productName" className="text-muted-foreground text-xs font-medium">Product / Game / Subscription</Label>
-                  <Input 
+                  <Label
+                    htmlFor="productName"
+                    className="text-muted-foreground text-xs font-medium"
+                  >
+                    Product / Game / Subscription
+                  </Label>
+                  <Input
                     id="productName"
                     name="productName"
                     required
@@ -273,10 +339,15 @@ const CustomOrder = () => {
                     className="bg-background/50 border-white/10 focus:border-primary/50 transition-colors h-11"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="platform" className="text-muted-foreground text-xs font-medium">Platform / Region</Label>
-                  <Input 
+                  <Label
+                    htmlFor="platform"
+                    className="text-muted-foreground text-xs font-medium"
+                  >
+                    Platform / Region
+                  </Label>
+                  <Input
                     id="platform"
                     name="platform"
                     required
@@ -290,7 +361,9 @@ const CustomOrder = () => {
 
               {/* Quick Select Platform Chips */}
               <div className="space-y-2">
-                <Label className="text-[11px] text-muted-foreground">Quick Select Platform:</Label>
+                <Label className="text-[11px] text-muted-foreground">
+                  Quick Select Platform:
+                </Label>
                 <div className="flex flex-wrap gap-1.5">
                   {POPULAR_PLATFORMS.map((plat) => (
                     <button
@@ -299,9 +372,11 @@ const CustomOrder = () => {
                       onClick={() => handleSelectPlatform(plat)}
                       className={cn(
                         "text-xs px-2.5 py-1 rounded-md border transition-all",
-                        formData.platform.toLowerCase().includes(plat.toLowerCase())
+                        formData.platform
+                          .toLowerCase()
+                          .includes(plat.toLowerCase())
                           ? "bg-primary/20 border-primary text-white"
-                          : "bg-secondary/40 border-white/5 text-muted-foreground hover:border-white/20 hover:text-white"
+                          : "bg-secondary/40 border-white/5 text-muted-foreground hover:border-white/20 hover:text-white",
                       )}
                     >
                       {plat}
@@ -311,8 +386,13 @@ const CustomOrder = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="details" className="text-muted-foreground text-xs font-medium">Additional Details (Optional)</Label>
-                <Textarea 
+                <Label
+                  htmlFor="details"
+                  className="text-muted-foreground text-xs font-medium"
+                >
+                  Additional Details (Optional)
+                </Label>
+                <Textarea
                   id="details"
                   name="details"
                   value={formData.details}
@@ -322,8 +402,8 @@ const CustomOrder = () => {
                 />
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-12 text-xs tracking-widest uppercase font-bold gradient-primary hover:shadow-[0_0_40px_-10px_rgba(var(--primary-rgb),0.5)] transition-all duration-300"
                 disabled={loading}
               >

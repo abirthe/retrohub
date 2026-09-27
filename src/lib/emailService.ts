@@ -1,7 +1,7 @@
 // Email service to send order completion emails
 // This can be called from the frontend or backend
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 interface EmailPayload {
   order_id: string;
@@ -19,25 +19,31 @@ export async function sendOrderEmail(payload: EmailPayload) {
   try {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     if (!supabaseUrl) {
-      throw new Error('Supabase URL not configured');
+      throw new Error("Supabase URL not configured");
     }
 
     // Use the active session JWT so the Edge Function can verify the caller.
     // The anon key is intentionally NOT used here — it cannot authenticate a specific user.
-    const { data: { session } } = await supabase.auth.getSession();
-    const authToken = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const authToken =
+      session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!authToken) {
-      throw new Error('No auth token available for email dispatch');
+      throw new Error("No auth token available for email dispatch");
     }
 
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
+    const response = await fetch(
+      `${supabaseUrl}/functions/v1/send-order-email`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
+    );
 
     if (!response.ok) {
       const error = await response.text();
@@ -47,7 +53,7 @@ export async function sendOrderEmail(payload: EmailPayload) {
     const result = await response.json();
     return result;
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : "Unknown error";
     // Don't throw — email failure shouldn't break order completion
     return { success: false, error: message };
   }
@@ -61,43 +67,48 @@ export async function sendOrderCompletionEmail(orderId: string) {
   try {
     // Get order details
     const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select(`
+      .from("orders")
+      .select(
+        `
         id,
         total,
         final_output,
         status,
         products(title),
         user_id
-      `)
-      .eq('id', orderId)
+      `,
+      )
+      .eq("id", orderId)
       .single();
 
     if (orderError || !order) {
-      throw new Error(`Failed to fetch order: ${orderError?.message ?? 'not found'}`);
+      throw new Error(
+        `Failed to fetch order: ${orderError?.message ?? "not found"}`,
+      );
     }
 
-    if (order.status !== 'fulfilled') {
+    if (order.status !== "fulfilled") {
       throw new Error(`Order is not fulfilled yet (status: ${order.status})`);
     }
 
     if (!order.final_output) {
-      throw new Error('No delivery code available for this order');
+      throw new Error("No delivery code available for this order");
     }
 
     // Get customer email from profiles table
     const { data: profile, error: emailError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', order.user_id)
+      .from("profiles")
+      .select("email")
+      .eq("id", order.user_id)
       .single();
 
     if (emailError || !profile || !profile.email) {
       // Don't fail completely - email is optional
-      return { 
-        success: false, 
-        error: 'Customer email not found. Customer can view code on /orders page.',
-        warning: true 
+      return {
+        success: false,
+        error:
+          "Customer email not found. Customer can view code on /orders page.",
+        warning: true,
       };
     }
 
@@ -106,16 +117,15 @@ export async function sendOrderCompletionEmail(orderId: string) {
     const result = await sendOrderEmail({
       order_id: order.id,
       recipient: profile.email,
-      product_title: productData?.title || 'Product',
+      product_title: productData?.title || "Product",
       code: order.final_output,
       order_total: Number(order.total),
     });
 
     return result;
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : "Unknown error";
     // Don't throw - email failure shouldn't break order fulfillment
     return { success: false, error: message, warning: true };
   }
 }
-

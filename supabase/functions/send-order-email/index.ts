@@ -1,30 +1,30 @@
 // Supabase Edge Function to send order completion emails
 // This function is called when an order is completed
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
-const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'noreply@retrohub.com'
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "noreply@retrohub.com";
 
 interface EmailPayload {
-  order_id: string
-  recipient: string
-  product_title: string
-  code: string
-  order_total: number
+  order_id: string;
+  recipient: string;
+  product_title: string;
+  code: string;
+  order_total: number;
 }
 
 serve(async (req) => {
   try {
     // Get the order data from the request
-    const payload: EmailPayload = await req.json()
+    const payload: EmailPayload = await req.json();
 
     if (!payload.recipient || !payload.code) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      )
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
     }
 
     // Email HTML template
@@ -63,9 +63,9 @@ serve(async (req) => {
                 <div class="code">${payload.code}</div>
               </div>
               
-              <p><strong>Important:</strong> Please save this code securely. You can also view it anytime in your <a href="${Deno.env.get('SITE_URL') || 'https://your-site.com'}/orders">order history</a>.</p>
+              <p><strong>Important:</strong> Please save this code securely. You can also view it anytime in your <a href="${Deno.env.get("SITE_URL") || "https://your-site.com"}/orders">order history</a>.</p>
               
-              <a href="${Deno.env.get('SITE_URL') || 'https://your-site.com'}/orders" class="button">View All Orders</a>
+              <a href="${Deno.env.get("SITE_URL") || "https://your-site.com"}/orders" class="button">View All Orders</a>
             </div>
             <div class="footer">
               <p>© 2024 RETROHUB. Dev by ABIR HOSSAIN</p>
@@ -74,14 +74,14 @@ serve(async (req) => {
           </div>
         </body>
       </html>
-    `
+    `;
 
     // Send email using Resend API
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
         from: FROM_EMAIL,
@@ -89,36 +89,35 @@ serve(async (req) => {
         subject: `🎮 Your ${payload.product_title} Code - RETROHUB`,
         html: emailHtml,
       }),
-    })
+    });
 
     if (!emailResponse.ok) {
-      const error = await emailResponse.text()
-      throw new Error(`Email API error: ${error}`)
+      const error = await emailResponse.text();
+      throw new Error(`Email API error: ${error}`);
     }
 
-    const emailData = await emailResponse.json()
+    const emailData = await emailResponse.json();
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Email sent successfully',
-        email_id: emailData.id 
+      JSON.stringify({
+        success: true,
+        message: "Email sent successfully",
+        email_id: emailData.id,
       }),
-      { 
-        status: 200, 
-        headers: { 'Content-Type': 'application/json' } 
-      }
-    )
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Failed to send email' 
+      JSON.stringify({
+        error: error.message || "Failed to send email",
       }),
-      { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json' } 
-      }
-    )
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
-})
-
+});

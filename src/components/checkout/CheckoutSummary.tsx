@@ -1,8 +1,14 @@
-import { CreditCard, ShieldCheck, LogIn } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
+import { CreditCard, ShieldCheck, LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface CheckoutSummaryProps {
   totalPrice: number;
@@ -16,9 +22,9 @@ export interface CheckoutSummaryProps {
   onSignIn?: () => void;
 }
 
-export const CheckoutSummary = ({ 
-  totalPrice, 
-  loading, 
+export const CheckoutSummary = ({
+  totalPrice,
+  loading,
   onCheckout,
   hasTopup = false,
   termsAccepted = false,
@@ -30,7 +36,9 @@ export const CheckoutSummary = ({
   return (
     <Card className="bg-card/80 backdrop-blur-xl border-white/10 border shadow-2xl sticky top-24">
       <CardHeader className="pb-4">
-        <CardTitle className="font-display text-lg tracking-wider">Order Summary</CardTitle>
+        <CardTitle className="font-display text-lg tracking-wider">
+          Order Summary
+        </CardTitle>
         <CardDescription>Review your order before paying</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -54,14 +62,24 @@ export const CheckoutSummary = ({
 
         {hasTopup && (
           <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-            <Checkbox 
-              id="terms" 
+            <Checkbox
+              id="terms"
               checked={termsAccepted}
-              onCheckedChange={(checked) => setTermsAccepted?.(checked as boolean)}
+              onCheckedChange={(checked) =>
+                setTermsAccepted?.(checked as boolean)
+              }
               className="mt-0.5"
             />
-            <label htmlFor="terms" className="text-xs text-muted-foreground leading-tight cursor-pointer">
-              I agree that the authority won't be responsible for misinformation (e.g. wrong Game ID) and such cases are <strong className="text-destructive font-semibold">not refundable</strong>.
+            <label
+              htmlFor="terms"
+              className="text-xs text-muted-foreground leading-tight cursor-pointer"
+            >
+              I agree that the authority won't be responsible for misinformation
+              (e.g. wrong Game ID) and such cases are{" "}
+              <strong className="text-destructive font-semibold">
+                not refundable
+              </strong>
+              .
             </label>
           </div>
         )}
@@ -104,7 +122,19 @@ export const CheckoutSummary = ({
             <span>RETROHUB Store Assurances</span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            100% genuine digital codes with instant automated delivery. Verified checkout exclusively via <strong className="text-pink-400">bKash</strong>. Need assistance? Contact our <a href="https://t.me/retrochanbot" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">24/7 Telegram Concierge</a>.
+            100% genuine digital codes with instant automated delivery. Verified
+            checkout exclusively via{" "}
+            <strong className="text-pink-400">bKash</strong>. Need assistance?
+            Contact our{" "}
+            <a
+              href="https://t.me/retrochanbot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              24/7 Telegram Concierge
+            </a>
+            .
           </p>
         </div>
       </CardContent>

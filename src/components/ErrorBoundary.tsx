@@ -1,19 +1,29 @@
-import React from 'react';
-import { ErrorBoundary as ReactErrorBoundary, FallbackProps } from 'react-error-boundary';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import React from "react";
+import {
+  ErrorBoundary as ReactErrorBoundary,
+  FallbackProps,
+} from "react-error-boundary";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
-const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
-  const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  const isChunkLoadError = /failed to fetch dynamically imported module|importing a module script failed|Cannot read properties of undefined \(reading 'default'\)|undefined \(reading 'default'\)|Chunk loaded without default export/i.test(errorMessage);
+const PageErrorFallback: React.FC<FallbackProps> = ({
+  error,
+  resetErrorBoundary,
+}) => {
+  const errorMessage =
+    error instanceof Error ? error.message : "An unexpected error occurred";
+  const isChunkLoadError =
+    /failed to fetch dynamically imported module|importing a module script failed|Cannot read properties of undefined \(reading 'default'\)|undefined \(reading 'default'\)|Chunk loaded without default export/i.test(
+      errorMessage,
+    );
 
   React.useEffect(() => {
     if (isChunkLoadError) {
-      const alreadyTried = window.sessionStorage.getItem('eb_auto_reload');
+      const alreadyTried = window.sessionStorage.getItem("eb_auto_reload");
       if (!alreadyTried) {
-        window.sessionStorage.setItem('eb_auto_reload', 'true');
+        window.sessionStorage.setItem("eb_auto_reload", "true");
         const url = new URL(window.location.href);
-        url.searchParams.set('v', String(Date.now()));
+        url.searchParams.set("v", String(Date.now()));
         window.location.replace(url.toString());
       }
     }
@@ -22,14 +32,14 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
   const handleTryAgain = () => {
     window.sessionStorage.clear();
     const url = new URL(window.location.href);
-    url.searchParams.set('v', String(Date.now()));
+    url.searchParams.set("v", String(Date.now()));
     window.location.replace(url.toString());
   };
 
   const handleGoHome = () => {
     window.sessionStorage.clear();
     const url = new URL(window.location.origin);
-    url.searchParams.set('v', String(Date.now()));
+    url.searchParams.set("v", String(Date.now()));
     window.location.replace(url.toString());
   };
 
@@ -39,7 +49,7 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
         <div className="w-16 h-16 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto border border-destructive/20">
           <AlertTriangle className="w-8 h-8" />
         </div>
-        
+
         <div className="space-y-2">
           <h2 className="font-display text-2xl font-bold text-white tracking-wide">
             Something Went Wrong
@@ -55,7 +65,7 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
             className="w-full sm:w-auto gradient-primary font-display text-xs tracking-wider gap-2 shadow-lg shadow-primary/20"
           >
             <RefreshCw className="w-4 h-4" />
-            {isChunkLoadError ? 'Reload Page' : 'Try Again'}
+            {isChunkLoadError ? "Reload Page" : "Try Again"}
           </Button>
 
           <Button
@@ -76,7 +86,9 @@ export interface AppErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-export const AppErrorBoundary: React.FC<AppErrorBoundaryProps> = ({ children }) => {
+export const AppErrorBoundary: React.FC<AppErrorBoundaryProps> = ({
+  children,
+}) => {
   return (
     <ReactErrorBoundary FallbackComponent={PageErrorFallback}>
       {children}

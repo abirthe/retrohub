@@ -3,11 +3,11 @@ export async function generateFulfillmentEmail(
   productName: string,
   customerName: string,
   fulfillmentCode: string,
-  isDelayed: boolean = false
+  isDelayed: boolean = false,
 ): Promise<string> {
   const apiKey = import.meta.env.VITE_XAI_API_KEY;
   if (!apiKey) {
-    throw new Error('XAI API Key is missing');
+    throw new Error("XAI API Key is missing");
   }
 
   const systemPrompt = `You are a helpful e-commerce assistant for a digital game key store.
@@ -28,24 +28,24 @@ Instructions:
 
 Write ONLY the email body in plain text (no markdown formatting, no JSON, no extra conversational text).`;
 
-  const response = await fetch('https://api.x.ai/v1/chat/completions', {
-    method: 'POST',
+  const response = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'grok-beta',
-      messages: [
-        { role: 'system', content: systemPrompt }
-      ],
+      model: "grok-beta",
+      messages: [{ role: "system", content: systemPrompt }],
       temperature: 0.7,
     }),
   });
 
   if (!response.ok) {
     const errorData = await response.text();
-    throw new Error(`Failed to generate email: ${response.status} ${errorData}`);
+    throw new Error(
+      `Failed to generate email: ${response.status} ${errorData}`,
+    );
   }
 
   const data = await response.json();

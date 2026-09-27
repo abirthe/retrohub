@@ -26,7 +26,8 @@ const NotFound = () => {
             Page Not Found
           </p>
           <p className="text-muted-foreground max-w-sm mx-auto">
-            The requested page has been moved, deleted, or never existed in this dimension.
+            The requested page has been moved, deleted, or never existed in this
+            dimension.
           </p>
         </div>
 
@@ -39,7 +40,7 @@ const NotFound = () => {
             <ArrowLeft className="w-4 h-4" /> Go Back
           </Button>
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="gradient-primary gap-2 shadow-lg shadow-primary/20"
           >
             <Home className="w-4 h-4" /> Home Page

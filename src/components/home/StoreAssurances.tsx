@@ -1,6 +1,6 @@
-import React from 'react';
-import { Zap, ShieldCheck, Smartphone, Send, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Zap, ShieldCheck, Smartphone, Send, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const StoreAssurances: React.FC = () => {
   return (
@@ -16,7 +16,8 @@ export const StoreAssurances: React.FC = () => {
             Instant Auto Delivery
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Direct real-time key and voucher fulfillment to your Customer Console & email upon checkout.
+            Direct real-time key and voucher fulfillment to your Customer
+            Console & email upon checkout.
           </p>
         </div>
 
@@ -30,7 +31,8 @@ export const StoreAssurances: React.FC = () => {
             100% Verified Valid Codes
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Wholesale distributor authenticated licenses backed by a zero-quibble replacement guarantee.
+            Wholesale distributor authenticated licenses backed by a
+            zero-quibble replacement guarantee.
           </p>
         </div>
 
@@ -44,7 +46,8 @@ export const StoreAssurances: React.FC = () => {
             bKash Exclusive Checkout
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Safe, zero-hassle local payments via bKash Send Money with instant TrxID receipt validation.
+            Safe, zero-hassle local payments via bKash Send Money with instant
+            TrxID receipt validation.
           </p>
         </div>
 
@@ -58,7 +61,8 @@ export const StoreAssurances: React.FC = () => {
             24/7 Telegram Concierge
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-            Direct chat for order status updates, game requests, and live support at @retrochanbot.
+            Direct chat for order status updates, game requests, and live
+            support at @retrochanbot.
           </p>
           <a
             href="https://t.me/retrochanbot"

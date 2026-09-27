@@ -1,7 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
@@ -47,74 +48,78 @@ Get more from the games you love with an EA Play subscription on PlayStation Net
 
 const products = [
   {
-    title: 'EA Play PSN (Ukraine) | 1 Month',
-    category: 'subscription',
-    platform: 'PlayStation',
-    region: 'GLOBAL',
-    delivery_type: 'instant_code',
+    title: "EA Play PSN (Ukraine) | 1 Month",
+    category: "subscription",
+    platform: "PlayStation",
+    region: "GLOBAL",
+    delivery_type: "instant_code",
     cost_price: 845,
     sale_price: 1245,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-psn.webp',
-    source_url: 'https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126',
-    source_platform: 'plati.market',
-    description: descUkraine
+    image_url: "/images/ea-play-psn.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126",
+    source_platform: "plati.market",
+    description: descUkraine,
   },
   {
-    title: 'EA Play PSN (Ukraine) | 12 Month',
-    category: 'subscription',
-    platform: 'PlayStation',
-    region: 'GLOBAL',
-    delivery_type: 'instant_code',
+    title: "EA Play PSN (Ukraine) | 12 Month",
+    category: "subscription",
+    platform: "PlayStation",
+    region: "GLOBAL",
+    delivery_type: "instant_code",
     cost_price: 3780,
     sale_price: 4180,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-psn.webp',
-    source_url: 'https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126',
-    source_platform: 'plati.market',
-    description: descUkraine
+    image_url: "/images/ea-play-psn.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126",
+    source_platform: "plati.market",
+    description: descUkraine,
   },
   {
-    title: 'EA Play PSN (Turkey) | 1 Month',
-    category: 'subscription',
-    platform: 'PlayStation',
-    region: 'TR',
-    delivery_type: 'instant_code',
+    title: "EA Play PSN (Turkey) | 1 Month",
+    category: "subscription",
+    platform: "PlayStation",
+    region: "TR",
+    delivery_type: "instant_code",
     cost_price: 1155,
     sale_price: 1555,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-psn.webp',
-    source_url: 'https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126',
-    source_platform: 'plati.market',
-    description: descTurkey
+    image_url: "/images/ea-play-psn.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126",
+    source_platform: "plati.market",
+    description: descTurkey,
   },
   {
-    title: 'EA Play PSN (Turkey) | 12 Month',
-    category: 'subscription',
-    platform: 'PlayStation',
-    region: 'TR',
-    delivery_type: 'instant_code',
+    title: "EA Play PSN (Turkey) | 12 Month",
+    category: "subscription",
+    platform: "PlayStation",
+    region: "TR",
+    delivery_type: "instant_code",
     cost_price: 4965,
     sale_price: 5365,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-psn.webp',
-    source_url: 'https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126',
-    source_platform: 'plati.market',
-    description: descTurkey
-  }
+    image_url: "/images/ea-play-psn.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-ps4-ps5-psn-turkey-ukraine/3703126",
+    source_platform: "plati.market",
+    description: descTurkey,
+  },
 ];
 
 async function seed() {
   try {
     for (const item of products) {
       const { data: existing, error: findError } = await supabase
-        .from('products')
-        .select('id')
-        .eq('title', item.title)
+        .from("products")
+        .select("id")
+        .eq("title", item.title)
         .maybeSingle();
 
       if (findError) {
@@ -123,19 +128,19 @@ async function seed() {
 
       if (existing) {
         const { error: updateError } = await supabase
-          .from('products')
+          .from("products")
           .update({
             ...item,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
-          .eq('id', existing.id);
+          .eq("id", existing.id);
 
         if (updateError) {
           throw updateError;
         }
       } else {
         const { error: insertError } = await supabase
-          .from('products')
+          .from("products")
           .insert(item);
 
         if (insertError) {
