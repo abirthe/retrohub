@@ -19,7 +19,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
   - Graceful AI-to-interactive-menu fallback when API quotas or network issues occur.
   - Deployed as `supabase/functions/customer-bot` (no JWT verification required for public customer access).
   - Automated Telegram command registration via `setMyCommands` (`/start`, `/track`, `/faq`, `/help`).
-- **Bidirectional Live Support Relay**: Seamlessly connects customers in `@retrochanbot` requesting human assistance directly into the Merchant Admin Bot (`@Notifyretro_bot`). The merchant receives real-time escalation alerts, replies directly to the customer using `/reply <chat_id> <message>` or tap-to-reply inline buttons, reviews open tickets via `/tickets`, and resolves tickets with `/resolve <chat_id>` to transition the customer back to Retro Chan.
+- **Bidirectional Live Support Relay & Human Escalation Isolation**: Seamlessly connects customers in `@retrochanbot` requesting human assistance directly into the Merchant Admin Bot (`@Notifyretro_bot`).
+  - **Zero Interruption Invariant**: The merchant admin bot is alerted *only* when the customer explicitly requests human assistance via interactive buttons (`escalate_*`) or human commands (`/human`, `/agent`, `/support`, `/staff`). Normal customer service inquiries never ping or bother the merchant.
+  - **Dual-Engine Customer Service ft. Grok**: Powered by xAI Grok (`grok-2-latest`, `grok-2`, `grok-beta`) with a built-in high-IQ Retro Chan Natural Intelligence engine for store guidance, bKash payment walkthroughs, order lookup, and delivery timelines.
+  - **Two-Way Merchant Relay**: The merchant replies directly to the customer using `/reply <chat_id> <message>`, inspects open tickets via `/tickets`, and resolves tickets with `/resolve <chat_id>` or the inline `[✅ Mark Resolved]` button. Customers can also self-resume AI support with `[🤖 Resume with Retro Chan AI]`.
 - **Per-User Cart Isolation**: `CartContext` now scopes each cart to `cart_${userId}` (authenticated) vs `cart_guest` (anonymous), eliminating cross-account cart leakage when multiple Google accounts are used on the same device.
 - **Universal Cross-Device Background Video Engine**: Complete overhaul of `BackgroundAnimation.tsx`.
   - HLS.js MSE engine with dedicated Web Worker offloading (`enableWorker: true`) — main UI thread fully free.
