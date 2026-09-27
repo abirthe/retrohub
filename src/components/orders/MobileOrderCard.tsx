@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, CheckCircle2, Copy, Check, Send, Sparkles } from 'lucide-react';
+import { Calendar, CheckCircle2, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Delivery, Order } from '@/lib/shopApi';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,6 @@ export interface MobileOrderCardProps {
 export const MobileOrderCard = ({ order, statusStyle, orderDate }: MobileOrderCardProps) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const orderDeliveries = (order.deliveries as unknown as Delivery[]) || [];
-  const telegramSupportUrl = `https://t.me/retrochanbot?start=order_${order.id.slice(0, 8)}`;
 
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -102,22 +101,6 @@ export const MobileOrderCard = ({ order, statusStyle, orderDate }: MobileOrderCa
           </span>
         </div>
       )}
-
-      {/* Action Footer with Telegram Support Launcher */}
-      <div className="pt-2 flex items-center justify-between gap-2 border-t border-white/5">
-        <a
-          href={telegramSupportUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[11px] text-cyan-400 hover:text-cyan-300 font-medium transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1.5 rounded-md border border-cyan-500/20"
-        >
-          <Send className="w-3 h-3 rotate-45" />
-          <span>Telegram Concierge</span>
-          <Sparkles className="w-2.5 h-2.5 text-cyan-300 animate-pulse" />
-        </a>
-
-        <span className="text-[10px] text-muted-foreground">24/7 AI + Staff Support</span>
-      </div>
     </div>
   );
 };
