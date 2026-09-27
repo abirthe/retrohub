@@ -2,9 +2,11 @@
 
 **RETROHUB** is a high-performance digital commerce platform engineered for instant delivery of digital game keys, in-game currency top-ups, verified gaming accounts, digital gift cards, subscription passes, and software licenses.
 
-Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL 15+)**, the platform features a cyber-neon ambient UI, local mobile payment workflows (bKash), a 24/7 Telegram admin bot with direct fulfillment commands, and automated background order monitoring.
+Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (PostgreSQL 15+)**, the platform features a cyber-neon ambient UI, local mobile payment workflows (bKash), a 24/7 Telegram admin bot with interactive inline buttons and direct mobile fulfillment commands, edge-native Cloudflare Worker asset routing with DDoS rate limiting, and automated background order monitoring.
 
-> **Developer & Architect:** Abir Hossain
+> **Developer & Architect:** Abir Hossain  
+> **Repository:** [https://github.com/abirthe/retrohub.git](https://github.com/abirthe/retrohub.git)  
+> **Release Branches:** `main` (Production), `Production` (Cloudflare), `Dev` (Development)
 
 ---
 
@@ -66,9 +68,8 @@ Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (Postg
   * ⏳ Pending Orders Awaiting Action
 * **Order Operations Board**:
   * **Verify Payment**: Transitions order to `payment_verified` after confirming the bKash/Nagad statement.
-  * **Start Sourcing**: Marks item as `sourcing` during external acquisition.
   * **Fulfill Order**: Records the delivery code, supplier source, and cost paid, automatically calculating profit and moving the status to `fulfilled`.
-  * **Hold / Cancel / Refund**: Full exception handling with audit trail recording.
+  * **Hold / Cancel / Refund**: Full exception handling with audit trail recording in `admin_action_logs`.
 * **Inventory & Catalog Control**: Inline price updating (`sale_price`, `cost_price`) and real-time stock adjustments.
 * **Custom Orders Board**: Manage incoming customer quotes and status.
 
@@ -79,29 +80,31 @@ Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (Postg
 Engineered with a **high-availability dual-channel dispatch architecture**: alerts are dispatched via the Supabase Edge Function (`telegram-webhook`) with an automatic direct Telegram Bot API fallback from the client, guaranteeing that merchant alerts are delivered even during edge runtime cold starts.
 
 #### Real-Time Merchant Alerts (Pushed Directly to Phone)
-* 🛍️ **New Order Alert**: Product title, total, customer Game ID, order ID, and a ready-to-use `/deliver` command.
+* 🛍️ **New Order Alert**: Product title, total, customer Game ID, order ID, and interactive inline buttons.
 * 💳 **Payment Submitted Alert**: Customer Transaction ID, order IDs, amount, and automatic duplicate TrxID fraud warnings.
 * 📝 **Custom Order Alert**: Customer name, email, platform, and request details.
 * ⚠️ **Low Stock Warning**: Instant notification when product inventory drops to $\le 3$.
 
 #### Interactive Telegram Commands & Inline Keyboards
-| Command | Action |
-| :--- | :--- |
-| **[Inline Button]** | Instantly **Cancel** or **Verify** orders directly from push notifications without typing commands |
-| `/orders` | View up to 10 latest unfulfilled orders with quick action shortcuts |
-| `/order <id>` | **Inspect full order details** (Player UID, Server, TrxID, timestamps, status) |
-| `/verify <id>` | **Verify customer payment** directly from chat (`status = 'payment_verified'`) |
-| `/deliver <id> <code>` | **Fulfill an order** with digital key or account credentials |
-| `/cancel <id> [reason]` | **Cancel an order** from phone, release reserved inventory keys, and log reason |
-| `/hold <id> [reason]` | Place order on hold (e.g. incorrect server or player UID) |
-| `/refund <id> [reason]` | Mark order as refunded (`status = 'refunded'`) |
-| `/summary` | View today's financial metrics (gross revenue, net profit, orders, pending items) |
-| `/stock [search]` | Check current inventory health or search specific product stock |
-| `/custom` | View the latest pending custom order requests |
-| `/remind` | Instantly trigger a fresh check of all unfulfilled orders |
-| `/help` | Display interactive command cheat sheet and operational syntax |
+The bot has all 12 operational commands registered via Telegram's `setMyCommands` API, complete with `callback_query` webhook support for touch-friendly mobile fulfillment:
 
-> 💡 **Short ID Support**: All order commands accept short prefixes (first 6–8 characters, e.g. `/cancel 8f4b12` or `/deliver 8f4b12 RA-9921`) in addition to full 36-character UUIDs for lightning-fast mobile operation.
+| Command | Action & Syntax | Description |
+| :--- | :--- | :--- |
+| **[Inline Button]** | Touch buttons | Instantly **Cancel** or **Verify** orders directly from push notifications without typing commands |
+| `/orders` | `/orders` | View up to 10 latest unfulfilled orders with quick action shortcuts |
+| `/order <id>` | `/order <order_id>` | **Inspect full order details** (Player UID, Server, TrxID, timestamps, status) |
+| `/verify <id>` | `/verify <order_id>` | **Verify customer payment** directly from chat (`status = 'payment_verified'`) |
+| `/deliver <id> <code>` | `/deliver <order_id> <code>` | **Fulfill an order** with digital key or account credentials |
+| `/cancel <id> [reason]` | `/cancel <order_id> [reason]` | **Cancel an order** from phone, release reserved inventory keys, and log reason |
+| `/hold <id> [reason]` | `/hold <order_id> [reason]` | Place order on hold (e.g. incorrect server or player UID) |
+| `/refund <id> [reason]` | `/refund <order_id> [reason]` | Mark order as refunded (`status = 'refunded'`) |
+| `/summary` | `/summary` | View today's financial metrics (gross revenue, net profit, orders, pending items) |
+| `/stock [search]` | `/stock [search_query]` | Check current inventory health or search specific product stock |
+| `/custom` | `/custom` | View the latest pending custom order requests |
+| `/remind` | `/remind` | Instantly trigger a fresh scan of all unfulfilled orders |
+| `/help` | `/help` | Display interactive command cheat sheet and operational syntax |
+
+> 💡 **Short ID Support**: All order commands accept short prefixes (first 6–8 characters, e.g. `/verify 8f4b12` or `/deliver 8f4b12 RA-9921`) in addition to full 36-character UUIDs for friction-free mobile operation.
 
 #### Automated 24/7 Background Reminders
 * Scheduled via [`.github/workflows/pending-orders-reminder.yml`](.github/workflows/pending-orders-reminder.yml).
@@ -111,16 +114,15 @@ Engineered with a **high-availability dual-channel dispatch architecture**: aler
 
 ### 8. Hardened Security & Anti-Fraud Architecture
 
-* **Telegram Webhook Secret Authentication**: Rejects incoming webhook calls lacking the matching `X-Telegram-Bot-Api-Secret-Token` header with `401 Unauthorized`, completely preventing forged `/deliver` requests.
-* **IP Rate Limiting**: In-memory sliding-window rate limiter restricts webhook requests to 30 requests/minute per client IP to safeguard against DDoS and brute-force attempts.
+* **Role-Gated Bot Commands**: Edge function verifies incoming Telegram chat IDs against `ADMIN_CHAT_ID`, rejecting unauthorized attempts with a `401/403` guard.
+* **Edge Rate Limiting**: Cloudflare Worker binding (`RATE_LIMITER`) throttles aggressive scrapers and DDoS bots by client IP directly at Cloudflare's edge before hitting Supabase.
 * **Atomic Payment Submission RPC**: Customer payment submission routes through a `SECURITY DEFINER` stored procedure (`submit_order_payment`) that strictly validates user ownership, verifies payment amounts, and atomically transitions status without granting direct table `UPDATE` access to clients.
 * **Duplicate TrxID Fraud Detection**: Scans previous orders for duplicate bKash Transaction IDs, immediately alerting the merchant if an ID is reused across accounts.
 * **Authoritative Catalog Enforcement**: Prices and stock levels are re-verified against the database upon checkout, preventing client-side DOM price tampering.
-* **Internal Action Authorization**: Edge Function notification actions require valid Supabase API keys or bearer tokens.
-* **HTML Sanitization**: Dynamic user input is escaped via `escapeHtml()` prior to Telegram HTML formatting, eliminating entity parsing crashes and injection.
+* **HTML Sanitization**: Dynamic user input is escaped via `escapeHtml()` prior to Telegram HTML formatting, eliminating entity parsing crashes and injection attacks.
 * **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Digital keys (`inventory_keys`) and internal logs are hidden from non-admin accounts.
-* **Open Redirect Protection**: `sanitiseReturnTo()` validates OAuth callback destinations against `window.location.origin`.
-* **Zero Client Credential Leakage**: Bot tokens, webhook secrets, and database service keys are stored strictly in server-side Supabase secrets.
+* **Zero Client Credential Leakage**: Bot tokens, webhook secrets, and database service keys are stored strictly in server-side Supabase secrets and Cloudflare encrypted variables.
+* **Comprehensive `.gitignore` Hardening**: Blocks accidental commits of `.env`, `supabase/.env`, `.wrangler/`, `.dev.vars`, `.npmrc`, keystores, and build caches.
 
 ---
 
@@ -133,12 +135,12 @@ Engineered to pass all Google Core Web Vitals and achieve green performance benc
   * **HTML Preload**: Document `<head>` includes `<link rel="preload" as="image" href="/hero-bg.webp" type="image/webp" fetchpriority="high" />`, enabling immediate parallel network streaming before JS bundles parse.
   * **Optimized Image Tags**: Explicit `width="1440"`, `height="810"`, `fetchPriority="high"`, and `decoding="async"` in [HeroSection.tsx](src/components/home/HeroSection.tsx).
 * **Interaction to Next Paint (INP < 50ms)**:
+  * **Vite Chunk Splitting**: Implemented aggressive `manualChunks` in `vite.config.ts` to divide vendor libraries (`react-vendor`, `supabase-vendor`, `ui-vendor`, `icons-vendor`) into isolated bundles, cutting initial JS parse times drastically and keeping the main thread clear.
   * **Web Worker Offloading**: HLS.js video transmuxing in [BackgroundAnimation.tsx](src/components/BackgroundAnimation.tsx) is delegated to a dedicated Web Worker (`enableWorker: true`), freeing the main UI thread.
   * **Passive & Non-Blocking Event Listeners**: Touch and scroll events use `{ passive: true, once: true }`. Background video play is scheduled via `requestAnimationFrame` so user taps register with 0ms input delay.
-  * **Concurrent React 18 `startTransition`**: Wrapped category filters (`#cat-giftcard`, `#cat-games`), sort selectors, and admin tab triggers in `startTransition`, ensuring click animations and borders render in frame 1 (<16ms) while list mutations happen non-blockingly.
+  * **Concurrent React 18 `startTransition`**: Wrapped category filters, sort selectors, and admin tab triggers in `startTransition`, ensuring click animations and borders render in frame 1 (<16ms) while list mutations happen non-blockingly.
 * **Cumulative Layout Shift (CLS = 0.00)**:
   * **Geometric Skeleton Grid**: Replaced generic loading spinners in [Index.tsx](src/pages/Index.tsx) with an 8-card responsive skeleton matching the exact card dimensions (`h-[280px] sm:h-[340px]`).
-  * **Vite Chunk Optimization**: Implemented aggressive `manualChunks` in `vite.config.ts` to split vendor libraries (React, Supabase, UI primitives) into independent chunks, drastically reducing initial JS parse time and improving main-thread responsiveness.
   * **Layout Height Pre-Allocation**: Added `min-h-[500px]` to catalog wrappers and fixed aspect-ratio containers (`h-32 sm:h-44`) for product imagery.
 
 ---
@@ -155,8 +157,9 @@ Engineered to pass all Google Core Web Vitals and achieve green performance benc
 | **Authentication** | Supabase Auth | Google OAuth 2.0, email/password, and session persistence |
 | **Database & Storage** | Supabase (PostgreSQL 15+) | Row Level Security, views, triggers, and `SECURITY DEFINER` RPCs |
 | **Serverless Functions**| Supabase Edge Functions (Deno) | Telegram bot webhook ingestion, notifications, and scheduled triggers |
+| **Edge Router & Security** | Cloudflare Workers (`worker.js`) | Global static asset serving, SPA 404 rewrite, and edge IP rate limiting |
 | **Automation & Cron** | GitHub Actions | 24/7 background pending order check every 2 hours, automated CI/CD |
-| **Deployment Targets** | Cloudflare Workers / Pages, Vercel, GitHub Pages | Production SPA build with client fallback routing |
+| **Deployment Targets** | Cloudflare Workers, Vercel, GitHub Pages | Production SPA build with client fallback routing |
 
 ---
 
@@ -226,14 +229,15 @@ retrohub/
 │   └── migrations/                      # Version-controlled PostgreSQL schemas, RLS & RPCs
 ├── .assetsignore                        # Cloudflare Workers Static Assets upload ignore rules
 ├── .env.example                         # Environment variable template
+├── .gitignore                           # Comprehensive security and cache protection rules
 ├── .nvmrc                               # Pinned Node.js version 20
-├── package.json                         # Project dependencies and npm scripts (includes postinstall auto-build)
+├── package.json                         # Dependencies, scripts, and postinstall auto-build
 ├── tailwind.config.ts                   # Tailwind theme styling & animations
 ├── vercel.json                          # Vercel SPA routing configuration
-├── vite.config.ts                       # Vite compiler config & path aliases (generates 200.html)
-├── worker.js                            # Cloudflare Worker SPA asset binding handler
-├── wrangler.json                        # Cloudflare Workers configuration
-└── wrangler.toml                        # Cloudflare Workers build and asset configuration
+├── vite.config.ts                       # Vite compiler, manual chunk splitting & 200.html generator
+├── worker.js                            # Cloudflare Worker edge router with rate limiting & ASSETS binding
+├── wrangler.json                        # Cloudflare Workers build and asset configuration (sanitized)
+└── wrangler.json.example                # Example template for Wrangler configuration
 ```
 
 ---
@@ -268,6 +272,9 @@ SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
 # Telegram Bot (Optional local development overrides)
 VITE_TELEGRAM_CHAT_ID="your_telegram_chat_id"
 VITE_TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
+
+# Cloudflare Worker Bindings
+CLOUD_FLARE_ASSET="ASSETS"
 ```
 
 ### 3. Run Development Server
@@ -290,14 +297,15 @@ npm run build        # Build optimized production bundle
 The project is pre-configured to deploy seamlessly across modern cloud providers:
 
 * **Cloudflare Workers (Static Assets)**:
-  * Static assets are compiled into `./dist` and bound via `env.ASSETS`.
+  * Static assets are compiled into `./dist` and bound via `env.ASSETS` or `env.CLOUD_FLARE_ASSET`.
+  * **Edge Rate Limiting**: Intercepts DDoS attacks and scrapers via `env.RATE_LIMITER` binding.
   * **Native SPA Fallback (`200.html`)**: Automatically generated by Vite's build lifecycle (`closeBundle` hook in [vite.config.ts](vite.config.ts)). Cloudflare natively serves `200.html` for client-side navigation without external redirect rules.
   * **`.assetsignore` Rule Enforcement**: Both the project root and `dist/` contain a dedicated `.assetsignore` file that explicitly ignores `_redirects` and `_headers` during upload, shielding the Cloudflare API `/workers/scripts/retrohub/versions` from false-positive infinite redirect loops (`code: 100324`).
   * **Automated Postinstall Build Hook**: A hardened lifecycle hook in `package.json` (`postinstall`) automatically destroys any stale cached redirect files and executes `vite build` fresh, ensuring that even if Cloudflare runs `wrangler deploy` without an explicit dashboard build command, `./dist` is freshly compiled from the current commit.
   * **Worker Fallback Engine**: [worker.js](worker.js) intercepts 404 responses for clean client routes (`/orders`, `/checkout`, `/admin`, etc.) and rewrites them to `/index.html` at the edge runtime.
   * **Synchronized Release Branches**: Production builds on Cloudflare are kept in lockstep by maintaining synchronization across `main`, `Production`, and `Dev` branches.
-  * **Enforced Build Lifecycle**: [wrangler.json](wrangler.json) and [wrangler.toml](wrangler.toml) enforce `"build": { "command": "npm run build" }`, guaranteeing fresh builds and cache invalidation.
-  * **Edge Observability**: Enabled in Wrangler config with real-time invocation logging (`observability.logs.enabled = true`, `traces = false`).
+  * **Enforced Build Lifecycle**: [wrangler.json](wrangler.json) enforces `"build": { "command": "npm run build" }`, guaranteeing fresh builds and cache invalidation while preventing automatic framework detection conflicts.
+  * **Edge Observability**: Enabled in Wrangler config with real-time invocation logging (`observability.logs.enabled = true`, `traces = true`).
   * Deployed automatically on push to `main` and `Production` via Cloudflare Workers Builds.
 * **Vercel**: Push to your repository; `vercel.json` automatically manages client-side SPA rewrite routing (`/*` $\rightarrow$ `/index.html`).
 * **GitHub Pages**: Handled automatically on `push` to `main` via `.github/workflows/deploy-pages.yml`.
