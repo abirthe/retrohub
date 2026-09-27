@@ -20,19 +20,25 @@ export default defineConfig({
     {
       name: 'cloudflare-spa-fallback',
       closeBundle() {
-        // 1. Copy index.html to 200.html (Cloudflare Pages/Workers standard SPA fallback)
-        const indexPath = path.resolve(__dirname, 'dist/index.html');
-        const fallbackPath = path.resolve(__dirname, 'dist/200.html');
+        const distDir = path.resolve(__dirname, 'dist');
+        if (!fs.existsSync(distDir)) {
+          fs.mkdirSync(distDir, { recursive: true });
+        }
+        // 1. Copy index.html to 200.html (Cloudflare Pages/Workers) and 404.html (GitHub Pages)
+        const indexPath = path.resolve(distDir, 'index.html');
+        const fallback200 = path.resolve(distDir, '200.html');
+        const fallback404 = path.resolve(distDir, '404.html');
         if (fs.existsSync(indexPath)) {
-          fs.copyFileSync(indexPath, fallbackPath);
+          fs.copyFileSync(indexPath, fallback200);
+          fs.copyFileSync(indexPath, fallback404);
         }
         // 2. Guarantee that NO _redirects file exists anywhere in dist or public
-        const redirectsPath = path.resolve(__dirname, 'dist/_redirects');
+        const redirectsPath = path.resolve(distDir, '_redirects');
         if (fs.existsSync(redirectsPath)) {
           fs.unlinkSync(redirectsPath);
         }
         // 3. Write .assetsignore to dist so Cloudflare Wrangler never uploads _redirects
-        const assetsIgnorePath = path.resolve(__dirname, 'dist/.assetsignore');
+        const assetsIgnorePath = path.resolve(distDir, '.assetsignore');
         fs.writeFileSync(assetsIgnorePath, '_redirects\n_headers\n');
       },
     },

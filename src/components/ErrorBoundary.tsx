@@ -9,23 +9,31 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
 
   React.useEffect(() => {
     if (isChunkLoadError) {
-      const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
+      const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_attempted') || '0', 10);
       const now = Date.now();
-      if (now - lastReload > 3000) {
-        window.sessionStorage.setItem('last_chunk_reload', String(now));
-        window.location.reload();
+      if (now - lastReload > 10000) {
+        window.sessionStorage.setItem('chunk_reload_attempted', String(now));
+        const url = new URL(window.location.href);
+        url.searchParams.set('v', String(now));
+        window.location.replace(url.toString());
       }
     }
   }, [isChunkLoadError]);
 
   const handleTryAgain = () => {
+    window.sessionStorage.removeItem('chunk_reload_attempted');
     window.sessionStorage.removeItem('last_chunk_reload');
-    if (isChunkLoadError) {
-      window.location.reload();
-    } else {
-      // Clear cache and reload to guarantee fresh application state
-      window.location.reload();
-    }
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', String(Date.now()));
+    window.location.replace(url.toString());
+  };
+
+  const handleGoHome = () => {
+    window.sessionStorage.removeItem('chunk_reload_attempted');
+    window.sessionStorage.removeItem('last_chunk_reload');
+    const url = new URL(window.location.origin);
+    url.searchParams.set('v', String(Date.now()));
+    window.location.replace(url.toString());
   };
 
   return (
@@ -55,7 +63,7 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
 
           <Button
             variant="outline"
-            onClick={() => { window.location.href = '/'; }}
+            onClick={handleGoHome}
             className="w-full sm:w-auto border-white/10 hover:bg-white/5 font-display text-xs tracking-wider gap-2"
           >
             <Home className="w-4 h-4" />
