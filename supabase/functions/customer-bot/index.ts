@@ -46,14 +46,21 @@ async function sendMessage(chatId: string | number, text: string, reply_markup?:
   if (reply_markup) {
     body.reply_markup = reply_markup
   }
-  const res = await fetch(url, {
+  let res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
   if (!res.ok) {
     const errText = await res.text()
-    console.error('Telegram sendMessage error:', errText)
+    console.error('Telegram sendMessage HTML error, retrying plain text:', errText)
+    // Strip HTML tags and retry as clean plain text
+    const cleanText = text.replace(/<[^>]*>/g, '')
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: cleanText, reply_markup, disable_web_page_preview: true }),
+    })
   }
   return res
 }
