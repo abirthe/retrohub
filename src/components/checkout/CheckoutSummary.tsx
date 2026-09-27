@@ -98,12 +98,14 @@ export const CheckoutSummary = ({
           </Button>
         )}
 
-        <div className="rounded-lg bg-secondary/30 p-3 flex gap-3 items-start border border-white/5">
-          <ShieldCheck className="w-5 h-5 text-success shrink-0" />
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-foreground">Secure Checkout</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Your transaction is secured with end-to-end encryption. We typically process orders within 5 minutes.</p>
+        <div className="rounded-lg bg-secondary/30 p-3.5 space-y-2 border border-white/5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>RETROHUB Store Assurances</span>
           </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            100% genuine digital codes with instant automated delivery. Verified checkout exclusively via <strong className="text-pink-400">bKash</strong>. Need assistance? Contact our <a href="https://t.me/retrochanbot" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">24/7 Telegram Concierge</a>.
+          </p>
         </div>
       </CardContent>
     </Card>

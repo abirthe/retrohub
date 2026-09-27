@@ -2,7 +2,7 @@ import { useState, useEffect, startTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/product';
 import { ShopHeader } from '@/components/layout';
-import { HeroSection, CategoryFilter } from '@/components/home';
+import { HeroSection, CategoryFilter, StoreAssurances } from '@/components/home';
 import FeaturedBanner from '@/components/home/FeaturedBanner';
 import { useProducts } from '@/hooks/useProducts';
 import { CATEGORIES } from '@/lib/constants';
@@ -129,6 +129,9 @@ const Index = () => {
 
       {/* Main Content */}
       <section className="container relative z-20 -mt-8 sm:-mt-16 space-y-6 sm:space-y-8 pb-20">
+        {/* Core Store Guarantees & Value Properties */}
+        <StoreAssurances />
+
         <CategoryFilter
           search={search}
           setSearch={setSearch}
