@@ -1,18 +1,24 @@
-import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import crypto from 'crypto';
+import { createClient } from "@supabase/supabase-js";
+import fs from "fs";
+import crypto from "crypto";
 
 const env = {};
-const lines = fs.readFileSync('.env', 'utf8').split('\n');
+const lines = fs.readFileSync(".env", "utf8").split("\n");
 for (const line of lines) {
   const t = line.trim();
-  if (!t || t.startsWith('#')) continue;
-  const eq = t.indexOf('=');
+  if (!t || t.startsWith("#")) continue;
+  const eq = t.indexOf("=");
   if (eq === -1) continue;
-  env[t.slice(0, eq).trim()] = t.slice(eq + 1).trim().replace(/^"|"$/g, '');
+  env[t.slice(0, eq).trim()] = t
+    .slice(eq + 1)
+    .trim()
+    .replace(/^"|"$/g, "");
 }
 
-const supabase = createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_ANON_KEY);
+const supabase = createClient(
+  env.VITE_SUPABASE_URL,
+  env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_ANON_KEY,
+);
 
 const description = `### ⚡ Google AI Pro (6 Months) — Official Activation
 
@@ -46,73 +52,81 @@ Upgrade your personal Google account to **Google AI Pro** for a full 6 months. G
 4. Your account is immediately upgraded to Google AI Pro with 5TB storage for 6 months!`;
 
 async function insertService() {
-  const title = 'Google AI Pro | 6 Months (Gemini 3.1 Pro + 5TB Storage)';
-  
+  const title = "Google AI Pro | 6 Months (Gemini 3.1 Pro + 5TB Storage)";
+
   // Check if product already exists
   const { data: existing } = await supabase
-    .from('products')
-    .select('id, title, category')
-    .ilike('title', '%Google AI Pro%')
+    .from("products")
+    .select("id, title, category")
+    .ilike("title", "%Google AI Pro%")
     .maybeSingle();
 
   if (existing) {
-    process.stdout.write(`Product already exists with ID: ${existing.id}\nUpdating...\n`);
+    process.stdout.write(
+      `Product already exists with ID: ${existing.id}\nUpdating...\n`,
+    );
     const { data, error } = await supabase
-      .from('products')
+      .from("products")
       .update({
         title,
-        category: 'service',
-        delivery_type: 'automation',
-        platform: 'Google',
-        region: 'GLOBAL',
+        category: "service",
+        delivery_type: "automation",
+        platform: "Google",
+        region: "GLOBAL",
         cost_price: 420,
         sale_price: 499,
         in_stock: 999,
         is_active: true,
-        image_url: '/images/services/google-ai-pro.jpg',
-        source_url: 'https://plati.market/itm/24-7-instant-google-ai-pro-6-months-on-your-mail-gemini-3-1-pro-5tb/5816660',
-        source_platform: 'plati',
+        image_url: "/images/services/google-ai-pro.jpg",
+        source_url:
+          "https://plati.market/itm/24-7-instant-google-ai-pro-6-months-on-your-mail-gemini-3-1-pro-5tb/5816660",
+        source_platform: "plati",
         description,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', existing.id)
+      .eq("id", existing.id)
       .select();
-    
+
     if (error) {
       process.stderr.write(`Update error: ${error.message}\n`);
     } else {
-      process.stdout.write(`Updated successfully: ${JSON.stringify(data[0], null, 2)}\n`);
+      process.stdout.write(
+        `Updated successfully: ${JSON.stringify(data[0], null, 2)}\n`,
+      );
     }
     return;
   }
 
   const newId = crypto.randomUUID();
   const { data, error } = await supabase
-    .from('products')
+    .from("products")
     .insert({
       id: newId,
       title,
-      category: 'service',
-      delivery_type: 'automation',
-      platform: 'Google',
-      region: 'GLOBAL',
+      category: "service",
+      delivery_type: "automation",
+      platform: "Google",
+      region: "GLOBAL",
       cost_price: 420,
       sale_price: 499,
       in_stock: 999,
       is_active: true,
-      image_url: '/images/services/google-ai-pro.jpg',
-      source_url: 'https://plati.market/itm/24-7-instant-google-ai-pro-6-months-on-your-mail-gemini-3-1-pro-5tb/5816660',
-      source_platform: 'plati',
+      image_url: "/images/services/google-ai-pro.jpg",
+      source_url:
+        "https://plati.market/itm/24-7-instant-google-ai-pro-6-months-on-your-mail-gemini-3-1-pro-5tb/5816660",
+      source_platform: "plati",
       description,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .select();
 
   if (error) {
     process.stderr.write(`Insert error: ${error.message}\n`);
   } else {
-    process.stdout.write(`Inserted successfully: ${JSON.stringify(data[0], null, 2)}\n`);
+    process.stdout.write(
+      `Inserted successfully: ${JSON.stringify(data[0], null, 2)}\n`,
+    );
   }
 }
 

@@ -3,14 +3,17 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Auto-recover seamlessly if a new deployment replaces hashed chunks
-window.addEventListener('vite:preloadError', (event) => {
+window.addEventListener("vite:preloadError", (event) => {
   event.preventDefault();
-  const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_timestamp') || '0', 10);
+  const lastReload = parseInt(
+    window.sessionStorage.getItem("chunk_reload_timestamp") || "0",
+    10,
+  );
   const now = Date.now();
   if (now - lastReload > 15000) {
-    window.sessionStorage.setItem('chunk_reload_timestamp', String(now));
+    window.sessionStorage.setItem("chunk_reload_timestamp", String(now));
     const url = new URL(window.location.href);
-    url.searchParams.set('v', String(now));
+    url.searchParams.set("v", String(now));
     window.location.replace(url.toString());
   }
 });

@@ -1,7 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
@@ -47,74 +48,78 @@ The ultimate gaming subscription from Electronic Arts. Get complete and unlimite
 
 const products = [
   {
-    title: 'EA Play (PC) | 1 Month',
-    category: 'subscription',
-    platform: 'PC',
-    region: 'GLOBAL',
-    delivery_type: 'instant_code',
+    title: "EA Play (PC) | 1 Month",
+    category: "subscription",
+    platform: "PC",
+    region: "GLOBAL",
+    delivery_type: "instant_code",
     cost_price: 1415,
     sale_price: 1815,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-pro-pc.webp',
-    source_url: 'https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108',
-    source_platform: 'plati.market',
-    description: descStandard
+    image_url: "/images/ea-play-pro-pc.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108",
+    source_platform: "plati.market",
+    description: descStandard,
   },
   {
-    title: 'EA Play (PC) | 12 Month',
-    category: 'subscription',
-    platform: 'PC',
-    region: 'GLOBAL',
-    delivery_type: 'instant_code',
+    title: "EA Play (PC) | 12 Month",
+    category: "subscription",
+    platform: "PC",
+    region: "GLOBAL",
+    delivery_type: "instant_code",
     cost_price: 6140,
     sale_price: 6540,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-pro-pc.webp',
-    source_url: 'https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108',
-    source_platform: 'plati.market',
-    description: descStandard
+    image_url: "/images/ea-play-pro-pc.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108",
+    source_platform: "plati.market",
+    description: descStandard,
   },
   {
-    title: 'EA Play Pro (PC) | 1 Month',
-    category: 'subscription',
-    platform: 'PC',
-    region: 'GLOBAL',
-    delivery_type: 'instant_code',
+    title: "EA Play Pro (PC) | 1 Month",
+    category: "subscription",
+    platform: "PC",
+    region: "GLOBAL",
+    delivery_type: "instant_code",
     cost_price: 3980,
     sale_price: 4380,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-pro-pc.webp',
-    source_url: 'https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108',
-    source_platform: 'plati.market',
-    description: descPro
+    image_url: "/images/ea-play-pro-pc.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108",
+    source_platform: "plati.market",
+    description: descPro,
   },
   {
-    title: 'EA Play Pro (PC) | 12 Month',
-    category: 'subscription',
-    platform: 'PC',
-    region: 'GLOBAL',
-    delivery_type: 'instant_code',
+    title: "EA Play Pro (PC) | 12 Month",
+    category: "subscription",
+    platform: "PC",
+    region: "GLOBAL",
+    delivery_type: "instant_code",
     cost_price: 10540,
     sale_price: 10940,
     in_stock: 100,
     is_active: true,
-    image_url: '/images/ea-play-pro-pc.webp',
-    source_url: 'https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108',
-    source_platform: 'plati.market',
-    description: descPro
-  }
+    image_url: "/images/ea-play-pro-pc.webp",
+    source_url:
+      "https://plati.market/itm/ea-play-pro-subscription-1-12-months-ea-app-origin-pc-ea-play-subscription/5404108",
+    source_platform: "plati.market",
+    description: descPro,
+  },
 ];
 
 async function seed() {
   try {
     for (const item of products) {
       const { data: existing, error: findError } = await supabase
-        .from('products')
-        .select('id')
-        .eq('title', item.title)
+        .from("products")
+        .select("id")
+        .eq("title", item.title)
         .maybeSingle();
 
       if (findError) {
@@ -123,19 +128,19 @@ async function seed() {
 
       if (existing) {
         const { error: updateError } = await supabase
-          .from('products')
+          .from("products")
           .update({
             ...item,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
-          .eq('id', existing.id);
+          .eq("id", existing.id);
 
         if (updateError) {
           throw updateError;
         }
       } else {
         const { error: insertError } = await supabase
-          .from('products')
+          .from("products")
           .insert(item);
 
         if (insertError) {

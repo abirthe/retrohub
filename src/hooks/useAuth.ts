@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,13 +20,16 @@ export function useAuth() {
     const timeout = setTimeout(() => settle(null), 5000);
 
     // Get initial session; always resolve loading regardless of outcome
-    supabase.auth.getSession()
+    supabase.auth
+      .getSession()
       .then(({ data: { session } }) => settle(session?.user ?? null))
       .catch(() => settle(null))
       .finally(() => clearTimeout(timeout));
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -59,12 +62,12 @@ export function useAuth() {
   };
 
   const signInWithGoogle = async (returnTo?: string) => {
-    const callbackUrl = new URL('/auth/callback', window.location.origin);
-    if (returnTo && returnTo !== '/') {
-      callbackUrl.searchParams.set('returnTo', returnTo);
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    if (returnTo && returnTo !== "/") {
+      callbackUrl.searchParams.set("returnTo", returnTo);
     }
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo: callbackUrl.toString(),
       },
@@ -80,9 +83,19 @@ export function useAuth() {
 
   const resetPassword = async (email: string) => {
     const redirectTo = `${window.location.origin}/auth/callback`;
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
     if (error) throw error;
   };
 
-  return { user, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword };
+  return {
+    user,
+    loading,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signOut,
+    resetPassword,
+  };
 }

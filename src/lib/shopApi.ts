@@ -13,26 +13,51 @@
 
 // ─── Re-exports (backwards compatibility) ─────────────────────────────────────
 export type {
-  ProductCategory, DeliveryType, Region, OrderStatus, AppRole,
-  Product, Order, Profile, AuditLog, Delivery, AdminActionLog,
-  CustomOrderPayload, CustomOrderRow,
-} from './types';
+  ProductCategory,
+  DeliveryType,
+  Region,
+  OrderStatus,
+  AppRole,
+  Product,
+  Order,
+  Profile,
+  AuditLog,
+  Delivery,
+  AdminActionLog,
+  CustomOrderPayload,
+  CustomOrderRow,
+} from "./types";
 
 export {
-  fetchProducts, fetchStoreProducts, fetchProductsByIds,
-  updateProductPrice, updateProductDetails, createProduct,
-  fetchFeaturedProductIds, updateFeaturedProductIds,
-} from './productApi';
+  fetchProducts,
+  fetchStoreProducts,
+  fetchProductsByIds,
+  updateProductPrice,
+  updateProductDetails,
+  createProduct,
+  fetchFeaturedProductIds,
+  updateFeaturedProductIds,
+} from "./productApi";
 
 export {
-  createOrder, fetchOrders, fetchOrderDeliveries, fetchAdminStats,
-  validateOrder, startSourcing, fulfillOrder, holdOrder, cancelOrder, refundOrder,
-} from './orderApi';
+  createOrder,
+  fetchOrders,
+  fetchOrderDeliveries,
+  fetchAdminStats,
+  validateOrder,
+  startSourcing,
+  fulfillOrder,
+  holdOrder,
+  cancelOrder,
+  refundOrder,
+} from "./orderApi";
 
-export { updateOrderTransactionId } from './paymentApi';
+export { updateOrderTransactionId } from "./paymentApi";
 
 export {
-  submitCustomOrder, fetchCustomOrders, updateCustomOrderStatus,
-} from './customOrderApi';
+  submitCustomOrder,
+  fetchCustomOrders,
+  updateCustomOrderStatus,
+} from "./customOrderApi";
 
-export { checkIsAdmin } from './authApi';
+export { checkIsAdmin } from "./authApi";

@@ -1,3 +1,3 @@
-export { default as ShopHeader } from './ShopHeader';
-export { default as NavLink } from './NavLink';
-export { default as Footer } from './Footer';
+export { default as ShopHeader } from "./ShopHeader";
+export { default as NavLink } from "./NavLink";
+export { default as Footer } from "./Footer";

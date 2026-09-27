@@ -1,2 +1,2 @@
-export * from './DesktopOrderTable';
-export * from './MobileOrderCard';
+export * from "./DesktopOrderTable";
+export * from "./MobileOrderCard";

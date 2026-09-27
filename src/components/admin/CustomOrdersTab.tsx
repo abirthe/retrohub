@@ -1,15 +1,19 @@
-import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCustomOrders, updateCustomOrderStatus, CustomOrderRow } from '@/lib/shopApi';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchCustomOrders,
+  updateCustomOrderStatus,
+  CustomOrderRow,
+} from "@/lib/shopApi";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Clock,
   CheckCircle2,
@@ -19,34 +23,34 @@ import {
   ExternalLink,
   Search,
   Filter,
-} from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
-type FilterStatus = 'all' | 'pending' | 'contacted' | 'resolved' | 'cancelled';
+type FilterStatus = "all" | "pending" | "contacted" | "resolved" | "cancelled";
 
 const STATUS_CONFIG: Record<
   string,
   { label: string; badge: string; icon: typeof Clock }
 > = {
   pending: {
-    label: 'Pending',
-    badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    label: "Pending",
+    badge: "bg-amber-500/15 text-amber-400 border-amber-500/30",
     icon: Clock,
   },
   contacted: {
-    label: 'Contacted',
-    badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+    label: "Contacted",
+    badge: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     icon: MessageSquare,
   },
   resolved: {
-    label: 'Resolved',
-    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    label: "Resolved",
+    badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
     icon: CheckCircle2,
   },
   cancelled: {
-    label: 'Cancelled',
-    badge: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+    label: "Cancelled",
+    badge: "bg-rose-500/15 text-rose-400 border-rose-500/30",
     icon: XCircle,
   },
 };
@@ -55,11 +59,15 @@ const CustomOrdersTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [updating, setUpdating] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: customOrders, isLoading, error } = useQuery<CustomOrderRow[], Error>({
-    queryKey: ['admin-custom-orders'],
+  const {
+    data: customOrders,
+    isLoading,
+    error,
+  } = useQuery<CustomOrderRow[], Error>({
+    queryKey: ["admin-custom-orders"],
     queryFn: fetchCustomOrders,
   });
 
@@ -67,18 +75,30 @@ const CustomOrdersTab = () => {
     setUpdating(id);
     try {
       await updateCustomOrderStatus(id, newStatus);
-      toast({ title: 'Status Updated', description: 'Custom order status updated successfully.' });
-      queryClient.invalidateQueries({ queryKey: ['admin-custom-orders'] });
+      toast({
+        title: "Status Updated",
+        description: "Custom order status updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-custom-orders"] });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown error occurred';
-      toast({ title: 'Update Failed', description: message, variant: 'destructive' });
+      const message =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      toast({
+        title: "Update Failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setUpdating(null);
     }
   };
 
   if (isLoading) {
-    return <div className="text-center py-12 text-muted-foreground animate-pulse text-sm">Loading custom orders...</div>;
+    return (
+      <div className="text-center py-12 text-muted-foreground animate-pulse text-sm">
+        Loading custom orders...
+      </div>
+    );
   }
 
   if (error) {
@@ -93,7 +113,8 @@ const CustomOrdersTab = () => {
 
   // Filter orders by status and search query
   const filteredOrders = allOrders.filter((order) => {
-    const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || order.status === filterStatus;
     const query = searchQuery.trim().toLowerCase();
     if (!query) return matchesStatus;
     const matchesSearch =
@@ -107,10 +128,10 @@ const CustomOrdersTab = () => {
 
   const counts: Record<FilterStatus, number> = {
     all: allOrders.length,
-    pending: allOrders.filter((o) => o.status === 'pending').length,
-    contacted: allOrders.filter((o) => o.status === 'contacted').length,
-    resolved: allOrders.filter((o) => o.status === 'resolved').length,
-    cancelled: allOrders.filter((o) => o.status === 'cancelled').length,
+    pending: allOrders.filter((o) => o.status === "pending").length,
+    contacted: allOrders.filter((o) => o.status === "contacted").length,
+    resolved: allOrders.filter((o) => o.status === "resolved").length,
+    cancelled: allOrders.filter((o) => o.status === "cancelled").length,
   };
 
   return (
@@ -134,7 +155,9 @@ const CustomOrdersTab = () => {
             <Filter className="h-3 w-3" />
             <span className="hidden xs:inline">Filter:</span>
           </div>
-          {(['all', 'pending', 'contacted', 'resolved', 'cancelled'] as const).map((status) => {
+          {(
+            ["all", "pending", "contacted", "resolved", "cancelled"] as const
+          ).map((status) => {
             const count = counts[status];
             const isActive = filterStatus === status;
             return (
@@ -143,17 +166,19 @@ const CustomOrdersTab = () => {
                 type="button"
                 onClick={() => setFilterStatus(status)}
                 className={cn(
-                  'px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 border',
+                  "px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 border",
                   isActive
-                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                    : 'bg-white/5 text-muted-foreground border-white/5 hover:border-white/20 hover:text-white'
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-white/5 text-muted-foreground border-white/5 hover:border-white/20 hover:text-white",
                 )}
               >
                 <span className="capitalize">{status}</span>
                 <span
                   className={cn(
-                    'text-[10px] px-1.5 py-0.2 rounded-full font-mono',
-                    isActive ? 'bg-black/30 text-white' : 'bg-white/10 text-muted-foreground'
+                    "text-[10px] px-1.5 py-0.2 rounded-full font-mono",
+                    isActive
+                      ? "bg-black/30 text-white"
+                      : "bg-white/10 text-muted-foreground",
                   )}
                 >
                   {count}
@@ -168,7 +193,9 @@ const CustomOrdersTab = () => {
       {filteredOrders.length === 0 ? (
         <div className="text-center py-16 bg-card/40 border border-white/5 rounded-2xl p-6">
           <p className="text-muted-foreground text-sm">
-            {allOrders.length === 0 ? 'No custom orders found.' : 'No custom orders match your filters.'}
+            {allOrders.length === 0
+              ? "No custom orders found."
+              : "No custom orders match your filters."}
           </p>
         </div>
       ) : (
@@ -176,7 +203,7 @@ const CustomOrdersTab = () => {
           {filteredOrders.map((order: CustomOrderRow) => {
             const statusConfig = STATUS_CONFIG[order.status] ?? {
               label: order.status,
-              badge: 'bg-primary/20 text-primary border-primary/30',
+              badge: "bg-primary/20 text-primary border-primary/30",
               icon: Clock,
             };
             const StatusIcon = statusConfig.icon;
@@ -193,21 +220,24 @@ const CustomOrdersTab = () => {
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={cn(
-                          'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold border tracking-wide uppercase',
-                          statusConfig.badge
+                          "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold border tracking-wide uppercase",
+                          statusConfig.badge,
                         )}
                       >
                         <StatusIcon className="h-3 w-3 shrink-0" />
                         {statusConfig.label}
                       </span>
                       <span className="text-[11px] text-muted-foreground font-mono">
-                        {new Date(order.created_at).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {new Date(order.created_at).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
                       </span>
                     </div>
 
@@ -217,7 +247,8 @@ const CustomOrdersTab = () => {
                         {order.product_name}
                       </h3>
                       <p className="text-xs sm:text-sm text-primary/80 font-medium mt-0.5">
-                        Platform: <span className="text-white">{order.platform}</span>
+                        Platform:{" "}
+                        <span className="text-white">{order.platform}</span>
                       </p>
                     </div>
 
@@ -225,11 +256,17 @@ const CustomOrdersTab = () => {
                     <div className="mt-2.5 p-3 sm:p-3.5 bg-white/[0.03] rounded-lg border border-white/5 text-xs sm:text-sm space-y-1.5">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
                         <div className="min-w-0">
-                          <span className="text-muted-foreground text-xs">Customer: </span>
-                          <span className="text-white font-medium break-words">{order.name}</span>
+                          <span className="text-muted-foreground text-xs">
+                            Customer:{" "}
+                          </span>
+                          <span className="text-white font-medium break-words">
+                            {order.name}
+                          </span>
                         </div>
                         <div className="min-w-0">
-                          <span className="text-muted-foreground text-xs">Email: </span>
+                          <span className="text-muted-foreground text-xs">
+                            Email:{" "}
+                          </span>
                           <a
                             href={`mailto:${order.email}?subject=${encodeURIComponent(`RetroHub: Order for ${order.product_name}`)}`}
                             className="text-primary hover:underline font-mono text-xs break-all inline-flex items-center gap-1"

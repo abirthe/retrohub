@@ -1,11 +1,12 @@
 export function HeroSection() {
   return (
     <section className="relative min-h-[380px] sm:min-h-[460px] lg:min-h-[520px] flex items-center justify-center overflow-hidden">
-      <div 
+      <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
-          maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
+          maskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, black 40%, transparent 100%)",
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40" />
@@ -15,7 +16,9 @@ export function HeroSection() {
       <div className="container relative z-10 text-center space-y-4 max-w-4xl px-4 py-12 sm:py-16">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-muted-foreground shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-          <span className="font-display tracking-widest text-[11px] uppercase">Official Digital Storefront</span>
+          <span className="font-display tracking-widest text-[11px] uppercase">
+            Official Digital Storefront
+          </span>
         </div>
 
         <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-black tracking-wider text-white uppercase leading-[1.08]">
@@ -23,10 +26,10 @@ export function HeroSection() {
         </h1>
 
         <p className="text-muted-foreground text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">
-          Instant automated delivery for authentic PC, console keys, digital gift cards, subscriptions, and gaming balances.
+          Instant automated delivery for authentic PC, console keys, digital
+          gift cards, subscriptions, and gaming balances.
         </p>
       </div>
     </section>
   );
 }
-

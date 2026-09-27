@@ -1,4 +1,4 @@
-import type { Product } from '@/lib/shopApi';
+import type { Product } from "@/lib/shopApi";
 
 export interface CartItem {
   product: Product;
@@ -6,7 +6,7 @@ export interface CartItem {
 }
 
 export const getCartStorageKey = (userId: string | null): string => {
-  return userId ? `cart_${userId}` : 'cart_guest';
+  return userId ? `cart_${userId}` : "cart_guest";
 };
 
 export const loadCartFromStorage = (key: string): CartItem[] => {
@@ -17,13 +17,13 @@ export const loadCartFromStorage = (key: string): CartItem[] => {
       if (Array.isArray(parsed)) return parsed;
     }
     // Backward compatibility: migrate legacy unpartitioned 'cart' key to 'cart_guest'
-    if (key === 'cart_guest') {
-      const legacy = localStorage.getItem('cart');
+    if (key === "cart_guest") {
+      const legacy = localStorage.getItem("cart");
       if (legacy) {
         const parsed = JSON.parse(legacy);
         if (Array.isArray(parsed)) {
-          localStorage.setItem('cart_guest', JSON.stringify(parsed));
-          localStorage.removeItem('cart');
+          localStorage.setItem("cart_guest", JSON.stringify(parsed));
+          localStorage.removeItem("cart");
           return parsed;
         }
       }

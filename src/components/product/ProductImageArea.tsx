@@ -1,6 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import { getRegionLabel } from '@/lib/regions';
-import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { getRegionLabel } from "@/lib/regions";
+import { cn } from "@/lib/utils";
 
 export interface ProductImageAreaProps {
   product: {
@@ -13,10 +13,10 @@ export interface ProductImageAreaProps {
 }
 
 const categoryColor: Record<string, string> = {
-  giftcard: 'bg-primary/10 text-primary border-primary/20',
-  topup: 'bg-accent/10 text-accent border-accent/20',
-  subscription: 'bg-success/10 text-success border-success/20',
-  service: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  giftcard: "bg-primary/10 text-primary border-primary/20",
+  topup: "bg-accent/10 text-accent border-accent/20",
+  subscription: "bg-success/10 text-success border-success/20",
+  service: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
 };
 
 export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
@@ -37,7 +37,7 @@ export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
           decoding="async"
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 relative z-0"
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = 'none';
+            (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
         />
       ) : (
@@ -47,11 +47,20 @@ export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
       )}
 
       <div className="absolute top-3 inset-x-3 z-20 flex justify-between gap-1.5">
-        <Badge variant="outline" className={cn("text-xs backdrop-blur-md px-3 py-1", categoryColor[product.category] || categoryColor.giftcard)}>
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-xs backdrop-blur-md px-3 py-1",
+            categoryColor[product.category] || categoryColor.giftcard,
+          )}
+        >
           {product.category}
         </Badge>
-        <Badge variant="outline" className="text-xs border-white/10 text-muted-foreground backdrop-blur-md px-3 py-1 bg-background/50">
-          {getRegionLabel(product.region || 'GLOBAL')}
+        <Badge
+          variant="outline"
+          className="text-xs border-white/10 text-muted-foreground backdrop-blur-md px-3 py-1 bg-background/50"
+        >
+          {getRegionLabel(product.region || "GLOBAL")}
         </Badge>
       </div>
     </div>

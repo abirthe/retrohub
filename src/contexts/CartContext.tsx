@@ -1,8 +1,19 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import type { Product } from '@/lib/shopApi';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { getCartStorageKey, loadCartFromStorage, type CartItem } from '@/lib/cartStorage';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  ReactNode,
+} from "react";
+import type { Product } from "@/lib/shopApi";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  getCartStorageKey,
+  loadCartFromStorage,
+  type CartItem,
+} from "@/lib/cartStorage";
 
 export type { CartItem };
 
@@ -17,7 +28,6 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -42,17 +52,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     // 1. Initial session load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      const initialUserId = session?.user?.id ?? null;
-      initializeCartForUser(initialUserId);
-    }).catch(() => {
-      if (!isMounted) return;
-      initializeCartForUser(null);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!isMounted) return;
+        const initialUserId = session?.user?.id ?? null;
+        initializeCartForUser(initialUserId);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        initializeCartForUser(null);
+      });
 
     // 2. Listen for auth changes (login, logout, switch account)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
       const newUserId = session?.user?.id ?? null;
       const prevUserId = activeUserIdRef.current;
@@ -68,11 +83,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const targetCart = loadCartFromStorage(newKey);
 
       // If a guest logs in and had items in guest cart while their account cart is empty, transfer guest items
-      if (prevUserId === null && newUserId !== null && event === 'SIGNED_IN') {
-        const guestCart = loadCartFromStorage('cart_guest');
+      if (prevUserId === null && newUserId !== null && event === "SIGNED_IN") {
+        const guestCart = loadCartFromStorage("cart_guest");
         if (guestCart.length > 0 && targetCart.length === 0) {
           localStorage.setItem(newKey, JSON.stringify(guestCart));
-          localStorage.removeItem('cart_guest');
+          localStorage.removeItem("cart_guest");
           setItems(guestCart);
           return;
         }
@@ -97,7 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
-    let result: 'stock_error' | 'updated' | 'added' = 'added';
+    let result: "stock_error" | "updated" | "added" = "added";
     const availableStock = product.in_stock;
 
     setItems((prev) => {
@@ -105,40 +120,40 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         const newQuantity = existing.quantity + quantity;
         if (newQuantity > product.in_stock) {
-          result = 'stock_error';
+          result = "stock_error";
           return prev;
         }
-        result = 'updated';
+        result = "updated";
         return prev.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: newQuantity }
-            : item
+            : item,
         );
       }
       if (quantity > product.in_stock) {
-        result = 'stock_error';
+        result = "stock_error";
         return prev;
       }
-      result = 'added';
+      result = "added";
       return [...prev, { product, quantity }];
     });
 
     // Schedule toast outside of state updater to keep interaction latency < 50ms (Good INP)
     queueMicrotask(() => {
-      if (result === 'stock_error') {
+      if (result === "stock_error") {
         toast({
-          title: 'Insufficient stock',
+          title: "Insufficient stock",
           description: `Only ${availableStock} items available`,
-          variant: 'destructive',
+          variant: "destructive",
         });
-      } else if (result === 'updated') {
+      } else if (result === "updated") {
         toast({
-          title: 'Added to cart',
+          title: "Added to cart",
           description: `${product.title} quantity updated`,
         });
       } else {
         toast({
-          title: 'Added to cart',
+          title: "Added to cart",
           description: `${product.title} added to your cart`,
         });
       }
@@ -149,8 +164,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((item) => item.product.id !== productId));
     queueMicrotask(() => {
       toast({
-        title: 'Removed from cart',
-        description: 'Item removed from your cart',
+        title: "Removed from cart",
+        description: "Item removed from your cart",
       });
     });
   };
@@ -172,16 +187,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return prev;
       }
       return prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === productId ? { ...item, quantity } : item,
       );
     });
 
     if (stockError) {
       queueMicrotask(() => {
         toast({
-          title: 'Insufficient stock',
+          title: "Insufficient stock",
           description: `Only ${availableStock} items available`,
-          variant: 'destructive',
+          variant: "destructive",
         });
       });
     }
@@ -194,7 +209,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce(
     (sum, item) => sum + Number(item.product.sale_price) * item.quantity,
-    0
+    0,
   );
 
   return (
@@ -217,7 +232,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 }

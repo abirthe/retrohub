@@ -20,9 +20,9 @@
 
 ## 📖 Executive Summary
 
-**Retro Chan (@retrochanbot)** is the front-line Customer Support AI for the RetroHub commerce platform. Operating 24/7 inside Telegram, this bot handles level-1 triage, instant order tracking, digital key delivery, and comprehensive bKash payment walkthroughs. 
+**Retro Chan (@retrochanbot)** is the front-line Customer Support AI for the RetroHub commerce platform. Operating 24/7 inside Telegram, this bot handles level-1 triage, instant order tracking, digital key delivery, and comprehensive bKash payment walkthroughs.
 
-It implements a **Dual-Engine Architecture**—relying on **xAI (Grok-2)** for deeply contextual, empathetic conversational support, seamlessly backed by an ultra-fast **Deterministic Knowledge Engine** to ensure zero downtime during API outages. 
+It implements a **Dual-Engine Architecture**—relying on **xAI (Grok-2)** for deeply contextual, empathetic conversational support, seamlessly backed by an ultra-fast **Deterministic Knowledge Engine** to ensure zero downtime during API outages.
 
 Furthermore, this edge function is meticulously **hardened** against Telegram network races and double-execution edge cases using PostgREST row-level locks and webhook secret validation.
 
@@ -66,7 +66,7 @@ graph TB
 
     Router -.->|Fallback Context| Fallback
     Router -->|Context + Last 6 Messages| Grok
-    
+
     SessionMux <--> DB
     Router <--> Orders
     Router --> RPC
@@ -80,24 +80,28 @@ graph TB
 ## ⚡ Core Features & Capabilities
 
 ### 1. Dual-Engine Conversational AI
-* **Engine A (xAI Grok)**: Powered by `grok-2-latest`. Injects active order contexts natively into the system prompt for highly contextual interactions. Gamified and enthusiastic tone (GG, GLHF).
-* **Engine B (Retro Chan Local)**: Sub-millisecond regex/keyword fallback system guaranteeing offline availability. Handles bKash guidelines, tracking, catalog overviews, and delivery speeds perfectly without token usage.
+
+- **Engine A (xAI Grok)**: Powered by `grok-2-latest`. Injects active order contexts natively into the system prompt for highly contextual interactions. Gamified and enthusiastic tone (GG, GLHF).
+- **Engine B (Retro Chan Local)**: Sub-millisecond regex/keyword fallback system guaranteeing offline availability. Handles bKash guidelines, tracking, catalog overviews, and delivery speeds perfectly without token usage.
 
 ### 2. Autonomous Digital Delivery Engine
-* **Order Parsing**: Detects 8-character short IDs natively in conversation to track live orders.
-* **Inline Keyboards**: Automatically mounts interactive `[📦 Check Status]` and `[🔑 View Key / Code]` buttons to order summaries.
-* **Instant Reveal**: Unveils redeemed game keys and digital credentials directly in the chat interface via `final_output` and `deliveries` tables.
+
+- **Order Parsing**: Detects 8-character short IDs natively in conversation to track live orders.
+- **Inline Keyboards**: Automatically mounts interactive `[📦 Check Status]` and `[🔑 View Key / Code]` buttons to order summaries.
+- **Instant Reveal**: Unveils redeemed game keys and digital credentials directly in the chat interface via `final_output` and `deliveries` tables.
 
 ### 3. Hardened Security & Resilience
-* **Idempotency Execution**: Telegram's at-least-once delivery is countered by the `telegram_processed_updates` table, ensuring a request is executed exactly once.
-* **Session Row-Level Locking**: High-velocity messages are safely serialized into the chat history array using `append_session_message()`, preventing race conditions and lost history.
-* **Strict Order Segregation**: Prefix scanning collisions are eliminated. Order tracking requires exact matches of the 8-character ID.
-* **Webhook Signature**: Prevents unauthorized API invocation via `TELEGRAM_WEBHOOK_SECRET` validation.
+
+- **Idempotency Execution**: Telegram's at-least-once delivery is countered by the `telegram_processed_updates` table, ensuring a request is executed exactly once.
+- **Session Row-Level Locking**: High-velocity messages are safely serialized into the chat history array using `append_session_message()`, preventing race conditions and lost history.
+- **Strict Order Segregation**: Prefix scanning collisions are eliminated. Order tracking requires exact matches of the 8-character ID.
+- **Webhook Signature**: Prevents unauthorized API invocation via `TELEGRAM_WEBHOOK_SECRET` validation.
 
 ### 4. Seamless Human Handoff Bridge
-* **Zero-Interruption**: The AI manages 100% of the conversation unless explicitly told otherwise.
-* **Admin Handoff**: Triggers via `/human` or `[🚨 Connect to Human Support]`. Pauses the AI (`escalated` state) and relays chat to the merchant desk.
-* **Live Relay**: The merchant can seamlessly reply through `@Notifyretro_bot` using `/reply <chat_id>`, creating a bidirectional bridge until they fire `/resolve`.
+
+- **Zero-Interruption**: The AI manages 100% of the conversation unless explicitly told otherwise.
+- **Admin Handoff**: Triggers via `/human` or `[🚨 Connect to Human Support]`. Pauses the AI (`escalated` state) and relays chat to the merchant desk.
+- **Live Relay**: The merchant can seamlessly reply through `@Notifyretro_bot` using `/reply <chat_id>`, creating a bidirectional bridge until they fire `/resolve`.
 
 ---
 
@@ -105,27 +109,31 @@ graph TB
 
 Ensure these are populated in your Supabase Secrets manager (`npx supabase secrets set`):
 
-| Secret | Value Type | Description |
-| :--- | :--- | :--- |
-| `CUSTOMER_BOT_TOKEN` | `string` | The primary bot token provided by BotFather for `@retrochanbot`. |
-| `ADMIN_CHAT_ID` | `bigint` | The Telegram Admin Group ID to route staff alerts. |
-| `XAI_API_KEY` | `uuid` | x.ai Grok API Bearer token. |
-| `TELEGRAM_WEBHOOK_SECRET` | `string` | Cryptographic secret verified against incoming webhook headers. |
+| Secret                    | Value Type | Description                                                      |
+| :------------------------ | :--------- | :--------------------------------------------------------------- |
+| `CUSTOMER_BOT_TOKEN`      | `string`   | The primary bot token provided by BotFather for `@retrochanbot`. |
+| `ADMIN_CHAT_ID`           | `bigint`   | The Telegram Admin Group ID to route staff alerts.               |
+| `XAI_API_KEY`             | `uuid`     | x.ai Grok API Bearer token.                                      |
+| `TELEGRAM_WEBHOOK_SECRET` | `string`   | Cryptographic secret verified against incoming webhook headers.  |
 
-*(Note: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically by the Supabase runtime environment.)*
+_(Note: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically by the Supabase runtime environment.)_
 
 ---
 
 ## 🚀 Deployment Playbook
 
 ### 1. Deploy the Edge Function
+
 Ship the finalized code to the Supabase Edge infrastructure:
+
 ```bash
 npx supabase functions deploy customer-bot --no-verify-jwt
 ```
 
 ### 2. Register Webhook Dispatcher
+
 Bind the webhook endpoint to Telegram with the cryptographic secret:
+
 ```powershell
 Invoke-RestMethod -Uri "https://api.telegram.org/bot<YOUR_CUSTOMER_BOT_TOKEN>/setWebhook" -Method Post -Body @{
     url = "https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/customer-bot"
@@ -172,4 +180,5 @@ $$;
 ```
 
 ---
-*Developed for RetroHub E-Commerce. Powered by Deno & Supabase.*
+
+_Developed for RetroHub E-Commerce. Powered by Deno & Supabase._

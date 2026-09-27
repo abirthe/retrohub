@@ -15,22 +15,28 @@ let chunkReloadPromise: Promise<never> | null = null;
 
 const handleChunkFailure = (error: unknown): Promise<never> => {
   const msg = error instanceof Error ? error.message : String(error);
-  const isChunkError = /failed to fetch dynamically imported module|importing a module script failed|Chunk loaded without default export|undefined \(reading 'default'\)|Cannot read properties of undefined/i.test(msg);
+  const isChunkError =
+    /failed to fetch dynamically imported module|importing a module script failed|Chunk loaded without default export|undefined \(reading 'default'\)|Cannot read properties of undefined/i.test(
+      msg,
+    );
 
   // If a reload is already in flight, return the same unresolved promise so Suspense stays active
   if (chunkReloadPromise) {
     return chunkReloadPromise;
   }
 
-  const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_timestamp') || '0', 10);
+  const lastReload = parseInt(
+    window.sessionStorage.getItem("chunk_reload_timestamp") || "0",
+    10,
+  );
   const now = Date.now();
 
   // If we haven't reloaded recently (within 15s), trigger a cache-busted page replacement
   if (isChunkError && now - lastReload > 15000) {
     chunkReloadPromise = new Promise(() => {});
-    window.sessionStorage.setItem('chunk_reload_timestamp', String(now));
+    window.sessionStorage.setItem("chunk_reload_timestamp", String(now));
     const url = new URL(window.location.href);
-    url.searchParams.set('v', String(now));
+    url.searchParams.set("v", String(now));
     window.location.replace(url.toString());
     return chunkReloadPromise;
   }
@@ -45,13 +51,15 @@ const handleChunkFailure = (error: unknown): Promise<never> => {
 
 // Helper to auto-recover seamlessly when a new deployment replaces JS chunk hashes
 const lazyWithRetry = <T extends React.ComponentType<Record<string, unknown>>>(
-  componentImport: () => Promise<{ default: T }>
+  componentImport: () => Promise<{ default: T }>,
 ) =>
   lazy(async () => {
     try {
       const module = await componentImport();
       if (!module || !module.default) {
-        return handleChunkFailure(new Error('Chunk loaded without default export, refreshing page'));
+        return handleChunkFailure(
+          new Error("Chunk loaded without default export, refreshing page"),
+        );
       }
       return module;
     } catch (error) {
@@ -89,10 +97,14 @@ const App = () => {
     // App mounts → guard cleared → second chunk error fires → reload again → ∞
     try {
       const url = new URL(window.location.href);
-      if (url.searchParams.has('v') || url.searchParams.has('reload')) {
-        url.searchParams.delete('v');
-        url.searchParams.delete('reload');
-        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      if (url.searchParams.has("v") || url.searchParams.has("reload")) {
+        url.searchParams.delete("v");
+        url.searchParams.delete("reload");
+        window.history.replaceState(
+          null,
+          "",
+          url.pathname + url.search + url.hash,
+        );
       }
     } catch {
       // Safe no-op
@@ -103,49 +115,76 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <TooltipProvider>
-        <div className="relative w-full min-h-screen">
-          <div className="fixed inset-0 z-0 pointer-events-none">
-            <BackgroundAnimation />
-          </div>
-          <div className="relative z-10 flex flex-col w-full min-h-screen">
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppErrorBoundary>
-                <div className="flex-1 flex flex-col">
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      {/* Storefront aliases for reverse navigation and inbound links */}
-                      <Route path="/shop" element={<Navigate to="/" replace />} />
-                      <Route path="/store" element={<Navigate to="/" replace />} />
-                      <Route path="/products" element={<Navigate to="/" replace />} />
-                      <Route path="/cart" element={<Navigate to="/checkout" replace />} />
-                      <Route path="/login" element={<Navigate to="/auth" replace />} />
-                      <Route path="/signin" element={<Navigate to="/auth" replace />} />
-                      <Route path="/register" element={<Navigate to="/auth" replace />} />
+          <div className="relative w-full min-h-screen">
+            <div className="fixed inset-0 z-0 pointer-events-none">
+              <BackgroundAnimation />
+            </div>
+            <div className="relative z-10 flex flex-col w-full min-h-screen">
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppErrorBoundary>
+                  <div className="flex-1 flex flex-col">
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        {/* Storefront aliases for reverse navigation and inbound links */}
+                        <Route
+                          path="/shop"
+                          element={<Navigate to="/" replace />}
+                        />
+                        <Route
+                          path="/store"
+                          element={<Navigate to="/" replace />}
+                        />
+                        <Route
+                          path="/products"
+                          element={<Navigate to="/" replace />}
+                        />
+                        <Route
+                          path="/cart"
+                          element={<Navigate to="/checkout" replace />}
+                        />
+                        <Route
+                          path="/login"
+                          element={<Navigate to="/auth" replace />}
+                        />
+                        <Route
+                          path="/signin"
+                          element={<Navigate to="/auth" replace />}
+                        />
+                        <Route
+                          path="/register"
+                          element={<Navigate to="/auth" replace />}
+                        />
 
-                      <Route path="/product/:slug" element={<ProductDetail />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/payment" element={<Payment />} />
-                      <Route path="/orders" element={<Orders />} />
-                      <Route path="/console" element={<Orders />} />
-                      <Route path="/support" element={<Orders />} />
-                      <Route path="/admin" element={<AdminDashboard />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/auth/callback" element={<AuthCallback />} />
-                      <Route path="/custom-order" element={<CustomOrder />} />
-                      <Route path="/privacy" element={<Privacy />} />
-                      <Route path="/terms" element={<Terms />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </div>
-                <Footer />
-              </AppErrorBoundary>
-            </BrowserRouter>
+                        <Route
+                          path="/product/:slug"
+                          element={<ProductDetail />}
+                        />
+                        <Route path="/checkout" element={<Checkout />} />
+                        <Route path="/payment" element={<Payment />} />
+                        <Route path="/orders" element={<Orders />} />
+                        <Route path="/console" element={<Orders />} />
+                        <Route path="/support" element={<Orders />} />
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/auth" element={<Auth />} />
+                        <Route
+                          path="/auth/callback"
+                          element={<AuthCallback />}
+                        />
+                        <Route path="/custom-order" element={<CustomOrder />} />
+                        <Route path="/privacy" element={<Privacy />} />
+                        <Route path="/terms" element={<Terms />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </div>
+                  <Footer />
+                </AppErrorBoundary>
+              </BrowserRouter>
+            </div>
           </div>
-        </div>
         </TooltipProvider>
       </CartProvider>
     </QueryClientProvider>

@@ -24,13 +24,13 @@ npm run dev
 
 ## Branch Naming Convention
 
-| Type | Format | Example |
-|------|--------|---------|
-| Feature | `feat/<short-desc>` | `feat/add-paypal-flow` |
-| Bug fix | `fix/<short-desc>` | `fix/checkout-crash` |
-| Hotfix | `hotfix/<short-desc>` | `hotfix/trxid-validation` |
-| Chore | `chore/<short-desc>` | `chore/update-deps` |
-| Docs | `docs/<short-desc>` | `docs/api-readme` |
+| Type    | Format                | Example                   |
+| ------- | --------------------- | ------------------------- |
+| Feature | `feat/<short-desc>`   | `feat/add-paypal-flow`    |
+| Bug fix | `fix/<short-desc>`    | `fix/checkout-crash`      |
+| Hotfix  | `hotfix/<short-desc>` | `hotfix/trxid-validation` |
+| Chore   | `chore/<short-desc>`  | `chore/update-deps`       |
+| Docs    | `docs/<short-desc>`   | `docs/api-readme`         |
 
 All branches should be cut from `main` and opened as Pull Requests back into `main`.
 
@@ -48,6 +48,7 @@ All branches should be cut from `main` and opened as Pull Requests back into `ma
 **Types:** `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `ci`
 
 Examples:
+
 ```
 feat(payment): add duplicate TrxID fraud detection
 fix(worker): restore wrangler.json to prevent Vite 6 build error
@@ -122,6 +123,7 @@ When adding new tables, columns, or policies:
 ## Reporting Issues
 
 Use GitHub Issues with one of the labels:
+
 - `bug` — Something broken in production
 - `enhancement` — Feature request
 - `question` — Clarification needed

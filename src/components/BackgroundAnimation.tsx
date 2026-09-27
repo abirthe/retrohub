@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Hls from 'hls.js';
+import React, { useEffect, useRef, useState } from "react";
+import Hls from "hls.js";
 
 const BackgroundAnimation: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -16,20 +16,21 @@ const BackgroundAnimation: React.FC = () => {
     video.volume = 0;
     video.playsInline = true;
     video.controls = false;
-    video.removeAttribute('controls');
-    video.setAttribute('muted', '');
-    video.setAttribute('playsinline', 'true');
-    video.setAttribute('webkit-playsinline', 'true');
-    video.setAttribute('autoplay', '');
-    video.setAttribute('loop', '');
-    video.setAttribute('x5-playsinline', 'true');
-    video.setAttribute('x5-video-player-type', 'h5');
-    video.setAttribute('x5-video-player-fullscreen', 'false');
-    video.setAttribute('x-webkit-airplay', 'deny');
-    video.setAttribute('disablepictureinpicture', 'true');
-    video.setAttribute('disableremoteplayback', 'true');
+    video.removeAttribute("controls");
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "true");
+    video.setAttribute("webkit-playsinline", "true");
+    video.setAttribute("autoplay", "");
+    video.setAttribute("loop", "");
+    video.setAttribute("x5-playsinline", "true");
+    video.setAttribute("x5-video-player-type", "h5");
+    video.setAttribute("x5-video-player-fullscreen", "false");
+    video.setAttribute("x-webkit-airplay", "deny");
+    video.setAttribute("disablepictureinpicture", "true");
+    video.setAttribute("disableremoteplayback", "true");
 
-    const videoSrc = 'https://stream.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys.m3u8';
+    const videoSrc =
+      "https://stream.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys.m3u8";
     let hls: Hls | null = null;
     let isMounted = true;
 
@@ -69,7 +70,7 @@ const BackgroundAnimation: React.FC = () => {
 
     // Lifecycle events: wake up playback when tab is restored or device unlocked
     const handleResume = () => {
-      if (document.visibilityState === 'visible' && video && video.paused) {
+      if (document.visibilityState === "visible" && video && video.paused) {
         playVideo();
       }
     };
@@ -90,31 +91,31 @@ const BackgroundAnimation: React.FC = () => {
 
     // Bind interaction listeners across pointer, touch, scroll, mouse, and key
     const interactionEvents: (keyof WindowEventMap)[] = [
-      'pointerdown',
-      'touchstart',
-      'touchend',
-      'click',
-      'scroll',
-      'wheel',
-      'keydown',
-      'mousemove',
+      "pointerdown",
+      "touchstart",
+      "touchend",
+      "click",
+      "scroll",
+      "wheel",
+      "keydown",
+      "mousemove",
     ];
 
     interactionEvents.forEach((evt) => {
       window.addEventListener(evt, handleUserInteraction, { passive: true });
     });
 
-    document.addEventListener('visibilitychange', handleResume);
-    window.addEventListener('pageshow', handleResume);
-    window.addEventListener('focus', handleResume);
-    window.addEventListener('online', handleOnline);
+    document.addEventListener("visibilitychange", handleResume);
+    window.addEventListener("pageshow", handleResume);
+    window.addEventListener("focus", handleResume);
+    window.addEventListener("online", handleOnline);
 
-    video.addEventListener('ended', handleEnded);
-    video.addEventListener('canplay', playVideo);
-    video.addEventListener('loadeddata', playVideo);
-    video.addEventListener('canplaythrough', playVideo);
-    video.addEventListener('playing', handlePlaying);
-    video.addEventListener('timeupdate', handlePlaying);
+    video.addEventListener("ended", handleEnded);
+    video.addEventListener("canplay", playVideo);
+    video.addEventListener("loadeddata", playVideo);
+    video.addEventListener("canplaythrough", playVideo);
+    video.addEventListener("playing", handlePlaying);
+    video.addEventListener("timeupdate", handlePlaying);
 
     // 2. Playback Engine Initialization:
     // Engine A (Primary for Desktop Chrome/Edge/Firefox, Android): MSE HLS.js
@@ -168,18 +169,18 @@ const BackgroundAnimation: React.FC = () => {
           }
         }
       });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       // Engine B (Fallback for iOS Safari & iPadOS where MSE is not supported): Native HLS
       video.src = videoSrc;
       video.load();
-      video.addEventListener('loadedmetadata', playVideo, { once: true });
-      video.addEventListener('canplay', playVideo, { once: true });
-      video.addEventListener('loadeddata', playVideo, { once: true });
+      video.addEventListener("loadedmetadata", playVideo, { once: true });
+      video.addEventListener("canplay", playVideo, { once: true });
+      video.addEventListener("loadeddata", playVideo, { once: true });
     }
 
     // Safety watchdog: periodically ensures video is running and loops cleanly
     const watchdog = setInterval(() => {
-      if (video && document.visibilityState === 'visible') {
+      if (video && document.visibilityState === "visible") {
         if (video.paused || video.ended) {
           if (video.ended) {
             video.currentTime = 0;
@@ -198,16 +199,16 @@ const BackgroundAnimation: React.FC = () => {
       interactionEvents.forEach((evt) => {
         window.removeEventListener(evt, handleUserInteraction);
       });
-      document.removeEventListener('visibilitychange', handleResume);
-      window.removeEventListener('pageshow', handleResume);
-      window.removeEventListener('focus', handleResume);
-      window.removeEventListener('online', handleOnline);
-      video.removeEventListener('ended', handleEnded);
-      video.removeEventListener('canplay', playVideo);
-      video.removeEventListener('loadeddata', playVideo);
-      video.removeEventListener('canplaythrough', playVideo);
-      video.removeEventListener('playing', handlePlaying);
-      video.removeEventListener('timeupdate', handlePlaying);
+      document.removeEventListener("visibilitychange", handleResume);
+      window.removeEventListener("pageshow", handleResume);
+      window.removeEventListener("focus", handleResume);
+      window.removeEventListener("online", handleOnline);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("canplay", playVideo);
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplaythrough", playVideo);
+      video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("timeupdate", handlePlaying);
     };
   }, []);
 
@@ -236,7 +237,7 @@ const BackgroundAnimation: React.FC = () => {
         tabIndex={-1}
         aria-hidden="true"
         className={`absolute inset-0 w-full h-full object-cover scale-[1.05] origin-center [filter:hue-rotate(25deg)_saturate(1.35)_brightness(1.1)] [transform:translateZ(0)] will-change-transform pointer-events-none transition-opacity duration-1000 ${
-          isPlaying ? 'opacity-85 sm:opacity-90' : 'opacity-0'
+          isPlaying ? "opacity-85 sm:opacity-90" : "opacity-0"
         }`}
       />
 
@@ -251,7 +252,8 @@ const BackgroundAnimation: React.FC = () => {
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] max-w-[900px] h-[350px] pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.05) 55%, transparent 75%)',
+          background:
+            "radial-gradient(ellipse at center, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.05) 55%, transparent 75%)",
         }}
       />
     </div>
