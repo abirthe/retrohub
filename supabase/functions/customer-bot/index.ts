@@ -650,6 +650,22 @@ async function getOrCreateSession(fromUser: any, chatId: number) {
       .maybeSingle();
 
     if (existing) {
+      // Auto-terminate / reset session if inactive for more than 1 hour (3600000 ms)
+      const lastUpdated = new Date(existing.updated_at).getTime();
+      const now = Date.now();
+      if (now - lastUpdated > 3600000) {
+        existing.recent_messages = [];
+        existing.state = "bot_active";
+
+        await supabase
+          .from("customer_support_sessions")
+          .update({
+            recent_messages: [],
+            state: "bot_active",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("chat_id", chatId);
+      }
       return existing;
     }
 
@@ -1265,7 +1281,28 @@ Tap the button below to reach our merchant specialist directly.`;
   await updateSessionState(chatId, { metadata: session.metadata });
 
   // ─────────────────────────────────────────────────────────────
-  // A. EXPLICIT HUMAN ESCALATION COMMANDS (/human, /agent, /support, /help)
+  // A. EXPLICIT SESSION TERMINATION (/terminate, /reset)
+  // ─────────────────────────────────────────────────────────────
+  if (rawText === "/terminate" || rawText === "/reset") {
+    await sendChatAction(chatId, "typing");
+    await updateSessionState(chatId, {
+      recent_messages: [],
+      state: "bot_active",
+    });
+    // Also reset local memory so immediate appends don't resurrect the ghost session
+    session.recent_messages = [];
+    session.state = "bot_active";
+
+    await sendMessage(
+      chatId,
+      "🧹 <b>Session Cleared!</b>\n\nI have forgotten our previous conversation context. How can I help you today?",
+      buildGeneralKeyboard(),
+    );
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // B. EXPLICIT HUMAN ESCALATION COMMANDS (/human, /agent, /support, /help)
   // ─────────────────────────────────────────────────────────────
   if (
     rawText === "/help" ||
