@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, CheckCircle2, Copy, Check, Send, Sparkles } from 'lucide-react';
+import { Calendar, CheckCircle2, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Delivery, Order } from '@/lib/shopApi';
 import { Button } from '@/components/ui/button';
@@ -30,8 +30,7 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
             <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Status</TableHead>
             <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Total</TableHead>
             <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Date</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4">Delivery & Keys</TableHead>
-            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pr-6 text-right">Support</TableHead>
+            <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pr-6">Delivery & Keys</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -44,7 +43,6 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
             });
             const orderDeliveries = (order.deliveries as unknown as Delivery[]) || [];
             const shortId = order.id.slice(0, 8);
-            const telegramSupportUrl = `https://t.me/retrochanbot?start=order_${shortId}`;
 
             return (
               <TableRow key={order.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
@@ -91,7 +89,7 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
                   </div>
                 </TableCell>
 
-                <TableCell className="max-w-[260px]">
+                <TableCell className="max-w-[260px] pr-6">
                   {orderDeliveries.length > 0 ? (
                     <div className="text-xs space-y-1.5 py-1">
                       {orderDeliveries.map((delivery) => (
@@ -127,19 +125,6 @@ export const DesktopOrderTable = ({ orders, statusStyles }: DesktopOrderTablePro
                       {order.status === 'sourcing' ? '⚡ Sourcing key...' : '⏳ Awaiting verification...'}
                     </div>
                   )}
-                </TableCell>
-
-                <TableCell className="pr-6 text-right">
-                  <a
-                    href={telegramSupportUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-1.5 rounded-lg border border-cyan-500/20 shadow-sm"
-                  >
-                    <Send className="w-3 h-3 rotate-45" />
-                    <span>Telegram Bot</span>
-                    <Sparkles className="w-2.5 h-2.5 text-cyan-300 animate-pulse" />
-                  </a>
                 </TableCell>
               </TableRow>
             );

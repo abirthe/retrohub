@@ -58,7 +58,7 @@ describe('Page Component Renders', () => {
 
   it('renders Customer Console (Orders) page', () => {
     renderWithProviders(<Orders />);
-    expect(screen.getByText(/Track Order by ID/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Customer/i })).toBeInTheDocument();
     expect(screen.getByText(/Launch Support Bot/i)).toBeInTheDocument();
     expect(screen.getByText(/24\/7 Live Triage/i)).toBeInTheDocument();
   });

@@ -80,8 +80,7 @@ const BackgroundAnimation: React.FC = () => {
           hlsInstance = hls;
           hls.loadSource(videoSrc);
           hls.attachMedia(video);
-          const manifestEvent = Hls.Events?.MANIFEST_PARSED || 'hlsManifestParsed';
-          hls.on(manifestEvent, () => {
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
             playVideo();
           });
         }
