@@ -22,7 +22,7 @@ const sanitiseReturnTo = (url: string | null | undefined): string => {
 };
 
 const Auth = () => {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -34,12 +34,13 @@ const Auth = () => {
     (location.state as { from?: string } | null)?.from ?? searchParams.get('returnTo')
   );
 
-  // Automatically redirect if already logged in
+  // Redirect if already signed in — runs synchronously on the same tick
+  // that loading flips to false, preventing a frame of auth UI from flashing
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       navigate(returnTo, { replace: true });
     }
-  }, [user, navigate, returnTo]);
+  }, [user, loading, navigate, returnTo]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -51,6 +52,16 @@ const Auth = () => {
       setGoogleLoading(false);
     }
   };
+
+  // Don't render the page at all until we know if the user is signed in.
+  // This prevents the login card from flashing for already-authenticated users.
+  if (loading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex flex-col">
