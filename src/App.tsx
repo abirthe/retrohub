@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 import BackgroundAnimation from "@/components/BackgroundAnimation";
+import { Footer } from "@/components/layout";
 
 // Global in-flight reload promise so all simultaneously failing chunks wait together in Suspense
 let chunkReloadPromise: Promise<never> | null = null;
@@ -111,33 +112,36 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <AppErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    {/* Storefront aliases for reverse navigation and inbound links */}
-                    <Route path="/shop" element={<Navigate to="/" replace />} />
-                    <Route path="/store" element={<Navigate to="/" replace />} />
-                    <Route path="/products" element={<Navigate to="/" replace />} />
-                    <Route path="/cart" element={<Navigate to="/checkout" replace />} />
-                    <Route path="/login" element={<Navigate to="/auth" replace />} />
-                    <Route path="/signin" element={<Navigate to="/auth" replace />} />
-                    <Route path="/register" element={<Navigate to="/auth" replace />} />
+                <div className="flex-1 flex flex-col">
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      {/* Storefront aliases for reverse navigation and inbound links */}
+                      <Route path="/shop" element={<Navigate to="/" replace />} />
+                      <Route path="/store" element={<Navigate to="/" replace />} />
+                      <Route path="/products" element={<Navigate to="/" replace />} />
+                      <Route path="/cart" element={<Navigate to="/checkout" replace />} />
+                      <Route path="/login" element={<Navigate to="/auth" replace />} />
+                      <Route path="/signin" element={<Navigate to="/auth" replace />} />
+                      <Route path="/register" element={<Navigate to="/auth" replace />} />
 
-                    <Route path="/product/:slug" element={<ProductDetail />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/payment" element={<Payment />} />
-                    <Route path="/orders" element={<Orders />} />
-                    <Route path="/console" element={<Orders />} />
-                    <Route path="/support" element={<Orders />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/custom-order" element={<CustomOrder />} />
-                    <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/terms" element={<Terms />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
+                      <Route path="/product/:slug" element={<ProductDetail />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/payment" element={<Payment />} />
+                      <Route path="/orders" element={<Orders />} />
+                      <Route path="/console" element={<Orders />} />
+                      <Route path="/support" element={<Orders />} />
+                      <Route path="/admin" element={<AdminDashboard />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route path="/custom-order" element={<CustomOrder />} />
+                      <Route path="/privacy" element={<Privacy />} />
+                      <Route path="/terms" element={<Terms />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </div>
+                <Footer />
               </AppErrorBoundary>
             </BrowserRouter>
           </div>

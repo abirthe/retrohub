@@ -1,4 +1,4 @@
-import { Zap, ShieldAlert } from 'lucide-react';
+import { Zap, ShieldCheck, Smartphone, Send } from 'lucide-react';
 
 export function HeroSection() {
   return (
@@ -25,8 +25,8 @@ export function HeroSection() {
       </div>
 
       <div className="container relative z-10 text-center space-y-4 max-w-4xl px-4 py-12 sm:py-16">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-muted-foreground shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
           <span className="font-display tracking-widest text-[11px] uppercase">Official Digital Storefront</span>
         </div>
 
@@ -35,26 +35,37 @@ export function HeroSection() {
         </h1>
 
         <p className="text-muted-foreground text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">
-          Instant digital delivery for PC, console keys, gift cards, subscriptions, and gaming balances.
+          Instant automated delivery for authentic PC, console keys, digital gift cards, subscriptions, and gaming balances.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground pt-2">
-          <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs sm:text-sm text-muted-foreground pt-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 shadow-sm">
             <Zap className="w-4 h-4 text-primary" />
-            <span className="text-foreground/90 font-medium">Instant Delivery</span>
+            <span className="text-foreground/90 font-medium">Instant Auto-Delivery</span>
           </div>
-          <span className="hidden sm:inline text-white/20">•</span>
-          <div className="flex items-center gap-1.5">
-            <ShieldAlert className="w-4 h-4 text-emerald-400" />
-            <span className="text-foreground/90 font-medium">100% Secure Checkout</span>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 shadow-sm">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span className="text-foreground/90 font-medium">100% Verified Valid Codes</span>
           </div>
-          <span className="hidden sm:inline text-white/20">•</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-            <span className="text-foreground/90 font-medium">Guaranteed Valid Codes</span>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 shadow-sm">
+            <Smartphone className="w-4 h-4 text-pink-400" />
+            <span className="text-foreground/90 font-medium">bKash Exclusive Pay</span>
           </div>
+
+          <a 
+            href="https://t.me/retrochanbot"
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 hover:bg-cyan-500/20 transition-colors shadow-sm"
+          >
+            <Send className="w-3.5 h-3.5 rotate-45 text-cyan-400" />
+            <span className="font-medium">24/7 Telegram Concierge</span>
+          </a>
         </div>
       </div>
     </section>
   );
 }
+

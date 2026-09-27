@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Smartphone, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ShopHeader } from '@/components/layout';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -89,7 +89,7 @@ const Payment = () => {
                             Complete Your Payment
                         </h1>
                         <p className="text-muted-foreground max-w-lg mx-auto text-lg">
-                            Choose your preferred payment method and submit the transaction details below.
+                            RETROHUB accepts exclusively <strong className="text-pink-400 font-semibold">bKash Send Money</strong> for instant order verification and key delivery.
                         </p>
                     </div>
 
@@ -100,11 +100,11 @@ const Payment = () => {
                             <Card className="border-primary/20 bg-card/50 backdrop-blur-sm shadow-[0_0_30px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
                                 <CardHeader className="pb-4">
                                     <CardTitle className="font-display text-xl flex items-center gap-2">
-                                        <CreditCard className="w-5 h-5 text-primary" />
-                                        Payment Details
+                                        <Smartphone className="w-5 h-5 text-pink-400" />
+                                        Official bKash Account
                                     </CardTitle>
                                     <CardDescription>
-                                        Send money to one of the accounts below
+                                        Send money to our official bKash account for instant verification
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
