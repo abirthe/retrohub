@@ -62,6 +62,10 @@ export default defineConfig({
           "vendor-supabase": ["@supabase/supabase-js"],
           "vendor-tanstack": ["@tanstack/react-query"],
           "vendor-charts": ["recharts"],
+          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          "vendor-carousel": ["embla-carousel-react"],
+          "vendor-utils": ["date-fns", "clsx", "tailwind-merge"],
+          "vendor-video": ["hls.js"]
         },
       },
     },

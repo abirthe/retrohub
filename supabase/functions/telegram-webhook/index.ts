@@ -26,18 +26,31 @@ function escapeHtml(str: unknown): string {
     .replace(/'/g, '&#039;')
 }
 
-async function sendMessage(chatId: string | number, text: string) {
+async function sendMessage(chatId: string | number, text: string, reply_markup?: any) {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`
+  const body: any = { chat_id: chatId, text, parse_mode: 'HTML' }
+  if (reply_markup) {
+    body.reply_markup = reply_markup
+  }
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     const errText = await res.text()
     console.error('Telegram API error:', errText)
   }
   return res
+}
+
+async function answerCallbackQuery(callbackQueryId: string, text: string = '', showAlert: boolean = false) {
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/answerCallbackQuery`
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ callback_query_id: callbackQueryId, text, show_alert: showAlert }),
+  })
 }
 
 /**
@@ -151,7 +164,16 @@ serve(async (req: Request) => {
           `• Cancel:  <code>/cancel ${shortId} Out of stock</code>\n\n` +
           `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
 
-        await sendMessage(ADMIN_CHAT_ID, msg)
+        const reply_markup = {
+          inline_keyboard: [
+            [
+              { text: '❌ Cancel Order', callback_data: `cancel:${shortId}` },
+              { text: '🔍 Inspect', callback_data: `order:${shortId}` }
+            ]
+          ]
+        }
+
+        await sendMessage(ADMIN_CHAT_ID, msg, reply_markup)
 
         if (lowStock && remainingStock !== undefined) {
           const stockMsg = `⚠️ <b>LOW STOCK ALERT!</b>\n\n` +
@@ -207,7 +229,15 @@ serve(async (req: Request) => {
 
         msg += `🔗 <a href="https://retrohub.tech/admin">Review in Admin Dashboard</a>`
 
-        await sendMessage(ADMIN_CHAT_ID, msg)
+        const inline_keyboard = orderList.map((id: string) => {
+          const shortId = id.substring(0, 8)
+          return [
+            { text: `✅ Verify ${shortId}`, callback_data: `verify:${shortId}` },
+            { text: `❌ Cancel ${shortId}`, callback_data: `cancel:${shortId}` }
+          ]
+        })
+
+        await sendMessage(ADMIN_CHAT_ID, msg, { inline_keyboard })
 
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
@@ -276,7 +306,73 @@ serve(async (req: Request) => {
 
     // -------------------------------------------------------------
     // 2. Telegram Webhook Updates (commands from Telegram chat)
-    // -------------------------------------------------------------
+    if (body.callback_query) {
+      const cq = body.callback_query
+      const chatId = cq.message?.chat?.id
+      if (chatId?.toString() !== ADMIN_CHAT_ID) {
+        await answerCallbackQuery(cq.id, 'Unauthorized', true)
+        return new Response('OK', { status: 200, headers: corsHeaders })
+      }
+      
+      const [action, ...args] = (cq.data || '').split(':')
+      const orderIdentifier = args[0]
+      
+      if (action === 'cancel' && orderIdentifier) {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await answerCallbackQuery(cq.id, 'Order not found', true)
+        } else if (order.status === 'cancelled' || order.status === 'fulfilled') {
+          await answerCallbackQuery(cq.id, 'Order already ' + order.status, true)
+        } else {
+          const cancelReason = 'Cancelled via inline button'
+          const updatedInput = {
+            ...(order.customer_input || {}),
+            cancel_reason: cancelReason,
+            cancelled_at: new Date().toISOString(),
+          }
+
+          const { error } = await supabase
+            .from('orders')
+            .update({
+              status: 'cancelled',
+              customer_input: updatedInput,
+              final_output: `Cancelled: ${cancelReason}`,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+
+          if (!error) {
+            try {
+              await supabase.from('inventory_keys').update({ status: 'available', order_id: null, sold_at: null }).eq('order_id', order.id)
+              await supabase.from('admin_action_logs').insert({ order_id: order.id, action: 'cancel_order', before_status: order.status, after_status: 'cancelled', notes: cancelReason })
+            } catch (_) {}
+            await sendMessage(chatId, `🚫 <b>Order Cancelled!</b>\nOrder <code>${order.id.substring(0,8)}</code> cancelled.`)
+            await answerCallbackQuery(cq.id, 'Order Cancelled')
+          } else {
+            await answerCallbackQuery(cq.id, 'Failed to cancel', true)
+          }
+        }
+      } else if (action === 'verify' && orderIdentifier) {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await answerCallbackQuery(cq.id, 'Order not found', true)
+        } else if (order.status === 'payment_verified' || order.status === 'fulfilled') {
+          await answerCallbackQuery(cq.id, 'Order already ' + order.status, true)
+        } else {
+          const { error } = await supabase.from('orders').update({ status: 'payment_verified', updated_at: new Date().toISOString() }).eq('id', order.id)
+          if (!error) {
+            await sendMessage(chatId, `✅ <b>Payment Verified!</b>\nOrder <code>${order.id.substring(0,8)}</code> verified.`)
+            await answerCallbackQuery(cq.id, 'Payment Verified')
+          } else {
+            await answerCallbackQuery(cq.id, 'Failed to verify', true)
+          }
+        }
+      } else {
+        await answerCallbackQuery(cq.id)
+      }
+      return new Response('OK', { status: 200, headers: corsHeaders })
+    }
+
     if (!body.message || !body.message.text) {
       return new Response('OK', { status: 200, headers: corsHeaders })
     }
