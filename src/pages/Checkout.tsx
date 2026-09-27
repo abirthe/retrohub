@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { ShopHeader } from '@/components/layout';
 import { useToast } from '@/hooks/use-toast';
-import heroBg from '@/assets/hero-bg.webp';
 import { CheckoutCartItems, CheckoutSummary } from '@/components/checkout';
 
 const Checkout = () => {
@@ -111,7 +110,6 @@ const Checkout = () => {
     <div className="min-h-screen relative selection:bg-primary/20">
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       </div>
 

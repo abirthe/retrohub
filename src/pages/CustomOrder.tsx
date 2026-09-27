@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ShopHeader } from '@/components/layout';
 import { ArrowLeft, Send, MessageSquare, CheckCircle2, Sparkles, PlusCircle } from 'lucide-react';
-import heroBg from '@/assets/hero-bg.webp';
 import { submitCustomOrder } from '@/lib/shopApi';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -117,7 +116,6 @@ const CustomOrder = () => {
     <div className="min-h-screen relative selection:bg-primary/20 flex flex-col pb-16">
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       </div>
 

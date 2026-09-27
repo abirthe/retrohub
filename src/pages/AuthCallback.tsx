@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle, Loader2, KeyRound } from 'lucide-react';
 import ShopHeader from '@/components/layout/ShopHeader';
-import heroBg from '@/assets/hero-bg.webp';
 
 /** Only allow same-origin relative paths to prevent open-redirect attacks. */
 const sanitiseReturnTo = (url: string | null | undefined): string => {
@@ -136,7 +135,6 @@ export default function AuthCallback() {
     <div className="min-h-screen relative flex flex-col selection:bg-primary/20">
       {/* Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 

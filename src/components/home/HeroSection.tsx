@@ -10,16 +10,6 @@ export function HeroSection() {
           WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
         }}
       >
-        <img
-          src="/hero-bg.webp"
-          alt="Hero Background"
-          width="1440"
-          height="810"
-          fetchPriority="high"
-          loading="eager"
-          decoding="async"
-          className="w-full h-full object-cover object-top opacity-5 mix-blend-screen"
-        />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.05)_0%,transparent_70%)]" />
       </div>

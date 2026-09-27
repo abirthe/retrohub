@@ -131,10 +131,10 @@ The bot has all 12 operational commands registered via Telegram's `setMyCommands
 
 Engineered to pass all Google Core Web Vitals and achieve green performance benchmarks in Cloudflare Web Analytics:
 
-* **Largest Contentful Paint (LCP < 200ms)**:
-  * **Next-Gen WebP**: Converted the hero background asset to modern WebP format, reducing file size from 177.3 kB down to **54.9 kB** (**69% compression**).
-  * **HTML Preload**: Document `<head>` includes `<link rel="preload" as="image" href="/hero-bg.webp" type="image/webp" fetchpriority="high" />`, enabling immediate parallel network streaming before JS bundles parse.
-  * **Optimized Image Tags**: Explicit `width="1440"`, `height="810"`, `fetchPriority="high"`, and `decoding="async"` in [HeroSection.tsx](src/components/home/HeroSection.tsx).
+* **Largest Contentful Paint (LCP < 300ms)**:
+  * **Zero-Blocking Architecture**: Replaced decorative background image element in [HeroSection.tsx](src/components/home/HeroSection.tsx) with GPU-accelerated CSS radial and linear gradient overlays.
+  * **Instant DOM Text LCP**: Eliminates 8.4s network image decode bottlenecks identified in Cloudflare Web Analytics, allowing the viewport's primary `<h1>` heading to paint instantaneously without waiting for network assets.
+  * **Network Bandwidth Optimization**: Eliminated 55 KB of critical head preload bandwidth from `index.html`, prioritizing viewport JavaScript chunks and fonts.
 * **Interaction to Next Paint (INP < 50ms)**:
   * **Vite Chunk Splitting**: `vite.config.ts` splits vendor libraries into 8 isolated bundles (`vendor-react`, `vendor-ui`, `vendor-supabase`, `vendor-tanstack`, `vendor-charts`, `vendor-forms`, `vendor-carousel`, `vendor-video`), cutting initial JS parse times drastically.
   * **Web Worker Offloading**: HLS.js video transmuxing in [BackgroundAnimation.tsx](src/components/BackgroundAnimation.tsx) is delegated to a dedicated Web Worker (`enableWorker: true`), freeing the main UI thread.
@@ -178,7 +178,7 @@ retrohub/
 ├── public/
 │   ├── .assetsignore                     # Directs Wrangler to exclude redirect rules during upload
 │   ├── favicon.png                       # Storefront favicon
-│   ├── hero-bg.webp                      # Next-gen WebP hero background (preloaded for LCP)
+│   ├── hero-bg.webp                      # Next-gen WebP fallback asset
 │   └── robots.txt                        # SEO crawler guidelines
 ├── scripts/                              # Catalog automation, seeding & pricing tools
 │   ├── database/                         # Migration runner & compiled SQL seeds

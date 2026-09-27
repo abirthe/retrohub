@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import ShopHeader from '@/components/layout/ShopHeader';
 import { Gamepad2, Loader2, ShieldCheck, Zap, KeyRound } from 'lucide-react';
-import heroBg from '@/assets/hero-bg.webp';
 
 /** Only allow same-origin relative paths to prevent open-redirect attacks. */
 const sanitiseReturnTo = (url: string | null | undefined): string => {
@@ -67,7 +66,6 @@ const Auth = () => {
     <div className="min-h-screen relative flex flex-col selection:bg-primary/20">
       {/* Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 
