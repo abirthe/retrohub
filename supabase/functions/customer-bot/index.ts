@@ -209,8 +209,8 @@ async function getAiResponse(
 ): Promise<string> {
   const fallback = getRetroChanIntelligenceResponse(latestMessage, sessionContext)
 
-  // Validate xAI Key format (xAI keys start with 'xai-' and are min 25 chars)
-  if (!XAI_API_KEY || !XAI_API_KEY.startsWith('xai-') || XAI_API_KEY.length < 25) {
+  // Check if API key is provided
+  if (!XAI_API_KEY || XAI_API_KEY.length < 10) {
     return fallback
   }
 
