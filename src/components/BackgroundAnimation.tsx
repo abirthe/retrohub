@@ -15,8 +15,8 @@ const BackgroundAnimation: React.FC = () => {
     video.volume = 0;
     video.playsInline = true;
     video.setAttribute('muted', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('playsinline', 'true');
+    video.setAttribute('webkit-playsinline', 'true');
     video.setAttribute('autoplay', '');
     video.setAttribute('loop', '');
 
@@ -34,13 +34,12 @@ const BackgroundAnimation: React.FC = () => {
             // Autoplay waiting for interaction on battery-saver or strict policy
           });
         }
-      } catch (_) {
+      } catch {
         // Fallback for synchronous play exceptions
       }
     };
 
-    // User gesture handler: do NOT defer with requestAnimationFrame or setTimeout
-    // Safari requires video.play() to be on the immediate call stack of the gesture event
+    // User gesture handler: handles click, touch, scroll, and mouse movement
     const handleUserInteraction = () => {
       if (video && video.paused) {
         playVideo();
@@ -68,7 +67,7 @@ const BackgroundAnimation: React.FC = () => {
       }
     };
 
-    // Bind interaction listeners across pointer, touch, scroll, and key
+    // Bind interaction listeners across pointer, touch, scroll, mouse, and key
     const interactionEvents: (keyof WindowEventMap)[] = [
       'pointerdown',
       'touchstart',
@@ -77,6 +76,7 @@ const BackgroundAnimation: React.FC = () => {
       'scroll',
       'wheel',
       'keydown',
+      'mousemove',
     ];
 
     interactionEvents.forEach((evt) => {
@@ -87,24 +87,22 @@ const BackgroundAnimation: React.FC = () => {
     window.addEventListener('pageshow', handleResume);
     window.addEventListener('focus', handleResume);
     window.addEventListener('online', handleOnline);
+
     video.addEventListener('ended', handleEnded);
+    video.addEventListener('canplay', playVideo);
+    video.addEventListener('loadeddata', playVideo);
+    video.addEventListener('canplaythrough', playVideo);
 
     // 2. Playback Engine Initialization:
-    // Engine A: Native HLS (iOS Safari, iPadOS, macOS Safari)
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoSrc;
-      video.load();
-      video.addEventListener('loadedmetadata', playVideo, { once: true });
-      video.addEventListener('canplay', playVideo, { once: true });
-      video.addEventListener('loadeddata', playVideo, { once: true });
-    } else if (Hls.isSupported()) {
-      // Engine B: MSE Hls.js (Chrome, Android Chrome, Edge, Firefox, Samsung Internet)
+    // Engine A (Primary for Desktop Chrome/Edge/Firefox, Android): MSE HLS.js
+    if (Hls.isSupported()) {
       hls = new Hls({
         enableWorker: false, // Prevents blob worker restrictions across extensions/sandboxes
-        lowLatencyMode: true,
-        backBufferLength: 30,
+        lowLatencyMode: false, // VOD asset must not use lowLatencyMode
+        backBufferLength: 0,
         maxBufferLength: 30,
         startLevel: -1, // Auto bitrate for device network
+        autoStartLoad: true,
       });
 
       hls.loadSource(videoSrc);
@@ -112,6 +110,12 @@ const BackgroundAnimation: React.FC = () => {
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (isMounted) {
+          playVideo();
+        }
+      });
+
+      hls.on(Hls.Events.FRAG_BUFFERED, () => {
+        if (isMounted && video.paused) {
           playVideo();
         }
       });
@@ -130,7 +134,7 @@ const BackgroundAnimation: React.FC = () => {
               try {
                 hls?.destroy();
                 if (video && isMounted) {
-                  hls = new Hls({ enableWorker: false });
+                  hls = new Hls({ enableWorker: false, lowLatencyMode: false });
                   hls.loadSource(videoSrc);
                   hls.attachMedia(video);
                 }
@@ -141,14 +145,26 @@ const BackgroundAnimation: React.FC = () => {
           }
         }
       });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Engine B (Fallback for iOS Safari & iPadOS where MSE is not supported): Native HLS
+      video.src = videoSrc;
+      video.load();
+      video.addEventListener('loadedmetadata', playVideo, { once: true });
+      video.addEventListener('canplay', playVideo, { once: true });
+      video.addEventListener('loadeddata', playVideo, { once: true });
     }
 
-    // Safety watchdog: periodically ensures video is running
+    // Safety watchdog: periodically ensures video is running and loops cleanly
     const watchdog = setInterval(() => {
-      if (video && video.paused && document.visibilityState === 'visible') {
-        playVideo();
+      if (video && document.visibilityState === 'visible') {
+        if (video.paused || video.ended) {
+          if (video.ended) {
+            video.currentTime = 0;
+          }
+          playVideo();
+        }
       }
-    }, 2000);
+    }, 1500);
 
     return () => {
       isMounted = false;
@@ -164,6 +180,9 @@ const BackgroundAnimation: React.FC = () => {
       window.removeEventListener('focus', handleResume);
       window.removeEventListener('online', handleOnline);
       video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('canplay', playVideo);
+      video.removeEventListener('loadeddata', playVideo);
+      video.removeEventListener('canplaythrough', playVideo);
     };
   }, []);
 
@@ -177,15 +196,16 @@ const BackgroundAnimation: React.FC = () => {
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover scale-[1.08] origin-center opacity-75 [filter:hue-rotate(28deg)_saturate(1.35)_brightness(1.08)] [transform:translateZ(0)] will-change-transform transition-opacity duration-1000"
+        poster="https://image.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys/thumbnail.webp?time=1"
+        className="absolute inset-0 w-full h-full object-cover scale-[1.05] origin-center opacity-85 sm:opacity-90 [filter:hue-rotate(25deg)_saturate(1.35)_brightness(1.1)] [transform:translateZ(0)] will-change-transform transition-opacity duration-1000"
       />
 
       {/* Theme Color Harmonization Overlay */}
       <div className="absolute inset-0 bg-primary/10 mix-blend-screen pointer-events-none" />
 
-      {/* Soft Vignette Gradients for Legibility without Smothering the Video */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/50 pointer-events-none" />
+      {/* Balanced Vignette Gradients for Legibility without Smothering the Video */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
 
       {/* Central Soft Ambient Glow tied to Primary Theme */}
       <div
