@@ -1,3 +1,4 @@
+import { startTransition } from 'react';
 import type { Product } from '@/lib/shopApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,7 +71,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   const handleCardClick = () => {
-    navigate(generateProductUrl(product));
+    startTransition(() => {
+      navigate(generateProductUrl(product));
+    });
   };
 
   const hasImage = Boolean(product.image_url);
