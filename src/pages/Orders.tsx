@@ -115,7 +115,7 @@ const Orders = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-screen selection:bg-primary/20 pb-16">
       <ShopHeader />
 
       <div className="container py-8 max-w-6xl">

@@ -64,11 +64,11 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col">
+    <div className="min-h-screen relative flex flex-col selection:bg-primary/20">
       {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.05]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/95 to-background" />
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-[0.03]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 
       <div className="relative z-10">
