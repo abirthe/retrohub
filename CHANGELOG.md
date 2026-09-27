@@ -19,7 +19,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
 - **Font Delivery**: Removed render-blocking `@import` from `index.css`; added preconnect and asynchronous font stylesheet in `index.html`.
 - **Edge Caching**: Configured `Cache-Control: public, max-age=31536000, immutable` for hashed assets in `worker.js` and stale-while-revalidate for static media.
 - **Favicon**: Compressed and properly sized `favicon.png` from 463 KB down to 16.8 KB (96% bandwidth reduction).
-- **Product Detail CWV**: Added layout skeleton to eliminate Cumulative Layout Shift (CLS) and set `fetchPriority="high"` on product hero images for LCP.
+- **Deployment Chunk Self-Healing**: Added global `vite:preloadError` event listener in `main.tsx`, timestamp-cooldown auto-reload in `App.tsx` (`lazyWithRetry`), and `ErrorBoundary.tsx` fallback to automatically refresh the page when background deployments replace hashed asset chunks (eliminating `Failed to fetch dynamically imported module`).
 
 ### Added
 - `src/lib/productApi.ts` — Product catalog CRUD, featured banner, storefront search

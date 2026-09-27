@@ -5,21 +5,21 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  const isChunkLoadError = errorMessage.includes('Failed to fetch dynamically imported module') || 
-                           errorMessage.includes('Importing a module script failed');
+  const isChunkLoadError = /failed to fetch dynamically imported module|importing a module script failed/i.test(errorMessage);
 
   React.useEffect(() => {
     if (isChunkLoadError) {
-      const alreadyReloaded = window.sessionStorage.getItem('chunk_error_reloaded');
-      if (!alreadyReloaded) {
-        window.sessionStorage.setItem('chunk_error_reloaded', 'true');
+      const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
+      const now = Date.now();
+      if (now - lastReload > 10000) {
+        window.sessionStorage.setItem('last_chunk_reload', String(now));
         window.location.reload();
       }
     }
   }, [isChunkLoadError]);
 
   const handleTryAgain = () => {
-    window.sessionStorage.removeItem('chunk_error_reloaded');
+    window.sessionStorage.removeItem('last_chunk_reload');
     if (isChunkLoadError) {
       window.location.reload();
     } else {
