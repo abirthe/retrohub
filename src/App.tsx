@@ -81,13 +81,11 @@ const PageLoader = () => (
 
 const App = () => {
   useEffect(() => {
-    // Clear chunk reload guards once application successfully mounts
-    window.sessionStorage.removeItem('chunk_reload_timestamp');
-    window.sessionStorage.removeItem('chunk_reload_attempted');
-    window.sessionStorage.removeItem('last_chunk_reload');
-    window.sessionStorage.removeItem('eb_auto_reload');
-
-    // Remove cache buster parameter from URL bar to keep it clean
+    // Clean up cosmetic URL params added by cache-busting reload
+    // NOTE: Do NOT clear chunk_reload_timestamp here — that guard must persist
+    // until its 15-second TTL expires naturally. Clearing it too early (while
+    // lazy routes are still loading in Suspense) caused a redirect loop:
+    // App mounts → guard cleared → second chunk error fires → reload again → ∞
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.has('v') || url.searchParams.has('reload')) {
