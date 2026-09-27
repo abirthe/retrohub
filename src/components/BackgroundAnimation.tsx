@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import Hls from 'hls.js';
 
 const BackgroundAnimation: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -7,23 +8,28 @@ const BackgroundAnimation: React.FC = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Force muted and playsInline for strict mobile browsers (iOS Safari, Android Chrome)
+    // Strict mobile and desktop autoplay readiness
     video.defaultMuted = true;
     video.muted = true;
+    video.volume = 0;
+    video.playsInline = true;
+    video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('autoplay', '');
+    video.setAttribute('loop', '');
 
     const videoSrc = 'https://stream.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys.m3u8';
-    let hlsInstance: { destroy: () => void } | null = null;
-    let isCancelled = false;
+    let hls: Hls | null = null;
+    let isMounted = true;
 
-    const playVideo = async () => {
-      try {
-        if (video.paused) {
-          await video.play();
-        }
-      } catch (_) {
-        // Silently ignore autoplay restrictions until user interacts
+    const playVideo = () => {
+      if (!video) return;
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          // Autoplay restricted until user interaction
+        });
       }
     };
 
@@ -34,77 +40,75 @@ const BackgroundAnimation: React.FC = () => {
     };
 
     const forcePlayOnInteraction = () => {
-      requestAnimationFrame(() => {
-        if (video && video.paused) {
-          video.play().catch(() => {});
-        }
-      });
+      if (video && video.paused) {
+        playVideo();
+      }
     };
 
     const setupInteractionListeners = () => {
       window.addEventListener('click', forcePlayOnInteraction, { once: true, passive: true });
       window.addEventListener('touchstart', forcePlayOnInteraction, { once: true, passive: true });
       window.addEventListener('scroll', forcePlayOnInteraction, { once: true, passive: true });
-      window.addEventListener('keydown', forcePlayOnInteraction, { once: true });
+      window.addEventListener('keydown', forcePlayOnInteraction, { once: true, passive: true });
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     setupInteractionListeners();
 
-    const initPlayback = async () => {
-      if (isCancelled || !video) return;
+    // 1. Native HLS support (Safari, iOS WebKit)
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = videoSrc;
+      video.load();
+      video.addEventListener('loadedmetadata', playVideo, { once: true });
+      video.addEventListener('canplay', playVideo, { once: true });
+    } else if (Hls.isSupported()) {
+      // 2. MSE HLS.js for Chromium, Edge, Firefox
+      hls = new Hls({
+        enableWorker: false, // Prevents blob worker restrictions across browser environments
+        lowLatencyMode: true,
+        backBufferLength: 60,
+      });
 
-      // 1. Native HLS support (Safari/iOS/macOS)
-      if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = videoSrc;
-        video.load();
-        video.addEventListener('loadedmetadata', () => {
+      hls.loadSource(videoSrc);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (isMounted) {
           playVideo();
-        }, { once: true });
-        video.addEventListener('canplay', () => {
-          playVideo();
-        }, { once: true });
-        return;
-      }
-
-      // 2. Dynamic HLS.js loader for browsers without native HLS support (Chrome, Edge, Firefox)
-      try {
-        const hlsModule = await import('hls.js');
-        if (isCancelled || !hlsModule) return;
-        const Hls = hlsModule.default;
-
-        if (Hls && typeof Hls.isSupported === 'function' && Hls.isSupported()) {
-          const hls = new Hls({
-            enableWorker: true,
-          });
-          hlsInstance = hls;
-          hls.loadSource(videoSrc);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            playVideo();
-          });
         }
-      } catch (err) {
-        console.warn('Hls.js dynamic load error:', err);
-      }
-    };
+      });
 
-    initPlayback();
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls?.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls?.recoverMediaError();
+              break;
+            default:
+              hls?.destroy();
+              break;
+          }
+        }
+      });
+    }
 
-    // Periodic safety check to resume video if initially paused by browser autoplay policy
+    // Fallback interval to kickstart playback if initially blocked by browser autoplay policy
     const checkInterval = setInterval(() => {
       if (video && video.paused) {
         playVideo();
       } else if (video && !video.paused) {
         clearInterval(checkInterval);
       }
-    }, 2000);
+    }, 1500);
 
     return () => {
-      isCancelled = true;
+      isMounted = false;
       clearInterval(checkInterval);
-      if (hlsInstance) {
-        hlsInstance.destroy();
+      if (hls) {
+        hls.destroy();
       }
       window.removeEventListener('click', forcePlayOnInteraction);
       window.removeEventListener('touchstart', forcePlayOnInteraction);
@@ -124,44 +128,23 @@ const BackgroundAnimation: React.FC = () => {
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover scale-[1.15] origin-center opacity-60 [filter:hue-rotate(35deg)_saturate(1.4)_brightness(1.05)] transition-opacity duration-1000"
+        className="absolute inset-0 w-full h-full object-cover scale-[1.08] origin-center opacity-75 [filter:hue-rotate(28deg)_saturate(1.35)_brightness(1.08)] transition-opacity duration-1000"
       />
 
       {/* Theme Color Harmonization Overlay */}
       <div className="absolute inset-0 bg-primary/10 mix-blend-screen pointer-events-none" />
 
-      {/* Gradients Overlay for Depth and Contrast (Symmetrical) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-background" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-background/80" />
+      {/* Soft Vignette Gradients for Legibility without Smothering the Video */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/50 pointer-events-none" />
 
       {/* Central Soft Ambient Glow tied to Primary Theme */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] max-w-[800px] h-[300px] pointer-events-none">
-        <svg
-          viewBox="0 0 800 300"
-          className="w-full h-full"
-          preserveAspectRatio="none"
-          overflow="visible"
-        >
-          <defs>
-            <filter id="glow-blur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="30" />
-            </filter>
-            <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.35" />
-              <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <ellipse
-            cx="400"
-            cy="150"
-            rx="300"
-            ry="100"
-            fill="url(#glow-gradient)"
-            filter="url(#glow-blur)"
-          />
-        </svg>
-      </div>
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] max-w-[900px] h-[350px] pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.05) 55%, transparent 75%)',
+        }}
+      />
     </div>
   );
 };

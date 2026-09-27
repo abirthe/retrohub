@@ -6,8 +6,8 @@ export function HeroSection() {
       <div 
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
-          maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+          maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
         }}
       >
         <img
@@ -18,10 +18,10 @@ export function HeroSection() {
           fetchPriority="high"
           loading="eager"
           decoding="async"
-          className="w-full h-full object-cover object-top opacity-25"
+          className="w-full h-full object-cover object-top opacity-10 mix-blend-screen"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/80 to-background" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.06)_0%,transparent_70%)]" />
       </div>
 
       <div className="container relative z-10 text-center space-y-4 max-w-4xl px-4 py-12 sm:py-16">
