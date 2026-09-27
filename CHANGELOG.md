@@ -7,50 +7,55 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
 
 ## [Unreleased]
 
-### Optimized (Core Web Vitals & Performance)
-- **INP Responsiveness (Interaction to Next Paint)**:
-  - Eliminated 300ms mobile tap delay using `touch-action: manipulation` across all buttons, links, inputs, and interactive cards in `index.css`.
-  - Replaced CPU/GPU-intensive SVG `feGaussianBlur` filter with a hardware-accelerated CSS `radial-gradient` in `BackgroundAnimation.tsx`.
-  - Removed full-viewport CSS `filter` on video elements to prevent compositor thread locking on mobile devices.
-  - Disabled video decoding on small mobile viewports (< 768px) to dedicate 100% of mobile GPU/CPU to interaction rendering.
-  - Decoupled `toast()` alerts from pure `CartContext` state updaters via `queueMicrotask` to avoid nested synchronous re-renders.
-  - Wrapped `customerInput` keystrokes and `ProductCard` navigations in React 18 `startTransition` for instant UI feedback.
-- **HLS Background Video**: Decoupled `hls.js` (~595 KB) from initial critical path; lazy-loaded `BackgroundAnimation` on idle and prioritized native HLS on iOS/Safari.
-- **Font Delivery**: Removed render-blocking `@import` from `index.css`; added preconnect and asynchronous font stylesheet in `index.html`.
-- **Edge Caching**: Configured `Cache-Control: public, max-age=31536000, immutable` for hashed assets in `worker.js` and stale-while-revalidate for static media.
-- **Favicon**: Compressed and properly sized `favicon.png` from 463 KB down to 16.8 KB (96% bandwidth reduction).
-- **Deployment Chunk Self-Healing**: Added global `vite:preloadError` event listener in `main.tsx`, timestamp-cooldown auto-reload in `App.tsx` (`lazyWithRetry`), and `ErrorBoundary.tsx` fallback to automatically refresh the page when background deployments replace hashed asset chunks (eliminating `Failed to fetch dynamically imported module`).
-- **Telegram Bot Inspect Action**: Added missing `order` and `inspect` callback query handler in `telegram-webhook` edge function, and registered `/inspect` as an alias for `/order` so tapping `🔍 Inspect` or typing `/inspect [id]` immediately displays the full order inspection card with quick action shortcuts.
-- **Google OAuth Only Authentication**: Simplified `Auth.tsx` to exclusively feature one-click Google OAuth 2.0 authentication, removing manual email/password forms, signup tabs, and forgot password inputs for a frictionless, high-security gaming marketplace experience.
+---
+
+## [1.3.0] — 2026-09-28
 
 ### Added
-- `src/lib/productApi.ts` — Product catalog CRUD, featured banner, storefront search
-- `src/lib/orderApi.ts` — Order creation, admin state transitions, stats
-- `src/lib/paymentApi.ts` — bKash TrxID submission with RPC security
-- `src/lib/customOrderApi.ts` — Custom quote submission and admin management
-- `src/lib/authApi.ts` — Role-based admin check
-- `src/lib/types.ts` — Centralized shared type definitions
-- Real unit tests for TrxID validation, price tamper detection, stock helpers, and open redirect protection
-- Cloudflare `RATE_LIMITER` edge binding with 150 req/60s per client IP
-- Cloudflare `ASSETS`/`CLOUD_FLARE_ASSET` dual-binding fallback in `worker.js`
-- Telegram bot: all 12 commands registered via `setMyCommands`; `callback_query` webhook for inline button fulfillment
-- Comprehensive `.gitignore` covering wrangler configs, IDE metadata, test coverage, npm auth tokens
+- **24/7 AI Customer Support Bot** (`@retrochanbot`): Full `customer-bot` Supabase Edge Function powered by **xAI Grok** (`grok-beta`).
+  - Natural language understanding for order inquiries, game top-up help, bKash payment walkthroughs, and product questions.
+  - Instant order lookup by 6–8 char short ID, full UUID, or customer email — reveals status, items, amounts, and delivered codes.
+  - Multi-turn session persistence via new `customer_support_sessions` PostgreSQL table.
+  - Graceful AI-to-interactive-menu fallback when API quotas or network issues occur.
+  - Deployed as `supabase/functions/customer-bot` (no JWT verification required for public customer access).
+- **Per-User Cart Isolation**: `CartContext` now scopes each cart to `cart_${userId}` (authenticated) vs `cart_guest` (anonymous), eliminating cross-account cart leakage when multiple Google accounts are used on the same device.
+- **Universal Cross-Device Background Video Engine**: Complete overhaul of `BackgroundAnimation.tsx`.
+  - HLS.js MSE engine with dedicated Web Worker offloading (`enableWorker: true`) — main UI thread fully free.
+  - Native HLS on iOS/Safari, MSE HLS on Android/Desktop. Autoplay recovery via passive gesture listener on first touch/scroll.
+  - User-controlled ambient animation intensity toggle in `ShopHeader`.
+  - `touch-action: manipulation` applied globally to eliminate the 300ms mobile tap delay.
+- **Expanded Test Suite**: 27 unit tests across 3 suites — `cartContext.test.ts` (5 tests), `example.test.ts` (15 tests), `pages.test.tsx` (7 tests).
+- **`/inspect` Admin Bot Command**: Registered as an alias for `/order`; `🔍 Inspect` inline button callback now works seamlessly.
+- **Google OAuth-Only Auth**: `Auth.tsx` simplified to one-click Google sign-in, removing legacy email/password UI.
+- **Deployment Chunk Self-Healing**: `vite:preloadError` listener + `lazyWithRetry` + `ErrorBoundary.tsx` prevents infinite reload loops on hashed-chunk deployment.
+- **`supabase/README.md`**: Comprehensive backend reference documenting Edge Functions, security RPCs, migration series, and required secrets.
+- **`docs/MERCHANT_SYSTEM_OVERVIEW.md`**: Updated to document Dual Telegram Bot Architecture (Section 8) and expanded Solo Merchant Operational Playbook (Section 10).
+- `supabase/migrations/20260927000002_customer_support_sessions.sql` — Multi-turn support session tracking table with RLS.
+- `supabase/migrations/20260927000003_fix_security_linter_warnings.sql` — Resolved `SECURITY DEFINER` and RLS linter findings.
+- `supabase/migrations/20260927000004_fix_database_linter_performance_warnings.sql` — Added missing FK indexes.
+- `supabase/migrations/20260927000005_drop_safe_unused_indexes.sql` — Dropped redundant indexes.
+- `supabase/migrations/20260927000006_drop_obsolete_stock_validation.sql` — Removed deprecated stock trigger.
+
+### Optimized (Core Web Vitals & Performance)
+- **LCP < 300ms**: Eliminated 8.4s hero image decode bottleneck; replaced decorative `<img>` with GPU-accelerated CSS gradients in `HeroSection.tsx`.
+- **INP < 50ms**: Removed CPU-intensive `feGaussianBlur` SVG filter; decoupled `toast()` from `CartContext` via `queueMicrotask`; wrapped interactions in `startTransition`.
+- **CLS = 0.00**: Introduced 8-card skeleton grid with exact card dimensions; pre-allocated layout heights on catalog sections.
+- **Font Delivery**: Removed render-blocking `@import` from `index.css`; added preconnect and async font stylesheet.
+- **Edge Caching**: `Cache-Control: public, max-age=31536000, immutable` for hashed static assets; `stale-while-revalidate` for media.
+- **Favicon**: Compressed from 463 KB → 16.8 KB (96% reduction).
 
 ### Changed
-- `src/lib/shopApi.ts` refactored into a backwards-compatible barrel re-export
-- `wrangler.json` restored to Git to prevent Cloudflare Vite 6 auto-detection build error
-- `wrangler.toml` removed (superseded by `wrangler.json`)
-- `scripts/README.md` renamed to `scripts/README_SCRIPT.md`
-
-### Removed
-- `Products/` catalog Excel/CSV files untracked from Git (stored locally only)
-- `src/components/ProductCard.tsx` dead re-export file deleted
-- Hook naming inconsistency fixed: standardized to camelCase (`useMobile`)
+- `README.md`: Updated all feature sections (Sections 7–10), tech stack, repository structure, and deployment instructions to reflect v1.3.0.
+- `scripts/README_SCRIPT.md`: Updated test count to 27 tests across 3 suites.
+- `CHANGELOG.md`: Promoted all prior Unreleased work into v1.3.0.
+- `.env.example`: Added `CUSTOMER_BOT_TOKEN` and `VITE_XAI_API_KEY` to the environment template.
+- Node.js engine requirement updated from `>=20.0.0` to `>=22.0.0` in `package.json`.
 
 ### Security
-- `Products/` and `*.xlsx`, `*.ods`, `*.csv` added to `.gitignore`
-- Cloudflare edge rate limiting protecting all routes from bot abuse
-- `TELEGRAM_WEBHOOK_SECRET` stale key removed from Supabase secrets
+- `customer_support_sessions` table gated by RLS — customers only see their own session history.
+- `CUSTOMER_BOT_TOKEN` stored exclusively in Supabase secrets; never exposed client-side or committed to Git.
+- Per-user cart isolation prevents cross-account session data bleed.
+- Cloudflare rate limiter upgraded documentation: 150 req/60s per client IP.
 
 ---
 

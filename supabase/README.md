@@ -1,0 +1,134 @@
+# RetroHub Backend & Supabase Architecture ⚡🗄️
+
+Comprehensive technical documentation for RetroHub's database schema, versioned migrations, stored procedures, Edge Functions, and Telegram integrations.
+
+---
+
+## 📁 Directory Structure
+
+```
+supabase/
+├── functions/
+│   ├── customer-bot/        # 24/7 AI Customer Support Bot (Retro Chan @retrochanbot)
+│   ├── telegram-webhook/    # 24/7 Merchant Admin Bot (@Notifyretro_bot)
+│   └── send-order-email/    # Resend order fulfillment email edge function
+├── migrations/              # 29 versioned PostgreSQL migrations
+└── README.md                # This manual
+```
+
+---
+
+## ⚡ Edge Functions Overview
+
+### 1. `customer-bot` — AI Customer Support Bot (`@retrochanbot`)
+A public-facing Telegram support agent powered by **xAI Grok** (`grok-beta`) and connected directly to the RetroHub database.
+
+* **Natural Language Processing**: Translates user questions into clear, helpful guidance on regional game keys, activation, server UID requirements, and delivery times.
+* **Instant Order Tracking**: Accepts short IDs (e.g. `8f4b12`), 36-char UUIDs, or user email addresses to display live order status, verification stage, item breakdowns, and delivered digital codes.
+* **bKash Payment Assistant**: Step-by-step payment walkthrough for personal and merchant bKash send money, explaining the dynamic 1.0% charge calculation.
+* **Multi-Turn Session Persistence**: Persists user interactions in the `customer_support_sessions` table with automatic cleanup.
+* **Graceful Degradation**: Automatically falls back to an interactive Telegram inline menu if AI API limits or network issues occur.
+
+```bash
+# Deploy customer bot
+npx supabase functions deploy customer-bot --no-verify-jwt
+```
+
+### 2. `telegram-webhook` — Merchant Admin Bot (`@Notifyretro_bot`)
+A private, role-gated back-office bot configured for instant smartphone order fulfillment and real-time merchant alerts.
+
+* **Dual-Channel Dispatch Architecture**: Dispatched via this edge function with automatic direct client fallback to ensure notifications are never missed during cold starts.
+* **Push Notifications**: Pushes new order alerts, customer bKash TrxID submissions with duplicate fraud detection, custom quote alerts, and low stock warnings (<= 3 units).
+* **Interactive Fulfillment Commands**:
+  * `/orders` — View up to 10 latest unfulfilled orders
+  * `/order <id>` or `/inspect <id>` — Inspect full order details
+  * `/verify <id>` — Verify customer bKash payment (`status = 'payment_verified'`)
+  * `/deliver <id> <code>` — Fulfill order with license key or account credentials
+  * `/cancel <id> [reason]` — Cancel order and release reserved stock
+  * `/hold <id> [reason]` — Pause order (e.g., incorrect Player UID)
+  * `/refund <id> [reason]` — Mark order as refunded
+  * `/summary` — Today's revenue, net profit, orders, and pending items
+  * `/stock [search]` — Live inventory health report
+  * `/custom` — Review custom quote requests
+  * `/remind` — Trigger immediate scan for unfulfilled orders
+  * `/help` — Command reference sheet
+* **Inline Keyboards**: One-touch `Verify` or `Cancel` buttons directly under notifications.
+
+```bash
+# Deploy admin bot webhook
+npx supabase functions deploy telegram-webhook --no-verify-jwt
+```
+
+### 3. `send-order-email` — Customer Order Notification
+Connects to the **Resend API** to email digital codes, receipts, and platform redemption instructions directly to the buyer's email address upon order fulfillment.
+
+```bash
+# Deploy email function
+npx supabase functions deploy send-order-email --no-verify-jwt
+```
+
+---
+
+## 🗄️ Database Architecture & Migrations
+
+The database runs on **PostgreSQL 15+** managed via 29 versioned SQL migrations in `supabase/migrations/`:
+
+| Migration Series | Scope & Purpose |
+| :--- | :--- |
+| `20260208*` | Initial core schema: `products`, `orders`, `profiles`, `inventory_keys`, `user_roles`. |
+| `20260917*` | V2 schema refactoring: relational integrity, foreign keys, and status enums. |
+| `20260919*` | Performance indexes V3, missing regional taxonomies, and `SECURITY DEFINER` function security fixes. |
+| `20260920*` | Custom order requests board (`custom_orders` table) and database linter resolutions. |
+| `20260924*` | Added `service` and `accounts` categories; default `instant_code` delivery pipeline flag. |
+| `20260927*` | **Current V3 Architecture**: <br>• `20260927000001_secure_order_payment_and_pricing.sql` — Secure payment RPC + price tamper validation<br>• `20260927000002_customer_support_sessions.sql` — Multi-turn AI support session tracking<br>• `20260927000003_fix_security_linter_warnings.sql` — Resolved RLS and search path warnings<br>• `20260927000004_fix_database_linter_performance_warnings.sql` — Added missing foreign key indexes<br>• `20260927000005_drop_safe_unused_indexes.sql` — Dropped redundant unused indexes<br>• `20260927000006_drop_obsolete_stock_validation.sql` — Cleaned up deprecated stock triggers |
+
+---
+
+## 🛡️ Security Definer RPCs & Stored Procedures
+
+Clients access sensitive mutations exclusively through audited `SECURITY DEFINER` functions:
+
+| Procedure | Parameters | Role & Security Invariant |
+| :--- | :--- | :--- |
+| `submit_order_payment` | `p_order_id`, `p_payment_method`, `p_transaction_id`, `p_payment_phone`, `p_amount_paid` | Validates that caller owns the order (`user_id = auth.uid()`), checks transaction ID format, ensures exact amount match, and transitions status to `payment_submitted`. |
+| `has_role` | `_user_id`, `_role` | Checks whether the authenticated user possesses an administrative role in `user_roles`. |
+| `verify_payment` | `p_order_id`, `p_admin_id` | Verifies payment and moves order to `payment_verified`. Restricted to `admin` role. |
+| `fulfill_order` | `p_order_id`, `p_code`, `p_cost_price`, `p_supplier` | Fulfills order, unlocks code, logs profit margin, and transitions status to `fulfilled`. Restricted to `admin` role. |
+| `cancel_order` | `p_order_id`, `p_reason`, `p_admin_id` | Cancels order, releases any locked inventory keys, and logs action. Restricted to `admin` role. |
+| `hold_order` | `p_order_id`, `p_reason`, `p_admin_id` | Puts order on hold due to missing details. Restricted to `admin` role. |
+| `refund_order` | `p_order_id`, `p_reason`, `p_admin_id` | Issues refund state change. Restricted to `admin` role. |
+
+---
+
+## 📊 Analytical Views
+
+Real-time aggregate views powers the `/admin` merchant dashboard:
+* `v_revenue_today`: Sum of gross transaction values for orders fulfilled or verified today.
+* `v_orders_today`: Total orders placed today.
+* `v_profit_today`: Real-time net margin: $\sum (\text{Sale Price} - \text{Cost Price})$.
+* `v_pending_action_count`: Live counter of orders awaiting verification or fulfillment.
+
+---
+
+## 🔐 Required Supabase Secrets
+
+Set these in your Supabase project dashboard (**Project Settings -> Edge Functions -> Secrets**):
+
+```bash
+# Telegram Bot Tokens
+TELEGRAM_BOT_TOKEN="your_admin_bot_token"
+ADMIN_CHAT_ID="your_telegram_chat_id"
+CUSTOMER_BOT_TOKEN="your_customer_bot_token"
+
+# AI Integration
+XAI_API_KEY="your_xai_api_key"
+
+# Email Delivery
+RESEND_API_KEY="your_resend_api_key"
+```
+
+---
+
+## 📄 License
+Private & Proprietary — Developed for RetroHub E-Commerce. All rights reserved.  
+© 2026 RETROHUB — Engineered by **Abir Hossain**.
