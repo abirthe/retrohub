@@ -87,12 +87,21 @@ Engineered with a **high-availability dual-channel dispatch architecture**: aler
 #### Interactive Telegram Commands
 | Command | Action |
 | :--- | :--- |
-| `/orders` | View up to 10 latest unfulfilled orders with quick delivery shortcuts |
-| `/deliver <order_id> <code>` | **Fulfill an order directly from Telegram** without opening the dashboard |
-| `/summary` | View today's financial metrics (revenue, orders today, pending items) |
+| `/orders` | View up to 10 latest unfulfilled orders with quick action shortcuts |
+| `/order <id>` | **Inspect full order details** (Player UID, Server, TrxID, timestamps, status) |
+| `/verify <id>` | **Verify customer payment** directly from chat (`status = 'payment_verified'`) |
+| `/deliver <id> <code>` | **Fulfill an order** with digital key or account credentials |
+| `/source <id>` | Mark order as actively `sourcing` during external procurement |
+| `/cancel <id> [reason]` | **Cancel an order** from phone, release reserved inventory keys, and log reason |
+| `/hold <id> [reason]` | Place order on hold (e.g. incorrect server or player UID) |
+| `/refund <id> [reason]` | Mark order as refunded (`status = 'refunded'`) |
+| `/summary` | View today's financial metrics (gross revenue, net profit, orders, pending items) |
+| `/stock [search]` | Check current inventory health or search specific product stock |
 | `/custom` | View the latest pending custom order requests |
 | `/remind` | Instantly trigger a fresh check of all unfulfilled orders |
-| `/help` | Display all available commands and syntax |
+| `/help` | Display interactive command cheat sheet and operational syntax |
+
+> 💡 **Short ID Support**: All order commands accept short prefixes (first 6–8 characters, e.g. `/cancel 8f4b12` or `/deliver 8f4b12 RA-9921`) in addition to full 36-character UUIDs for lightning-fast mobile operation.
 
 #### Automated 24/7 Background Reminders
 * Scheduled via [`.github/workflows/pending-orders-reminder.yml`](.github/workflows/pending-orders-reminder.yml).
