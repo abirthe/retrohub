@@ -144,9 +144,9 @@ const App = () => {
             </BrowserRouter>
           </div>
         </div>
-      </TooltipProvider>
-    </CartProvider>
-  </QueryClientProvider>
+        </TooltipProvider>
+      </CartProvider>
+    </QueryClientProvider>
   );
 };
 

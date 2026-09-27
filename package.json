@@ -5,13 +5,12 @@
   "description": "RETROHUB - Game Keys & Top-ups E-commerce Platform. Dev by ABIR HOSSAIN",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "vite",
-    "prebuild": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true });\"",
+    "prebuild": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true }); ['dist/_redirects', '_redirects', 'public/_redirects'].forEach(f => { if (fs.existsSync(f)) try { fs.rmSync(f, { recursive: true, force: true }); } catch(e){} });\"",
     "build": "vite build",
-    "postinstall": "node -e \"const fs = require('fs'); ['dist/_redirects', '_redirects', 'public/_redirects'].forEach(f => { if (fs.existsSync(f)) try { fs.rmSync(f, { recursive: true, force: true }); } catch(e){} });\" && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
