@@ -106,6 +106,13 @@ const Orders = () => {
       return (data || []) as unknown as OrderWithDetails[];
     },
     enabled: !!user,
+    refetchInterval: (query) => {
+      const list = query.state.data as OrderWithDetails[] | undefined;
+      const hasActive = list?.some(
+        (o) => o.status !== 'fulfilled' && o.status !== 'cancelled' && o.status !== 'refunded' && o.status !== 'failed'
+      );
+      return hasActive ? 8000 : false;
+    },
   });
 
   const filteredOrders = (orders || []).filter((order) => {

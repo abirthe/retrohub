@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { createOrder } from '@/lib/shopApi';
@@ -15,6 +16,7 @@ const Checkout = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [customerInput, setCustomerInput] = useState<Record<string, string>>({});
 
@@ -84,6 +86,9 @@ const Checkout = () => {
 
       if (createdOrderIds.length > 0) {
         clearCart();
+        queryClient.invalidateQueries({ queryKey: ['user-orders'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+        queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({
           title: 'Order initiated',
           description: 'Please complete your payment.',

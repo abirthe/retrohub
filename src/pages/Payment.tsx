@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ const Payment = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { toast } = useToast();
+    const queryClient = useQueryClient();
     const [transactionId, setTransactionId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,6 +48,8 @@ const Payment = () => {
         try {
             if (orderIds.length > 0) {
                 await updateOrderTransactionId(orderIds, trimmed);
+                queryClient.invalidateQueries({ queryKey: ['user-orders'] });
+                queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
             } else {
                 // Fallback simulation if no order IDs (e.g. testing)
                 await new Promise(resolve => setTimeout(resolve, 1000));
