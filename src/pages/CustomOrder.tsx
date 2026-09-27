@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,7 @@ const CustomOrder = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [submittedData, setSubmittedData] = useState<{
     name: string;
@@ -72,6 +74,7 @@ const CustomOrder = () => {
     
     try {
       await submitCustomOrder(formData);
+      queryClient.invalidateQueries({ queryKey: ['admin-custom-orders'] });
       
       setSubmittedData({
         name: formData.name,
