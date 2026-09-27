@@ -3,6 +3,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { notifyCustomOrder } from './telegramService';
+import { logger } from './logger';
 import type { CustomOrderPayload, CustomOrderRow } from './types';
 
 export async function submitCustomOrder(payload: CustomOrderPayload) {
@@ -31,7 +32,7 @@ export async function submitCustomOrder(payload: CustomOrderPayload) {
       details: payload.details,
     });
   } catch (e) {
-    console.error('Error sending telegram notification for custom order:', e);
+    logger.error('Error sending telegram notification for custom order:', { error: String(e) });
   }
 
   return { success: true };

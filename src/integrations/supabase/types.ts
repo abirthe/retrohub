@@ -7,8 +7,35 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -46,7 +73,15 @@ export type Database = {
           notes?: string | null
           order_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "admin_action_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_logs: {
         Row: {
@@ -117,6 +152,57 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      customer_support_sessions: {
+        Row: {
+          chat_id: number
+          created_at: string | null
+          escalated_at: string | null
+          first_name: string | null
+          last_name: string | null
+          last_order_id: string | null
+          metadata: Json | null
+          recent_messages: Json | null
+          resolved_at: string | null
+          sentiment_score: number | null
+          state: string
+          updated_at: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string | null
+          escalated_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          last_order_id?: string | null
+          metadata?: Json | null
+          recent_messages?: Json | null
+          resolved_at?: string | null
+          sentiment_score?: number | null
+          state?: string
+          updated_at?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string | null
+          escalated_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          last_order_id?: string | null
+          metadata?: Json | null
+          recent_messages?: Json | null
+          resolved_at?: string | null
+          sentiment_score?: number | null
+          state?: string
+          updated_at?: string | null
+          user_id?: string | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -215,6 +301,20 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_grouped_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       products: {
@@ -240,7 +340,7 @@ export type Database = {
           category: Database["public"]["Enums"]["product_category"]
           cost_price: number
           created_at?: string | null
-          delivery_type: Database["public"]["Enums"]["delivery_type"]
+          delivery_type?: Database["public"]["Enums"]["delivery_type"]
           description?: string | null
           id?: string
           image_url?: string | null
@@ -321,6 +421,24 @@ export type Database = {
       }
     }
     Views: {
+      v_grouped_products: {
+        Row: {
+          base_title: string | null
+          category: Database["public"]["Enums"]["product_category"] | null
+          cost_price: number | null
+          created_at: string | null
+          delivery_type: Database["public"]["Enums"]["delivery_type"] | null
+          id: string | null
+          image_url: string | null
+          in_stock: number | null
+          is_active: boolean | null
+          platform: string | null
+          region: Database["public"]["Enums"]["region_tag"] | null
+          sale_price: number | null
+          title: string | null
+        }
+        Relationships: []
+      }
       v_orders_today: {
         Row: {
           order_count: number | null
@@ -347,24 +465,6 @@ export type Database = {
         }
         Relationships: []
       }
-      v_grouped_products: {
-        Row: {
-          base_title: string | null
-          category: Database["public"]["Enums"]["product_category"] | null
-          cost_price: number | null
-          created_at: string | null
-          delivery_type: Database["public"]["Enums"]["delivery_type"] | null
-          id: string | null
-          image_url: string | null
-          in_stock: number | null
-          is_active: boolean | null
-          platform: string | null
-          region: Database["public"]["Enums"]["region_tag"] | null
-          sale_price: number | null
-          title: string | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       cancel_order: {
@@ -373,16 +473,19 @@ export type Database = {
       }
       fulfill_order: {
         Args: {
-          p_order_id: string
-          p_delivery_code: string
           p_cost_paid?: number
-          p_sourced_from?: string
+          p_delivery_code: string
           p_notes?: string
+          p_order_id: string
+          p_sourced_from?: string
         }
         Returns: Json
       }
       has_role: {
-        Args: { _role: Database["public"]["Enums"]["app_role"]; _user_id: string }
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
         Returns: boolean
       }
       hold_order: {
@@ -393,18 +496,17 @@ export type Database = {
         Args: { p_order_id: string; p_reason?: string }
         Returns: Json
       }
-      start_sourcing: {
-        Args: { p_order_id: string }
+      start_sourcing: { Args: { p_order_id: string }; Returns: Json }
+      submit_order_payment: {
+        Args: {
+          p_order_id: string
+          p_payment_method?: string
+          p_transaction_id: string
+        }
         Returns: Json
       }
-      validate_order: {
-        Args: { p_order_id: string }
-        Returns: Json
-      }
-      verify_payment: {
-        Args: { p_order_id: string }
-        Returns: Json
-      }
+      validate_order: { Args: { p_order_id: string }; Returns: Json }
+      verify_payment: { Args: { p_order_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user"
@@ -415,10 +517,22 @@ export type Database = {
         | "payment_verified"
         | "sourcing"
         | "fulfilled"
+        | "validated"
+        | "processing"
+        | "completed"
         | "failed"
         | "cancelled"
         | "refunded"
-      product_category: "pc_game" | "xbox_game" | "ps_game" | "topup" | "subscription" | "software" | "giftcard" | "service"
+      product_category:
+        | "giftcard"
+        | "topup"
+        | "subscription"
+        | "pc_game"
+        | "xbox_game"
+        | "ps_game"
+        | "software"
+        | "service"
+        | "accounts"
       region_tag:
         | "GLOBAL"
         | "US"
@@ -465,18 +579,19 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -500,11 +615,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -525,11 +640,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -550,11 +665,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -567,11 +682,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -581,6 +696,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["admin", "user"],
@@ -591,16 +709,62 @@ export const Constants = {
         "payment_verified",
         "sourcing",
         "fulfilled",
+        "validated",
+        "processing",
+        "completed",
         "failed",
         "cancelled",
         "refunded",
       ],
-      product_category: ["pc_game", "xbox_game", "ps_game", "topup", "subscription", "software", "giftcard", "service", "accounts"],
+      product_category: [
+        "giftcard",
+        "topup",
+        "subscription",
+        "pc_game",
+        "xbox_game",
+        "ps_game",
+        "software",
+        "service",
+        "accounts",
+      ],
       region_tag: [
-        "GLOBAL", "US", "EU", "ASIA", "LATAM", "UK", "CA", "MX", "BR", "IN",
-        "CN", "JP", "KR", "AU", "NZ", "ME", "AFRICA", "OCEANIA", "AE", "SA",
-        "ZA", "RU", "TR", "SG", "MY", "TH", "ID", "PH", "VN",
-        "AR", "CO", "CL", "PE", "EG", "NG", "PK", "BD",
+        "GLOBAL",
+        "US",
+        "EU",
+        "ASIA",
+        "LATAM",
+        "UK",
+        "CA",
+        "MX",
+        "BR",
+        "IN",
+        "CN",
+        "JP",
+        "KR",
+        "AU",
+        "NZ",
+        "ME",
+        "AFRICA",
+        "OCEANIA",
+        "AE",
+        "SA",
+        "ZA",
+        "RU",
+        "TR",
+        "SG",
+        "MY",
+        "TH",
+        "ID",
+        "PH",
+        "VN",
+        "AR",
+        "CO",
+        "CL",
+        "PE",
+        "EG",
+        "NG",
+        "PK",
+        "BD",
       ],
     },
   },

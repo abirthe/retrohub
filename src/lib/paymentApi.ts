@@ -3,6 +3,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { notifyPaymentSubmitted } from './telegramService';
+import { logger } from './logger';
 
 /**
  * Submits payment transaction IDs for a batch of orders.
@@ -56,7 +57,7 @@ export async function updateOrderTransactionId(orderIds: string[], transactionId
   try {
     await notifyPaymentSubmitted({ orderIds, transactionId: trimmedTrx });
   } catch (e) {
-    console.error('Error sending payment notification:', e);
+    logger.error('Error sending payment notification:', { error: String(e) });
   }
 
   return { success: true };

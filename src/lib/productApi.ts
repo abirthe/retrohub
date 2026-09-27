@@ -2,6 +2,7 @@
 // All product-related data access: catalog fetching, search, admin CRUD, featured products.
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 import type { Product, ProductCategory } from './types';
 
 const PRODUCT_SELECT = 'id, title, sale_price, cost_price, image_url, category, platform, region, in_stock, delivery_type, source_url, source_platform, created_at, is_active';
@@ -205,7 +206,7 @@ export async function fetchFeaturedProductIds(): Promise<string[]> {
     }
     return JSON.parse(data.description || '[]');
   } catch (e) {
-    console.error('Error fetching featured products:', e);
+    logger.error('Error fetching featured products:', { error: String(e) });
     return [];
   }
 }
