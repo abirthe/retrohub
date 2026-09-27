@@ -256,12 +256,14 @@ To achieve autonomous operations for a solo merchant, RetroHub separates custome
 * **Edge Function**: `supabase/functions/customer-bot`
 * **Audience**: Public storefront visitors and buyers.
 * **Capabilities**:
-  * **Intelligent NLP**: Answers customer inquiries with gamer fluency, explaining regional key activation, server selection, delivery speeds, and troubleshooting.
+  * **Dual-Engine Intelligence**:
+    * **Engine A (xAI Grok)**: Powered by `grok-2-latest` (with `grok-2` and `grok-beta` fallback) for conversational NLP, live order context injection, regional platform guidance, and empathetic problem solving.
+    * **Engine B (Retro Chan Natural Intelligence Engine)**: Built-in local high-IQ knowledge engine providing sub-second answers on bKash payments (`01580382868`, 1% fee), instant delivery (1–15 min), order tracking, catalog highlights, and genuine key guarantees.
+  * **Zero-Interruption Invariant**: The merchant admin bot is **only alerted when a customer explicitly requests human assistance** (via `[👤 Talk to Human Agent]`, `/human`, `/agent`, `/support`, `/staff`). General inquiries, status checks, and payment walkthroughs never ping or bother the merchant desk.
   * **Instant Order Status**: Customers send a 6–8 character short ID, full 36-character UUID, or account email to look up order progress and retrieve fulfilled license keys.
-  * **Payment Walkthrough**: Step-by-step guidance on bKash personal send money and merchant payments, clarifying the 1.0% charge formula and TrxID submission.
-  * **Session Persistence**: Multi-turn support sessions stored in `customer_support_sessions`.
-  * **Live Support Relay**: When a customer taps "Talk to Human" or triggers sentiment escalation, the conversation is routed directly to `@Notifyretro_bot` for real-time merchant handling.
-  * **Uptime Guarantee**: Automatically falls back to interactive Telegram inline button menus if AI API limits or upstream delays occur.
+  * **Payment Walkthrough**: Step-by-step guidance on bKash Send Money to `01580382868`, clarifying the 1.0% charge formula and TrxID submission at `/payment`.
+  * **Session Persistence**: Multi-turn support sessions stored in `customer_support_sessions` with automated 20-message memory.
+  * **Self-Resume & Cancellation**: Customers can tap `[🤖 Resume with Retro Chan AI]` at any time to return to autonomous AI mode.
 
 ### 2. Merchant Operations & Alert Bot (`@Notifyretro_bot`)
 * **Edge Function**: `supabase/functions/telegram-webhook`
@@ -289,13 +291,13 @@ To achieve autonomous operations for a solo merchant, RetroHub separates custome
 
 ### 3. Bidirectional Live Support Relay (Human Assistance Bridge)
 ```
-Customer in @retrochanbot ──(asks for human)──► Alert in @Notifyretro_bot
-Customer in @retrochanbot ◄──(/reply <chat_id>)─ Admin in @Notifyretro_bot
-Customer in @retrochanbot ◄──(/resolve <id>)──── Admin in @Notifyretro_bot (Back to AI)
+Customer in @retrochanbot ──(explicit human request)──► Alert in @Notifyretro_bot
+Customer in @retrochanbot ◄──(/reply <chat_id> <msg>)── Admin in @Notifyretro_bot
+Customer in @retrochanbot ◄──(/resolve <chat_id>)────── Admin in @Notifyretro_bot (Back to AI)
 ```
-* **Seamless Escalation**: The merchant is alerted directly on their smartphone with the customer's name, chat ID, linked order, and recent transcript.
-* **Direct Two-Way Chat**: Admin sends `/reply <chat_id> <message>` or taps the inline reply button; the customer receives it instantly from `@retrochanbot`.
-* **One-Touch Resolution**: Admin sends `/resolve <chat_id>` or taps `Mark Resolved` to transition the customer back to Retro Chan AI.
+* **Seamless Escalation**: The merchant is alerted directly on their smartphone with the customer's name, chat ID, linked order, and trigger reason.
+* **Direct Two-Way Chat**: Admin sends `/reply <chat_id> <message>` or taps the inline reply button; the customer receives it instantly from `@retrochanbot` as `👨‍💻 RetroHub Support Specialist`.
+* **One-Touch Resolution**: Admin sends `/resolve <chat_id>` or taps `Mark Resolved` to transition the customer back to Retro Chan AI. Customer can also self-resume anytime via `[🤖 Resume with Retro Chan AI]`.
 
 ---
 
