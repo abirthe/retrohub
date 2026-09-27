@@ -2,12 +2,15 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Auto-recover from stale chunks when a new deployment replaces hashed assets
-window.addEventListener('vite:preloadError', () => {
-  const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
-  if (Date.now() - lastReload > 4000) {
-    window.sessionStorage.setItem('last_chunk_reload', String(Date.now()));
-    window.location.reload();
+// Auto-recover seamlessly if a new deployment replaces hashed chunks
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  const lastReload = parseInt(window.sessionStorage.getItem('chunk_reload_attempted') || '0', 10);
+  if (Date.now() - lastReload > 10000) {
+    window.sessionStorage.setItem('chunk_reload_attempted', String(Date.now()));
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', String(Date.now()));
+    window.location.replace(url.toString());
   }
 });
 
