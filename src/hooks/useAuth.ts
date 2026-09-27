@@ -7,18 +7,34 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    let settled = false;
+
+    const settle = (sessionUser: User | null) => {
+      if (settled) return;
+      settled = true;
+      setUser(sessionUser);
       setLoading(false);
-    });
+    };
+
+    // Hard timeout — if Supabase doesn't respond in 5 s, unblock the UI
+    const timeout = setTimeout(() => settle(null), 5000);
+
+    // Get initial session; always resolve loading regardless of outcome
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => settle(session?.user ?? null))
+      .catch(() => settle(null))
+      .finally(() => clearTimeout(timeout));
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      settled = true; // prevent late setState on unmount
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
