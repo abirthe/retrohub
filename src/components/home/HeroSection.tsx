@@ -18,10 +18,10 @@ export function HeroSection() {
           fetchPriority="high"
           loading="eager"
           decoding="async"
-          className="w-full h-full object-cover object-top opacity-10 mix-blend-screen"
+          className="w-full h-full object-cover object-top opacity-5 mix-blend-screen"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/80" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.06)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.05)_0%,transparent_70%)]" />
       </div>
 
       <div className="container relative z-10 text-center space-y-4 max-w-4xl px-4 py-12 sm:py-16">
