@@ -308,13 +308,88 @@ function orderNotFoundMessage(identifier: string, ambiguous: boolean): string {
     : `⚠️ Order <code>#${escapeHtml(identifier)}</code> was not found. Please verify the ID on your receipt.`;
 }
 
+interface CatalogProduct {
+  id: string;
+  title: string;
+  platform: string;
+  sale_price: number;
+  in_stock: number;
+}
+
+let cachedProducts: CatalogProduct[] = [];
+let cachedCatalog = "";
+let lastCatalogFetch = 0;
+
+async function getLiveProducts(): Promise<CatalogProduct[]> {
+  const now = Date.now();
+  if (cachedProducts.length > 0 && now - lastCatalogFetch < 1000 * 60 * 5) {
+    return cachedProducts;
+  }
+  try {
+    const { data: products, error } = await supabase
+      .from("products")
+      .select("id, title, platform, sale_price, in_stock")
+      .eq("is_active", true);
+
+    if (error || !products) return cachedProducts;
+
+    cachedProducts = products;
+    cachedCatalog =
+      "8. Live Product Catalog (Suggest from these):\n" +
+      products
+        .map(
+          (p) =>
+            `- ${p.title} [${p.platform}]: ৳${p.sale_price} (Stock: ${p.in_stock})`,
+        )
+        .join("\n");
+    lastCatalogFetch = now;
+    return cachedProducts;
+  } catch (e) {
+    console.error("Failed to fetch live products catalog:", e);
+    return cachedProducts;
+  }
+}
+
+function extractSearchTerms(clean: string): string {
+  const stopWords = new Set([
+    "do", "you", "have", "certain", "games", "game", "of", "my", "choice", "in",
+    "your", "shop", "store", "is", "the", "a", "an", "for", "please", "can", "i",
+    "get", "buy", "price", "any", "got", "what", "are", "there", "available",
+    "stock", "tell", "me", "about", "show", "give", "much", "cost", "how", "sell",
+    "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account"
+  ]);
+  const words = clean.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 1 && !stopWords.has(w));
+  return words.join(" ").trim();
+}
+
+function findMatchingProducts(query: string, products: CatalogProduct[]): CatalogProduct[] {
+  const clean = query.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+  const stopWords = new Set([
+    "do", "you", "have", "certain", "games", "game", "of", "my", "choice", "in",
+    "your", "shop", "store", "is", "the", "a", "an", "for", "please", "can", "i",
+    "get", "buy", "price", "any", "got", "what", "are", "there", "available",
+    "stock", "tell", "me", "about", "show", "give", "much", "cost", "how", "sell",
+    "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account"
+  ]);
+
+  const words = clean.split(/\s+/).filter((w) => w.length > 2 && !stopWords.has(w));
+  if (words.length === 0) return [];
+
+  return products.filter((p) => {
+    const titleLower = p.title.toLowerCase();
+    const platLower = p.platform.toLowerCase();
+    return words.some((w) => titleLower.includes(w) || platLower.includes(w));
+  });
+}
+
 /**
  * High-IQ Retro Chan Natural Intelligence Engine
- * Provides instant, highly accurate store assistance even if Grok xAI API is unavailable.
+ * Provides instant, catalog-aware store assistance even if Grok xAI API is unavailable or rate-limited.
  */
 function getRetroChanIntelligenceResponse(
   rawText: string,
   sessionContext?: { order?: any; customerName?: string },
+  products: CatalogProduct[] = [],
 ): string {
   const clean = rawText.toLowerCase().trim();
   const name = sessionContext?.customerName || "there";
@@ -380,7 +455,7 @@ function getRetroChanIntelligenceResponse(
     );
   }
 
-  // 4. Products & Catalog
+  // 4. Products, Catalog Inquiries & Specific Game Availability
   if (
     clean.includes("game") ||
     clean.includes("product") ||
@@ -388,15 +463,72 @@ function getRetroChanIntelligenceResponse(
     clean.includes("gift card") ||
     clean.includes("buy") ||
     clean.includes("catalog") ||
-    clean.includes("price")
+    clean.includes("price") ||
+    clean.includes("stock") ||
+    clean.includes("fifa") ||
+    clean.includes("valorant") ||
+    clean.includes("resident") ||
+    clean.includes("witcher") ||
+    clean.includes("warhammer") ||
+    clean.includes("gta") ||
+    clean.includes("mine") ||
+    clean.includes("got") ||
+    clean.includes("have")
   ) {
+    // A. Specific Custom Game / User Choice inquiries
+    if (
+      clean.includes("choice") ||
+      clean.includes("custom") ||
+      clean.includes("request") ||
+      clean.includes("on demand") ||
+      clean.includes("specific")
+    ) {
+      return (
+        `🎮 <b>Custom Games & Special Requests:</b>\n\n` +
+        `Yes, absolutely! At RetroHub, even if a specific game of your choice is not currently listed in our automated catalog, we offer <b>Custom On-Demand Game Sourcing</b> for virtually ANY title on PC (Steam, EA, Epic) or Consoles (PlayStation, Xbox, Nintendo)!\n\n` +
+        `👉 <b>How to get it:</b> Simply tap <b>👨‍💻 Talk to Human Agent</b> below and tell our merchant desk which game and edition you want. We will check regional distributor pricing and provide an instant bKash checkout quote for you! ⚡`
+      );
+    }
+
+    // B. Search against live catalog products
+    if (products && products.length > 0) {
+      const matches = findMatchingProducts(clean, products);
+      if (matches.length > 0) {
+        const itemsList = matches.slice(0, 4).map((p) =>
+          `• <b>${escapeHtml(p.title)}</b> [${escapeHtml(p.platform)}]\n  💰 Price: <b>৳${p.sale_price}</b> | Stock: ${p.in_stock > 0 ? `✅ In Stock (${p.in_stock})` : "⚠️ Out of Stock"}`
+        ).join("\n\n");
+        return (
+          `🎮 <b>Found in our Live Catalog:</b>\n\n` +
+          `${itemsList}\n\n` +
+          `🛒 Order instantly at <a href="https://www.retrohub.tech">retrohub.tech</a> with bKash Send Money to <code>01580382868</code>!`
+        );
+      }
+
+      // Check if user inquired about a specific game title not in automated stock
+      const searchTerms = extractSearchTerms(clean);
+      if (searchTerms.length > 1) {
+        return (
+          `🔍 <b>Live Catalog Search:</b>\n\n` +
+          `I searched our inventory for "<b>${escapeHtml(searchTerms)}</b>", but it is not currently in our automated instant catalog.\n\n` +
+          `✨ <b>Good news:</b> We offer <b>Custom On-Demand Game Sourcing</b>! We can source almost ANY game key or gift card upon request.\n\n` +
+          `Tap <b>👨‍💻 Talk to Human Agent</b> below, let our merchant team know what you'd like, and we'll arrange it for you right away! 🎮`
+        );
+      }
+    }
+
+    // C. General Product Overview with live sample items
+    const sampleProducts = (products || []).slice(0, 5).map((p) =>
+      `• <b>${escapeHtml(p.title)}</b> (${escapeHtml(p.platform)}) — ৳${p.sale_price}`
+    ).join("\n");
+
     return (
-      `🎮 <b>What We Offer at RetroHub:</b>\n\n` +
+      `🎮 <b>RetroHub Live Catalog & Featured Stock:</b>\n\n` +
+      (sampleProducts ? `${sampleProducts}\n\n` : "") +
       `• <b>Global Game Keys:</b> Steam, PlayStation Network, Xbox Game Pass, Nintendo eShop\n` +
       `• <b>Digital Gift Cards:</b> Apple App Store, Google Play, Razer Gold, Roblox\n` +
       `• <b>In-Game Top-Ups:</b> Free Fire Diamonds, PUBG UC, Valorant Points\n` +
       `• <b>Custom Orders:</b> On-demand sourcing for regional titles!\n\n` +
-      `Explore live stock and pricing at our storefront: <a href="https://www.retrohub.tech">retrohub.tech</a> 🛒`
+      `Explore live stock and instant delivery at: <a href="https://www.retrohub.tech">retrohub.tech</a> 🛒`
     );
   }
 
@@ -463,40 +595,8 @@ function getRetroChanIntelligenceResponse(
   // Default smart fallback
   return (
     `Thanks for reaching out, ${escapeHtml(name)}! 😊\n\n` +
-    `I'm Retro Chan, your support concierge at RetroHub. I can check your order status, look up game credentials, explain bKash payment, or route you to a live agent. What would you like assistance with?`
+    `I'm Retro Chan, your support concierge at RetroHub. I can check your order status, look up game credentials, check our live game catalog, explain bKash payment, or route you to a live agent. What would you like assistance with?`
   );
-}
-
-let cachedCatalog = "";
-let lastCatalogFetch = 0;
-
-async function getCatalogSnippet(): Promise<string> {
-  const now = Date.now();
-  if (cachedCatalog && now - lastCatalogFetch < 1000 * 60 * 5) {
-    return cachedCatalog;
-  }
-  try {
-    const { data: products, error } = await supabase
-      .from("products")
-      .select("title, platform, sale_price, in_stock")
-      .eq("is_active", true);
-
-    if (error || !products) return "";
-
-    cachedCatalog =
-      "8. Live Product Catalog (Suggest from these):\n" +
-      products
-        .map(
-          (p) =>
-            `- ${p.title} [${p.platform}]: ৳${p.sale_price} (Stock: ${p.in_stock})`,
-        )
-        .join("\n");
-    lastCatalogFetch = now;
-    return cachedCatalog;
-  } catch (e) {
-    console.error("Failed to fetch catalog for AI", e);
-    return "";
-  }
 }
 
 /**
@@ -507,9 +607,11 @@ async function getAiResponse(
   latestMessage: string,
   sessionContext?: { order?: any; customerName?: string },
 ): Promise<string> {
+  const liveProducts = await getLiveProducts();
   const fallback = getRetroChanIntelligenceResponse(
     latestMessage,
     sessionContext,
+    liveProducts,
   );
 
   if (!XAI_API_KEY || XAI_API_KEY.length < 10) {
@@ -520,8 +622,8 @@ async function getAiResponse(
     const orderSnippet = sessionContext?.order
       ? `\nActive Customer Order: #${sessionContext.order.id.slice(0, 8)} | Item: ${sessionContext.order.products?.title || "Digital Item"} | Status: ${sessionContext.order.status} | Total: ৳${formatMoney(sessionContext.order.total)}`
       : "";
-      
-    const catalogSnippet = await getCatalogSnippet();
+
+    const catalogSnippet = cachedCatalog;
 
     const systemPrompt = `You are Retro Chan, the witty, charming, and highly intelligent customer support AI for Retro Hub (https://www.retrohub.tech).
 RetroHub Knowledge Base & Rules:
@@ -542,11 +644,6 @@ RetroHub Knowledge Base & Rules:
       { role: "user", content: latestMessage },
     ];
 
-    // ROBUSTNESS FIX: the original tried up to 3 models sequentially, each
-    // with its own 10s timeout — worst case ~30s before ever falling back
-    // to the (perfectly good) local responder. That risks the whole edge
-    // function call timing out, and Telegram treating it as a failed
-    // delivery and redelivering the update. One capped attempt is enough.
     const model = "grok-beta";
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -573,8 +670,9 @@ RetroHub Knowledge Base & Rules:
         const text = data.choices?.[0]?.message?.content?.trim();
         if (text) return text;
       } else {
+        const errText = await res.text();
         console.error(
-          `AI API error with model ${model}: ${res.status} ${res.statusText}`,
+          `AI API error with model ${model}: ${res.status} ${res.statusText} - ${errText}`,
         );
       }
     } catch (err: any) {
