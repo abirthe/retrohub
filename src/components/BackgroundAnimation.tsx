@@ -53,17 +53,19 @@ const BackgroundAnimation: React.FC = () => {
 
       // 2. Dynamic HLS.js loader for other browsers (Chrome, Edge, Firefox)
       try {
-        const { default: Hls } = await import('hls.js');
-        if (isCancelled) return;
+        const hlsModule = await import('hls.js');
+        if (isCancelled || !hlsModule) return;
+        const Hls = (hlsModule as any).default || hlsModule;
 
-        if (Hls.isSupported()) {
+        if (Hls && typeof Hls.isSupported === 'function' && Hls.isSupported()) {
           const hls = new Hls({
             enableWorker: true,
           });
           hlsInstance = hls;
           hls.loadSource(videoSrc);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          const manifestEvent = Hls.Events?.MANIFEST_PARSED || 'hlsManifestParsed';
+          hls.on(manifestEvent, () => {
             playVideo();
           });
         }

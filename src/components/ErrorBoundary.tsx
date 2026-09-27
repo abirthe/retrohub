@@ -5,13 +5,13 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  const isChunkLoadError = /failed to fetch dynamically imported module|importing a module script failed/i.test(errorMessage);
+  const isChunkLoadError = /failed to fetch dynamically imported module|importing a module script failed|Cannot read properties of undefined \(reading 'default'\)|undefined \(reading 'default'\)|Chunk loaded without default export/i.test(errorMessage);
 
   React.useEffect(() => {
     if (isChunkLoadError) {
       const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
       const now = Date.now();
-      if (now - lastReload > 10000) {
+      if (now - lastReload > 3000) {
         window.sessionStorage.setItem('last_chunk_reload', String(now));
         window.location.reload();
       }
@@ -23,7 +23,8 @@ const PageErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary 
     if (isChunkLoadError) {
       window.location.reload();
     } else {
-      resetErrorBoundary();
+      // Clear cache and reload to guarantee fresh application state
+      window.location.reload();
     }
   };
 
