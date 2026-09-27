@@ -1,6 +1,6 @@
 # RetroHub Backend & Supabase Architecture ⚡🗄️
 
-Comprehensive technical documentation for RetroHub's database schema, versioned migrations, stored procedures, Edge Functions, and Telegram integrations.
+Comprehensive technical documentation for RetroHub's database schema, versioned migrations, stored procedures, Edge Functions, Row-Level Security, and dual Telegram bot integrations.
 
 ---
 
@@ -21,24 +21,28 @@ supabase/
 ## ⚡ Edge Functions Overview
 
 ### 1. `customer-bot` — AI Customer Support Bot (`@retrochanbot`)
-A public-facing Telegram support agent powered by **xAI Grok** (`grok-beta`) and connected directly to the RetroHub database.
+A public-facing Telegram support agent powered by **xAI Grok** (`grok-beta`) and connected directly to the RetroHub PostgreSQL database.
 
-* **Natural Language Processing**: Translates user questions into clear, helpful guidance on regional game keys, activation, server UID requirements, and delivery times.
+* **Natural Language Processing**: Translates user questions into clear, helpful guidance on regional game keys, platform redemption, server UID requirements, and delivery times.
 * **Instant Order Tracking**: Accepts short IDs (e.g. `8f4b12`), 36-char UUIDs, or user email addresses to display live order status, verification stage, item breakdowns, and delivered digital codes.
 * **bKash Payment Assistant**: Step-by-step payment walkthrough for personal and merchant bKash send money, explaining the dynamic 1.0% charge calculation.
-* **Multi-Turn Session Persistence**: Persists user interactions in the `customer_support_sessions` table with automatic cleanup.
+* **Multi-Turn Session Persistence**: Persists user interactions in the `customer_support_sessions` table with automated 15-message rolling memory.
+* **Automated Escalation**: When a buyer requests a human agent or registers high sentiment frustration, the bot bridges them directly to the merchant.
 * **Graceful Degradation**: Automatically falls back to an interactive Telegram inline menu if AI API limits or network issues occur.
+* **Registered Menu Commands**: `/start`, `/track [id]`, `/faq`, `/help`.
 
 ```bash
 # Deploy customer bot
 npx supabase functions deploy customer-bot --no-verify-jwt
 ```
 
+---
+
 ### 2. `telegram-webhook` — Merchant Admin Bot (`@Notifyretro_bot`)
-A private, role-gated back-office bot configured for instant smartphone order fulfillment and real-time merchant alerts.
+A private, role-gated back-office bot configured for instant smartphone order fulfillment, real-time merchant alerts, and customer support relay.
 
 * **Dual-Channel Dispatch Architecture**: Dispatched via this edge function with automatic direct client fallback to ensure notifications are never missed during cold starts.
-* **Push Notifications**: Pushes new order alerts, customer bKash TrxID submissions with duplicate fraud detection, custom quote alerts, and low stock warnings (<= 3 units).
+* **Push Notifications**: Pushes new order alerts, customer bKash TrxID submissions with duplicate fraud detection, custom quote alerts, and low stock warnings (≤ 3 units).
 * **Interactive Fulfillment Commands**:
   * `/orders` — View up to 10 latest unfulfilled orders
   * `/order <id>` or `/inspect <id>` — Inspect full order details
@@ -51,13 +55,19 @@ A private, role-gated back-office bot configured for instant smartphone order fu
   * `/stock [search]` — Live inventory health report
   * `/custom` — Review custom quote requests
   * `/remind` — Trigger immediate scan for unfulfilled orders
-  * `/help` — Command reference sheet
-* **Inline Keyboards**: One-touch `Verify` or `Cancel` buttons directly under notifications.
+  * `/help` — Full command reference manual
+* **Live Customer Support Commands**:
+  * `/tickets` or `/support` — View open customer support requests requiring human assistance
+  * `/reply <chat_id> <message>` — Send a live message directly to a customer on `@retrochanbot`
+  * `/resolve <chat_id>` — Mark customer support ticket as resolved and return session to AI
+* **Inline Keyboards**: One-touch `Verify`, `Cancel`, `Inspect`, `Reply`, and `Resolve` buttons directly under notifications.
 
 ```bash
 # Deploy admin bot webhook
 npx supabase functions deploy telegram-webhook --no-verify-jwt
 ```
+
+---
 
 ### 3. `send-order-email` — Customer Order Notification
 Connects to the **Resend API** to email digital codes, receipts, and platform redemption instructions directly to the buyer's email address upon order fulfillment.
@@ -65,6 +75,41 @@ Connects to the **Resend API** to email digital codes, receipts, and platform re
 ```bash
 # Deploy email function
 npx supabase functions deploy send-order-email --no-verify-jwt
+```
+
+---
+
+## 🤝 Bidirectional Live Support Relay Sequence
+
+When a customer needs human assistance in `@retrochanbot`, the two bots orchestrate a live relay:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Customer (@retrochanbot)
+    participant CB as customer-bot (Edge Function)
+    participant DB as PostgreSQL (customer_support_sessions)
+    participant AB as telegram-webhook (Edge Function)
+    actor M as Merchant Admin (@Notifyretro_bot)
+
+    C->>CB: Sends message / clicks "Talk to Human" / /help
+    CB->>DB: Upsert session: state = 'escalated'
+    CB->>AB: Dispatch staff alert + recent messages
+    AB->>M: 🚨 Escalation Alert [💬 Reply] [✅ Resolve]
+    
+    M->>AB: /reply <chat_id> <message>
+    AB->>DB: Append agent message, state = 'agent_active'
+    AB->>CB: Relay message via CUSTOMER_BOT_TOKEN
+    CB->>C: 👤 Support Specialist: <message>
+
+    C->>CB: Customer replies
+    CB->>AB: Forward customer text
+    AB->>M: 📩 Customer Message (#<chat_id>): <text>
+
+    M->>AB: /resolve <chat_id>
+    AB->>DB: state = 'bot_active', resolved_at = NOW()
+    AB->>CB: Send resolution greeting
+    CB->>C: ✅ Ticket resolved. Returned to Retro Chan AI!
 ```
 
 ---
@@ -80,7 +125,7 @@ The database runs on **PostgreSQL 15+** managed via 29 versioned SQL migrations 
 | `20260919*` | Performance indexes V3, missing regional taxonomies, and `SECURITY DEFINER` function security fixes. |
 | `20260920*` | Custom order requests board (`custom_orders` table) and database linter resolutions. |
 | `20260924*` | Added `service` and `accounts` categories; default `instant_code` delivery pipeline flag. |
-| `20260927*` | **Current V3 Architecture**: <br>• `20260927000001_secure_order_payment_and_pricing.sql` — Secure payment RPC + price tamper validation<br>• `20260927000002_customer_support_sessions.sql` — Multi-turn AI support session tracking<br>• `20260927000003_fix_security_linter_warnings.sql` — Resolved RLS and search path warnings<br>• `20260927000004_fix_database_linter_performance_warnings.sql` — Added missing foreign key indexes<br>• `20260927000005_drop_safe_unused_indexes.sql` — Dropped redundant unused indexes<br>• `20260927000006_drop_obsolete_stock_validation.sql` — Cleaned up deprecated stock triggers |
+| `20260927*` | **Current V3 Architecture**: <br>• `20260927000001_secure_order_payment_and_pricing.sql` — Secure payment RPC + price tamper validation<br>• `20260927000002_customer_support_sessions.sql` — Multi-turn AI support session tracking table with RLS<br>• `20260927000003_fix_security_linter_warnings.sql` — Resolved RLS and function search path linter findings<br>• `20260927000004_fix_database_linter_performance_warnings.sql` — Added missing foreign key indexes<br>• `20260927000005_drop_safe_unused_indexes.sql` — Dropped redundant unused indexes<br>• `20260927000006_drop_obsolete_stock_validation.sql` — Cleaned up deprecated stock triggers |
 
 ---
 
@@ -100,6 +145,19 @@ Clients access sensitive mutations exclusively through audited `SECURITY DEFINER
 
 ---
 
+## 🔒 Row-Level Security (RLS) Matrix
+
+| Table | Anonymous / Guest | Authenticated Customer | Admin Role | Service Role Key |
+| :--- | :--- | :--- | :--- | :--- |
+| `products` | `SELECT` (active only) | `SELECT` (active only) | `ALL` | `ALL` |
+| `orders` | `INSERT` (new orders) | `SELECT`, `INSERT` (own orders) | `ALL` | `ALL` |
+| `inventory_keys` | None | None | `ALL` | `ALL` |
+| `customer_support_sessions` | None | `SELECT` (own chat session) | `ALL` | `ALL` |
+| `custom_orders` | `INSERT` | `SELECT`, `INSERT` (own quotes) | `ALL` | `ALL` |
+| `admin_action_logs` | None | None | `SELECT` | `ALL` |
+
+---
+
 ## 📊 Analytical Views
 
 Real-time aggregate views powers the `/admin` merchant dashboard:
@@ -112,7 +170,7 @@ Real-time aggregate views powers the `/admin` merchant dashboard:
 
 ## 🔐 Required Supabase Secrets
 
-Set these in your Supabase project dashboard (**Project Settings -> Edge Functions -> Secrets**):
+Set these in your Supabase project dashboard (**Project Settings -> Edge Functions -> Secrets**) or via CLI:
 
 ```bash
 # Telegram Bot Tokens
@@ -120,11 +178,19 @@ TELEGRAM_BOT_TOKEN="your_admin_bot_token"
 ADMIN_CHAT_ID="your_telegram_chat_id"
 CUSTOMER_BOT_TOKEN="your_customer_bot_token"
 
+# Webhook Security
+TELEGRAM_WEBHOOK_SECRET="your_webhook_secret_token"
+
 # AI Integration
 XAI_API_KEY="your_xai_api_key"
 
 # Email Delivery
 RESEND_API_KEY="your_resend_api_key"
+```
+
+To configure via Supabase CLI:
+```bash
+npx supabase secrets set TELEGRAM_BOT_TOKEN="xxx" ADMIN_CHAT_ID="xxx" CUSTOMER_BOT_TOKEN="xxx" XAI_API_KEY="xxx"
 ```
 
 ---

@@ -260,6 +260,7 @@ To achieve autonomous operations for a solo merchant, RetroHub separates custome
   * **Instant Order Status**: Customers send a 6–8 character short ID, full 36-character UUID, or account email to look up order progress and retrieve fulfilled license keys.
   * **Payment Walkthrough**: Step-by-step guidance on bKash personal send money and merchant payments, clarifying the 1.0% charge formula and TrxID submission.
   * **Session Persistence**: Multi-turn support sessions stored in `customer_support_sessions`.
+  * **Live Support Relay**: When a customer taps "Talk to Human" or triggers sentiment escalation, the conversation is routed directly to `@Notifyretro_bot` for real-time merchant handling.
   * **Uptime Guarantee**: Automatically falls back to interactive Telegram inline button menus if AI API limits or upstream delays occur.
 
 ### 2. Merchant Operations & Alert Bot (`@Notifyretro_bot`)
@@ -267,9 +268,34 @@ To achieve autonomous operations for a solo merchant, RetroHub separates custome
 * **Audience**: Solo merchant operator only (strictly role-gated by `ADMIN_CHAT_ID`).
 * **Capabilities**:
   * **Real-Time Push Alerts**: Instant notification of incoming orders, bKash TrxID submissions (with duplicate fraud alerts), custom quote requests, and low stock warnings.
-  * **Inline Button Controls**: One-tap `Cancel` or `Verify` buttons attached to order alerts.
-  * **12 Admin Commands**: Complete operational suite (`/orders`, `/order`, `/inspect`, `/verify`, `/deliver`, `/cancel`, `/hold`, `/refund`, `/summary`, `/stock`, `/custom`, `/remind`, `/help`).
+  * **Inline Button Controls**: One-tap `Cancel`, `Verify`, `Inspect`, `Reply`, and `Resolve` buttons attached to order alerts.
+  * **15 Admin Commands**: Complete operational suite:
+    * `/orders` — View unfulfilled orders
+    * `/order [id]` or `/inspect [id]` — Full order inspection card
+    * `/verify [id]` — Verify customer bKash payment
+    * `/deliver [id] [code]` — Deliver digital key / credentials
+    * `/cancel [id] [reason]` — Cancel order & release stock
+    * `/hold [id] [reason]` — Place order on hold
+    * `/refund [id] [reason]` — Mark order as refunded
+    * `/tickets` or `/support` — View open customer support tickets
+    * `/reply [chat_id] [msg]` — Reply directly to customer via `@retrochanbot`
+    * `/resolve [chat_id]` — Resolve support ticket & return customer to AI
+    * `/summary` — Daily revenue & profit metrics
+    * `/stock [search]` — Live inventory health report
+    * `/custom` — View pending custom quote requests
+    * `/remind` — Trigger immediate scan for unfulfilled orders
+    * `/help` — Full command cheat sheet
   * **Short ID Support**: Fast execution on mobile using first 6–8 characters of order UUIDs.
+
+### 3. Bidirectional Live Support Relay (Human Assistance Bridge)
+```
+Customer in @retrochanbot ──(asks for human)──► Alert in @Notifyretro_bot
+Customer in @retrochanbot ◄──(/reply <chat_id>)─ Admin in @Notifyretro_bot
+Customer in @retrochanbot ◄──(/resolve <id>)──── Admin in @Notifyretro_bot (Back to AI)
+```
+* **Seamless Escalation**: The merchant is alerted directly on their smartphone with the customer's name, chat ID, linked order, and recent transcript.
+* **Direct Two-Way Chat**: Admin sends `/reply <chat_id> <message>` or taps the inline reply button; the customer receives it instantly from `@retrochanbot`.
+* **One-Touch Resolution**: Admin sends `/resolve <chat_id>` or taps `Mark Resolved` to transition the customer back to Retro Chan AI.
 
 ---
 
@@ -301,7 +327,7 @@ To achieve autonomous operations for a solo merchant, RetroHub separates custome
 | :--- | :--- | :--- |
 | **New Payment Received** | Check bKash app $\rightarrow$ Send <code>/verify &lt;id&gt;</code> via Telegram or validate in `/admin`. | Under 5 minutes |
 | **Fulfill Digital Key** | Send <code>/deliver &lt;id&gt; &lt;code&gt;</code> in Telegram or click **Fulfill** in `/admin`. | Instant (Automatic) / Under 15m (Manual) |
-| **Customer Support Inquiry**| AI Bot (`@retrochanbot`) answers 95% of questions automatically; merchant steps in only for escalations. | Automated (Instant) |
+| **Customer Support Inquiry**| AI Bot (`@retrochanbot`) answers 95% of questions automatically; for human escalations, reply directly from `@Notifyretro_bot` using <code>/reply &lt;chat_id&gt; &lt;msg&gt;</code> or tap-to-reply inline buttons. | Instant (AI) / Under 5m (Human) |
 | **Cancel Fraud / Failed Trx**| Send <code>/cancel &lt;id&gt; [reason]</code> via Telegram (auto-releases keys and notifies audit log). | Under 5 minutes |
 | **Invalid Customer UID** | Send <code>/hold &lt;id&gt; [reason]</code> in Telegram or click **Hold Order** in `/admin`. | Under 10 minutes |
 | **Restock Digital Inventory**| Send <code>/stock</code> to inspect low stock $\rightarrow$ Adjust in `/admin` or run seeding scripts. | As stock depletes |
