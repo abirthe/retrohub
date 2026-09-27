@@ -33,13 +33,11 @@ supabase/config.toml
 config.toml
 
 # ------------------------------------------------------------------------------
-# 2b. Cloudflare & Wrangler Configs (Credentials & vars)
+# 2b. Cloudflare & Wrangler Configs (Secrets & dev variables)
 # ------------------------------------------------------------------------------
 .wrangler/
 .dev.vars
 .dev.vars.*
-wrangler.json
-wrangler.toml
 .mf/
 
 # ------------------------------------------------------------------------------
