@@ -10,14 +10,12 @@ export async function sendTelegramNotification(message: string) {
     });
 
     if (error) {
-      logger.warn("Edge function notification failed, trying fallback:", {
+      logger.warn("Edge function notification failed:", {
         message: error.message,
       });
-      await fallbackDirectNotification(message);
     }
   } catch (err) {
     logger.warn("Error invoking telegram-webhook:", { error: String(err) });
-    await fallbackDirectNotification(message);
   }
 }
 
@@ -80,28 +78,5 @@ export async function triggerPendingReminder() {
   } catch (err) {
     logger.error("Failed to trigger pending reminder:", { error: String(err) });
     return null;
-  }
-}
-
-async function fallbackDirectNotification(message: string) {
-  const token = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || "";
-  const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID || "";
-
-  if (!token || !chatId) return;
-
-  try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: "HTML",
-      }),
-    });
-  } catch (e) {
-    logger.error("Direct fallback telegram notification error:", {
-      error: String(e),
-    });
   }
 }
