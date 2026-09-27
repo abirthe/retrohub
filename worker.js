@@ -1,5 +1,24 @@
 export default {
   async fetch(request, env) {
+    // 0. Optional Edge Rate Limiting (by client IP)
+    if (env.RATE_LIMITER) {
+      try {
+        const clientIP = request.headers.get('cf-connecting-ip') || 'anonymous';
+        const { success } = await env.RATE_LIMITER.limit({ key: clientIP });
+        if (!success) {
+          return new Response('Too Many Requests. Please slow down and try again shortly.', {
+            status: 429,
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Retry-After': '60',
+            },
+          });
+        }
+      } catch (_) {
+        // Fall through gracefully if rate limiter check encounters an issue
+      }
+    }
+
     const url = new URL(request.url);
     const assets = env.ASSETS || env.CLOUD_FLARE_ASSET;
 
