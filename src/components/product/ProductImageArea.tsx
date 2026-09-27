@@ -30,6 +30,8 @@ export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
         <img
           src={product.image_url}
           alt={product.title}
+          width="1280"
+          height="720"
           fetchPriority="high"
           loading="eager"
           decoding="async"
