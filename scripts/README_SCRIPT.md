@@ -141,7 +141,7 @@ To prevent stale artifacts, ensure atomic deployments, and guarantee clean asset
 | `npm run prebuild` | Recursively removes the local `./dist` directory before compiling. | Runs automatically prior to `npm run build`. |
 | `npm run build` | Compiles optimized production bundle, generates `200.html` SPA fallback, and writes `dist/.assetsignore`. | Manual build or CI pipeline. |
 | `npm run postinstall` | Automatically purges cached redirect files and compiles the Vite application fresh into `./dist`. | Runs automatically upon `npm install` / `npm ci` in Cloudflare build containers. |
-| `npm test` | Runs Vitest unit test suite (15 tests across TrxID validation, price enforcement, stock helpers, open redirect prevention). | Manual or CI. |
+| `npm test` | Runs Vitest unit test suite (27 unit tests across 3 test suites: `cartContext.test.ts`, `example.test.ts`, `pages.test.tsx`). | Manual or CI. |
 | `npm run test:watch` | Runs Vitest in watch mode for active development. | Manual |
 | `npm run lint` | Runs ESLint flat config validation across all TypeScript source files. | Manual or CI. |
 

@@ -93,6 +93,7 @@ The bot has all 12 operational commands registered via Telegram's `setMyCommands
 | **[Inline Button]** | Touch buttons | Instantly **Cancel** or **Verify** orders directly from push notifications without typing commands |
 | `/orders` | `/orders` | View up to 10 latest unfulfilled orders with quick action shortcuts |
 | `/order <id>` | `/order <order_id>` | **Inspect full order details** (Player UID, Server, TrxID, timestamps, status) |
+| `/inspect <id>` | `/inspect <order_id>` | Alias for `/order` with full order inspection card and quick action shortcuts |
 | `/verify <id>` | `/verify <order_id>` | **Verify customer payment** directly from chat (`status = 'payment_verified'`) |
 | `/deliver <id> <code>` | `/deliver <order_id> <code>` | **Fulfill an order** with digital key or account credentials |
 | `/cancel <id> [reason]` | `/cancel <order_id> [reason]` | **Cancel an order** from phone, release reserved inventory keys, and log reason |
@@ -112,33 +113,62 @@ The bot has all 12 operational commands registered via Telegram's `setMyCommands
 
 ---
 
-### 8. Hardened Security & Anti-Fraud Architecture
+### 8. 24/7 AI Customer Support Bot (`@retrochanbot` / `customer-bot`)
+
+A dedicated customer-facing Telegram support agent powered by **xAI Grok** and deployed as a Supabase Edge Function (`customer-bot`). It handles customer inquiries, real-time order status lookups, bKash payment walkthroughs, and automated troubleshooting with high emotional intelligence and gaming fluency.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 RETRO CHAN (@retrochanbot)                  │
+├─────────────────────────────────────────────────────────────┤
+│  ⚡ "Hey! I'm Retro Chan, your Retro Hub Support AI!"        │
+│                                                             │
+│  [ 📦 Check Order Status ]      [ 💳 bKash Payment Guide ]  │
+│  [ ❓ Top-Up FAQ ]              [ 👨‍💼 Contact Merchant ]    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Key Capabilities & Architecture
+* **Intelligent Conversational Agent (xAI Grok)**: Powered by `grok-beta` / xAI chat completions API. Understands natural language queries, explains regional key activation, clarifies server UID requirements, and answers buyer questions contextually.
+* **Instant Order Tracking**: Customers can check any order by sending their 6–8 character short ID, full 36-character UUID, or account email. The bot fetches order status, items, amounts, verification stage, and revealed digital keys instantly.
+* **Interactive bKash Payment Guidance**: Explains exact steps for personal and merchant wallet transfers, details the 1.0% bKash transaction charge calculation, and reminds buyers where to find and copy their TrxID.
+* **Multi-Turn Session Tracking**: Persists conversation history and customer context in the PostgreSQL `customer_support_sessions` table, enabling natural back-and-forth dialogue without losing context.
+* **Graceful Degradation**: If AI API quotas or network latencies occur, the bot seamlessly falls back to interactive Telegram inline keyboard menus, ensuring 100% uptime.
+
+---
+
+### 9. Hardened Security & Anti-Fraud Architecture
 
 * **Role-Gated Bot Commands**: Edge function verifies incoming Telegram chat IDs against `ADMIN_CHAT_ID`, rejecting unauthorized attempts with a `401/403` guard.
 * **Edge Rate Limiting**: Cloudflare Worker binding (`RATE_LIMITER`) throttles aggressive scrapers and DDoS bots by client IP (150 req / 60 sec) directly at Cloudflare's edge before hitting Supabase.
+* **Per-User Cart Isolation**: Carts are scoped per user session (`cart_${userId}` for authenticated users, `cart_guest` for visitors), preventing cross-account cart pollution when switching logins.
 * **Atomic Payment Submission RPC**: Customer payment submission routes through a `SECURITY DEFINER` stored procedure (`submit_order_payment`) that strictly validates user ownership, verifies payment amounts, and atomically transitions status without granting direct table `UPDATE` access to clients.
 * **Duplicate TrxID Fraud Detection**: Scans previous orders for duplicate bKash Transaction IDs, immediately alerting the merchant if an ID is reused across accounts.
 * **Authoritative Catalog Enforcement**: Prices and stock levels are re-verified against the database upon every `createOrder` call in [`src/lib/orderApi.ts`](src/lib/orderApi.ts), preventing client-side DOM price tampering.
 * **HTML Sanitization**: Dynamic user input is escaped via `escapeHtml()` prior to Telegram HTML formatting, eliminating entity parsing crashes and injection attacks.
-* **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Digital keys (`inventory_keys`) and internal logs are hidden from non-admin accounts.
+* **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Digital keys (`inventory_keys`), support sessions, and internal logs are hidden from non-admin accounts.
 * **Zero Client Credential Leakage**: Bot tokens, webhook secrets, and database service keys are stored strictly in server-side Supabase secrets and Cloudflare encrypted variables.
 * **Comprehensive `.gitignore` Hardening**: Blocks accidental commits of `.env`, `supabase/.env`, `.wrangler/`, `.dev.vars`, `.npmrc`, keystores, build caches, and all catalog data files (`*.xlsx`, `*.ods`, `*.csv`).
 * **Open Redirect Prevention**: `AuthCallback.tsx` validates the `returnTo` param against the current origin before redirecting, blocking external redirect abuse.
 
 ---
 
-### 9. Core Web Vitals & Frontend Performance Engineering ⚡
+### 10. Universal Cross-Device Animated Engine & Core Web Vitals ⚡
 
-Engineered to pass all Google Core Web Vitals and achieve green performance benchmarks in Cloudflare Web Analytics:
+Engineered to pass all Google Core Web Vitals and provide a unified cyber-neon atmosphere across desktop, tablet, and mobile devices:
 
+* **Universal Cross-Device Background Video Engine**:
+  * **HLS.js MSE with Web Worker Offloading**: Delegates video transmuxing to a dedicated Web Worker (`enableWorker: true`), leaving 100% of the UI thread free for input handling.
+  * **Universal Mobile Playback with Gesture Recovery**: Native HLS playback on iOS/Safari and MSE HLS on Android/Desktop with `playsinline`, `muted`, and silent loop. If browser power-saver or strict autoplay policy defers playback, a global passive gesture listener smoothly recovers playback on the first touch or scroll.
+  * **Hardware-Accelerated Layering**: Replaced heavy CPU filters with GPU-accelerated CSS radial and linear gradient overlays.
+  * **Ambient Controls**: Integrated ambient animation toggle in the navigation header, allowing users to customize background intensity.
 * **Largest Contentful Paint (LCP < 300ms)**:
   * **Zero-Blocking Architecture**: Replaced decorative background image element in [HeroSection.tsx](src/components/home/HeroSection.tsx) with GPU-accelerated CSS radial and linear gradient overlays.
   * **Instant DOM Text LCP**: Eliminates 8.4s network image decode bottlenecks identified in Cloudflare Web Analytics, allowing the viewport's primary `<h1>` heading to paint instantaneously without waiting for network assets.
   * **Network Bandwidth Optimization**: Eliminated 55 KB of critical head preload bandwidth from `index.html`, prioritizing viewport JavaScript chunks and fonts.
 * **Interaction to Next Paint (INP < 50ms)**:
   * **Vite Chunk Splitting**: `vite.config.ts` splits vendor libraries into 8 isolated bundles (`vendor-react`, `vendor-ui`, `vendor-supabase`, `vendor-tanstack`, `vendor-charts`, `vendor-forms`, `vendor-carousel`, `vendor-video`), cutting initial JS parse times drastically.
-  * **Web Worker Offloading**: HLS.js video transmuxing in [BackgroundAnimation.tsx](src/components/BackgroundAnimation.tsx) is delegated to a dedicated Web Worker (`enableWorker: true`), freeing the main UI thread.
-  * **Passive & Non-Blocking Event Listeners**: Touch and scroll events use `{ passive: true, once: true }`. Background video play is scheduled via `requestAnimationFrame` so user taps register with 0ms input delay.
+  * **Touch Responsiveness**: Added `touch-action: manipulation` across all interactive elements, eliminating the 300ms mobile tap delay.
   * **Concurrent React 18 `startTransition`**: Wrapped category filters, sort selectors, and admin tab triggers in `startTransition`, ensuring click animations and borders render in frame 1 (<16ms) while list mutations happen non-blockingly.
 * **Cumulative Layout Shift (CLS = 0.00)**:
   * **Geometric Skeleton Grid**: Replaced generic loading spinners in [Index.tsx](src/pages/Index.tsx) with an 8-card responsive skeleton matching the exact card dimensions.
@@ -153,14 +183,14 @@ Engineered to pass all Google Core Web Vitals and achieve green performance benc
 | **Frontend Framework** | React 18.3, TypeScript 5.8, Vite 5.4 | Single Page Application with strict type safety |
 | **Styling & Icons** | Tailwind CSS 3.4, Lucide React, PostCSS | Cyber-neon design system, glassmorphism, responsive UI |
 | **UI Primitives** | Radix UI, shadcn/ui, Sonner | Accessible dialogs, drawers, dropdowns, and toast notifications |
-| **State & Caching** | TanStack Query v5, React Context | Server state management, cache invalidation, persistent cart |
+| **State & Caching** | TanStack Query v5, React Context | Server state management, cache invalidation, isolated user carts |
 | **Routing** | React Router DOM v6 | SPA navigation with guarded admin routes and OAuth handlers |
-| **Authentication** | Supabase Auth | Google OAuth 2.0, email/password, and session persistence |
-| **Database & Storage** | Supabase (PostgreSQL 15+) | Row Level Security, views, triggers, and `SECURITY DEFINER` RPCs |
-| **Serverless Functions** | Supabase Edge Functions (Deno) | Telegram bot webhook ingestion, notifications, and scheduled triggers |
+| **Authentication** | Supabase Auth (Google OAuth 2.0) | One-click Google login, session persistence, open-redirect protection |
+| **Database & Storage** | Supabase (PostgreSQL 15+) | 29 versioned migrations, RLS, views, triggers, and `SECURITY DEFINER` RPCs |
+| **Serverless Functions** | Supabase Edge Functions (Deno) | Telegram Admin Bot, AI Customer Support Bot (xAI Grok), Email dispatch |
 | **Edge Router & Security** | Cloudflare Workers (`worker.js`) | Global static asset serving, SPA 404 rewrite, and edge IP rate limiting |
 | **Automation & Cron** | GitHub Actions | 24/7 background pending order check every 2 hours, automated CI/CD |
-| **Testing** | Vitest 3.2, Testing Library | Unit tests for payment validation, price enforcement, stock helpers |
+| **Testing** | Vitest 3.2, Testing Library | 27 unit tests across 3 test suites for payment, cart, routing, and security |
 | **Deployment Targets** | Cloudflare Workers, Vercel, GitHub Pages | Production SPA build with client fallback routing |
 
 ---
@@ -192,12 +222,12 @@ retrohub/
 │   │   ├── admin/                        # Dashboard tabs, order dialogs, stats grid, catalog editor
 │   │   ├── checkout/                     # Order review cards and stock feedback
 │   │   ├── home/                         # Hero banner, category pills, product grid, filters
-│   │   ├── layout/                       # ShopHeader, Footer, navigation drawers
+│   │   ├── layout/                       # ShopHeader, Footer, navigation drawers, ambient controls
 │   │   ├── orders/                       # Customer order table, status badges, code reveal
 │   │   ├── payment/                      # bKash payment instructions and account display
 │   │   ├── product/                      # Product cards, detail modals, variant selectors
 │   │   └── ui/                           # Radix / shadcn accessible component primitives
-│   ├── contexts/                         # CartContext (persisted via localStorage)
+│   ├── contexts/                         # CartContext (persisted & isolated per user session)
 │   ├── hooks/                            # useAdmin, useAuth, useMobile, useToast
 │   ├── integrations/
 │   │   └── supabase/                     # Supabase client with production fallbacks & types
@@ -219,7 +249,7 @@ retrohub/
 │   │   └── utils.ts                      # Classname merging and currency formatters
 │   ├── pages/
 │   │   ├── AdminDashboard.tsx            # Merchant back-office (admin-role gated)
-│   │   ├── Auth.tsx                      # Login and registration portal
+│   │   ├── Auth.tsx                      # Login and registration portal (Google OAuth 2.0)
 │   │   ├── AuthCallback.tsx              # OAuth callback handler (open-redirect secured)
 │   │   ├── Checkout.tsx                  # Cart checkout & Player ID collection
 │   │   ├── CustomOrder.tsx               # Custom quote request form
@@ -232,21 +262,25 @@ retrohub/
 │   │   └── Terms.tsx                     # Terms of service (OAuth compliance)
 │   ├── test/
 │   │   ├── setup.ts                      # Vitest global test setup
-│   │   └── example.test.ts               # Unit tests: TrxID validation, price tamper, open redirect
+│   │   ├── cartContext.test.ts           # Cart isolation, storage persistence, and calculations
+│   │   ├── example.test.ts               # Unit tests: TrxID validation, price tamper, open redirect
+│   │   └── pages.test.tsx                # Page component rendering & routing tests
 │   ├── App.tsx                           # Root router, query client, and error boundary
 │   ├── index.css                         # Tailwind directives and cyber-neon design tokens
 │   └── main.tsx                          # React entrypoint
 ├── supabase/
 │   ├── functions/
-│   │   ├── telegram-webhook/             # Webhook receiver, all 12 bot commands & inline buttons
+│   │   ├── customer-bot/                 # AI Customer Support Bot (xAI Grok NLP, order tracking, FAQ)
+│   │   ├── telegram-webhook/             # Merchant Admin Bot (all 12 commands & inline buttons)
 │   │   └── send-order-email/             # Resend email notification edge function
-│   └── migrations/                       # 23 versioned PostgreSQL migrations (RLS, RPCs, indexes)
+│   ├── migrations/                       # 29 versioned PostgreSQL migrations (RLS, RPCs, indexes)
+│   └── README.md                         # Backend & Edge Functions documentation
 ├── CHANGELOG.md                          # Version history (Keep a Changelog format)
 ├── CONTRIBUTING.md                       # Branch naming, commit style, PR checklist
 ├── .assetsignore                         # Root-level Cloudflare asset upload ignore rules
 ├── .env.example                          # Environment variable template
 ├── .gitignore                            # Security & cache protection (incl. catalog data files)
-├── .nvmrc                                # Pinned Node.js version (20)
+├── .nvmrc                                # Pinned Node.js version (22)
 ├── components.json                       # shadcn/ui component registry config
 ├── eslint.config.js                      # ESLint flat config (TypeScript + React hooks rules)
 ├── package.json                          # Dependencies, npm scripts & postinstall build hook
@@ -265,7 +299,7 @@ retrohub/
 ## 🚀 Getting Started
 
 ### Prerequisites
-* **Node.js**: `v20.0.0+`
+* **Node.js**: `v22.0.0+`
 * **npm**: `v9.0.0+`
 * **Supabase Project** (PostgreSQL 15+)
 
@@ -288,15 +322,16 @@ cp wrangler.json.example wrangler.json
 VITE_SUPABASE_PROJECT_ID="your_project_id"
 VITE_SUPABASE_URL="https://your_project_id.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY="your_publishable_anon_key"
-VITE_SUPABASE_ANON_KEY="your_publishable_anon_key"
 
 # Server / Script Variables (Keep Private — Never Commit)
 SUPABASE_URL="https://your_project_id.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
+VITE_XAI_API_KEY="your_xai_api_key"
 
-# Telegram Bot (Optional — local development overrides)
-VITE_TELEGRAM_CHAT_ID="your_telegram_chat_id"
-VITE_TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
+# Telegram Bots (Optional for local dev, configured in Supabase secrets in production)
+VITE_TELEGRAM_CHAT_ID="your_admin_chat_id"
+VITE_TELEGRAM_BOT_TOKEN="your_admin_bot_token"
+CUSTOMER_BOT_TOKEN="your_customer_bot_token"
 
 # Cloudflare Worker Bindings
 CLOUD_FLARE_ASSET="ASSETS"
@@ -310,10 +345,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 4. Validate & Build
 ```bash
-npm run lint          # ESLint validation
-npx tsc --noEmit      # TypeScript type check (zero errors expected)
-npm test              # Run Vitest unit tests (15 tests)
-npm run build         # Production bundle
+npm run lint          # ESLint validation (0 errors)
+npx tsc --noEmit      # TypeScript type check (0 errors)
+npm test              # Run Vitest test suite (27 unit tests across 3 suites)
+npm run build         # Production bundle compilation
 ```
 
 ---
@@ -339,11 +374,12 @@ npx wrangler deploy
 Push to your repository; `vercel.json` automatically manages client-side SPA rewrites.
 
 ### GitHub Pages
-Handled automatically on `push` to `main` via `.github/workflows/deploy-pages.yml` (Node 20, `npm ci`, `npm run build`).
+Handled automatically on `push` to `main` via `.github/workflows/deploy-pages.yml` (Node 22, `npm ci`, `npm run build`).
 
 ### Supabase Edge Functions
 ```bash
 npx supabase functions deploy telegram-webhook --no-verify-jwt
+npx supabase functions deploy customer-bot --no-verify-jwt
 npx supabase functions deploy send-order-email --no-verify-jwt
 ```
 

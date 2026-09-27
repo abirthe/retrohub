@@ -229,7 +229,51 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 
 ---
 
-## 8. Security, Data Isolation & Concurrency
+## 8. Dual Telegram Bot Architecture
+
+To achieve autonomous operations for a solo merchant, RetroHub separates customer liaison duties from back-office merchant controls across two dedicated Telegram bots:
+
+```
+                  ┌──────────────────────────────────────────────┐
+                  │             RETROHUB ARCHITECTURE            │
+                  └───────┬──────────────────────────────┬───────┘
+                          │                              │
+                          ▼                              ▼
+             ┌────────────────────────┐      ┌────────────────────────┐
+             │ AI Customer Bot        │      │ Merchant Admin Bot     │
+             │ @retrochanbot          │      │ @Notifyretro_bot       │
+             └───────────┬────────────┘      └───────────┬────────────┘
+                         │                               │
+            ┌────────────┴────────────┐     ┌────────────┴────────────┐
+            │ - xAI Grok NLP Agent    │     │ - Real-Time Push Alerts │
+            │ - Live Order Status     │     │ - Inline Verification   │
+            │ - bKash Payment Help    │     │ - One-Tap Fulfillment   │
+            │ - Support Sessions      │     │ - Inventory & KPIs      │
+            └─────────────────────────┘     └─────────────────────────┘
+```
+
+### 1. 24/7 AI Customer Support Bot (`@retrochanbot`)
+* **Edge Function**: `supabase/functions/customer-bot`
+* **Audience**: Public storefront visitors and buyers.
+* **Capabilities**:
+  * **Intelligent NLP**: Answers customer inquiries with gamer fluency, explaining regional key activation, server selection, delivery speeds, and troubleshooting.
+  * **Instant Order Status**: Customers send a 6–8 character short ID, full 36-character UUID, or account email to look up order progress and retrieve fulfilled license keys.
+  * **Payment Walkthrough**: Step-by-step guidance on bKash personal send money and merchant payments, clarifying the 1.0% charge formula and TrxID submission.
+  * **Session Persistence**: Multi-turn support sessions stored in `customer_support_sessions`.
+  * **Uptime Guarantee**: Automatically falls back to interactive Telegram inline button menus if AI API limits or upstream delays occur.
+
+### 2. Merchant Operations & Alert Bot (`@Notifyretro_bot`)
+* **Edge Function**: `supabase/functions/telegram-webhook`
+* **Audience**: Solo merchant operator only (strictly role-gated by `ADMIN_CHAT_ID`).
+* **Capabilities**:
+  * **Real-Time Push Alerts**: Instant notification of incoming orders, bKash TrxID submissions (with duplicate fraud alerts), custom quote requests, and low stock warnings.
+  * **Inline Button Controls**: One-tap `Cancel` or `Verify` buttons attached to order alerts.
+  * **12 Admin Commands**: Complete operational suite (`/orders`, `/order`, `/inspect`, `/verify`, `/deliver`, `/cancel`, `/hold`, `/refund`, `/summary`, `/stock`, `/custom`, `/remind`, `/help`).
+  * **Short ID Support**: Fast execution on mobile using first 6–8 characters of order UUIDs.
+
+---
+
+## 9. Security, Data Isolation & Concurrency
 
 | Security Layer | Technical Implementation | Operational Guarantee |
 | :--- | :--- | :--- |
@@ -237,12 +281,13 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 | **Transaction ID Sanitization** | Client and server regex validation `/^[A-Z0-9]{6,30}$/i` | Injection payloads and malformed references are rejected prior to database mutation. |
 | **Atomic Payment Submission** | `submit_order_payment` `SECURITY DEFINER` stored procedure | Enforces order ownership, verifies total, and blocks unauthorized direct table updates. |
 | **Duplicate TrxID Detection** | Query cross-check on prior transaction references | Flags reused or fraudulent transaction IDs in real-time Telegram alerts. |
+| **Per-User Cart Isolation** | Carts keyed by `cart_${userId}` and `cart_guest` | Prevents shopping cart collision when customers switch between Google accounts. |
 | **Webhook Secret Header Auth** | `X-Telegram-Bot-Api-Secret-Token` verification in Edge Function | Rejects forged `/deliver` commands or fake payloads with 401 Unauthorized. |
-| **Sliding-Window IP Rate Limit**| In-memory sliding window limiter (30 req/min per IP) | Shields webhook endpoints from brute-force attempts and denial-of-service spikes. |
+| **Sliding-Window IP Rate Limit**| Cloudflare `RATE_LIMITER` (150 req/60s per IP) + in-memory limiter | Shields edge routers and webhook endpoints from brute-force attempts and DoS spikes. |
 | **Dual-Channel Alert Dispatch** | Edge Function webhook with direct client Telegram API fallback | Guarantees critical merchant order notifications are never dropped during edge cold starts. |
 | **Session JWT Authorization** | Bearer token passed in `emailService.ts` via Supabase session | Edge Functions authenticate the caller identity instead of relying solely on anon keys. |
 | **Private Error Masking** | Internal `useEffect` error logging in `AdminDashboard.tsx` | Raw PostgreSQL error payloads and schema hints are shielded from end users and never rendered into the DOM. |
-| **Row Level Security (RLS)** | PostgreSQL RLS enabled on all tables (`orders`, `deliveries`, `profiles`, `custom_orders`). | Customers can strictly only view their own orders and keys. Data leaks are mathematically blocked at the database engine. |
+| **Row Level Security (RLS)** | PostgreSQL RLS enabled on all 29 migrations (`orders`, `deliveries`, `profiles`, `custom_orders`, `customer_support_sessions`). | Customers can strictly only view their own orders and keys. Data leaks are mathematically blocked at the database engine. |
 | **Role-Based Access Control** | `has_role(auth.uid(), 'admin')` verified in PostgreSQL `SECURITY DEFINER` functions. | Storefront users cannot invoke admin state changes or access financial KPIs. |
 | **Concurrency Lock Protection**| `SELECT ... FOR UPDATE SKIP LOCKED` during key assignment. | Two concurrent customer orders can never be assigned the same digital code. |
 | **Complete Audit Trails** | `audit_logs` & `admin_action_logs` tables. | Every price mutation, role change, stock adjustment, and refund is logged with timestamp and admin ID. |
@@ -250,10 +295,13 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 
 ---
 
+## 10. Solo Merchant Operational Playbook
+
 | Daily Task | Administrative Action | Response Time Target |
 | :--- | :--- | :--- |
 | **New Payment Received** | Check bKash app $\rightarrow$ Send <code>/verify &lt;id&gt;</code> via Telegram or validate in `/admin`. | Under 5 minutes |
 | **Fulfill Digital Key** | Send <code>/deliver &lt;id&gt; &lt;code&gt;</code> in Telegram or click **Fulfill** in `/admin`. | Instant (Automatic) / Under 15m (Manual) |
+| **Customer Support Inquiry**| AI Bot (`@retrochanbot`) answers 95% of questions automatically; merchant steps in only for escalations. | Automated (Instant) |
 | **Cancel Fraud / Failed Trx**| Send <code>/cancel &lt;id&gt; [reason]</code> via Telegram (auto-releases keys and notifies audit log). | Under 5 minutes |
 | **Invalid Customer UID** | Send <code>/hold &lt;id&gt; [reason]</code> in Telegram or click **Hold Order** in `/admin`. | Under 10 minutes |
 | **Restock Digital Inventory**| Send <code>/stock</code> to inspect low stock $\rightarrow$ Adjust in `/admin` or run seeding scripts. | As stock depletes |
