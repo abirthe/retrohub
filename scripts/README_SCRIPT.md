@@ -1,5 +1,24 @@
 # RetroHub Catalog & Tooling Scripts Manual 🛠️
 
+<p align="center">
+  <img src="../public/favicon.png" alt="RetroHub Logo" width="80" height="80" />
+</p>
+
+<p align="center">
+  <b>The Solo Merchant's Virtual Data & Catalog Team</b><br>
+  <i>Engineered with Node.js, Supabase JS, and Automated Price Scraping.</i>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-Toolchain-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node Scripts" />
+  <img src="https://img.shields.io/badge/Maintenance-Automated-blue?style=for-the-badge&logo=dependabot&logoColor=white" alt="Maintenance" />
+  <img src="https://img.shields.io/badge/Database-Schema%20Sync-3ecf8e?style=for-the-badge&logo=supabase&logoColor=black" alt="Database" />
+</p>
+
+---
+
+## 📖 Executive Summary
+
 Comprehensive operational manual for all catalog management, database maintenance, price synchronization, image mapping, and seeding scripts in RetroHub.
 
 ---

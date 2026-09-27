@@ -1,5 +1,24 @@
 # RetroHub Backend & Supabase Architecture ⚡🗄️
 
+<p align="center">
+  <img src="../public/favicon.png" alt="RetroHub Logo" width="80" height="80" />
+</p>
+
+<p align="center">
+  <b>Enterprise-Grade Database, Edge Compute, & Access Control</b><br>
+  <i>Engineered with PostgreSQL 15, Deno Edge Functions, and Row-Level Security.</i>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL%2015+-3ecf8e?style=for-the-badge&logo=supabase&logoColor=black" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Runtime-Deno%20Edge-black?style=for-the-badge&logo=deno&logoColor=white" alt="Deno Edge Runtime" />
+  <img src="https://img.shields.io/badge/Security-RLS%20%26%20Definers-red?style=for-the-badge&logo=security&logoColor=white" alt="Security" />
+</p>
+
+---
+
+## 📖 Executive Summary
+
 Comprehensive technical documentation for RetroHub's database schema, versioned migrations, stored procedures, Edge Functions, Row-Level Security, and dual Telegram bot integrations.
 
 ---
