@@ -71,12 +71,24 @@ const statusStyles: Record<string, { className: string; icon: React.ReactNode; l
   },
 };
 
+interface OrderProduct {
+  id: string;
+  title: string;
+  platform: string | null;
+  category: string;
+}
+
+type OrderWithDetails = Order & {
+  products?: OrderProduct | null;
+  deliveries?: Delivery[];
+};
+
 const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [filterTab, setFilterTab] = useState<'all' | 'fulfilled' | 'active'>('all');
   const [searchOrderId, setSearchOrderId] = useState('');
-  const [searchedOrder, setSearchedOrder] = useState<(Order & { products?: any; deliveries?: Delivery[] }) | null>(null);
+  const [searchedOrder, setSearchedOrder] = useState<OrderWithDetails | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
@@ -91,7 +103,7 @@ const Orders = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as (Order & { products?: any; deliveries?: Delivery[] })[];
+      return (data || []) as unknown as OrderWithDetails[];
     },
     enabled: !!user,
   });
@@ -107,14 +119,14 @@ const Orders = () => {
 
     try {
       // 1. Try direct ID match
-      let query = supabase
+      const query = supabase
         .from('orders')
         .select('*, products(id, title, platform, category), deliveries(*)');
 
       if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean)) {
         const { data } = await query.eq('id', clean).maybeSingle();
         if (data) {
-          setSearchedOrder(data as any);
+          setSearchedOrder(data as unknown as OrderWithDetails);
           setIsSearching(false);
           return;
         }
@@ -127,14 +139,15 @@ const Orders = () => {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      const match = recent?.find((o: any) => o.id.toLowerCase().startsWith(clean.toLowerCase()));
+      const typedRecent = (recent || []) as unknown as OrderWithDetails[];
+      const match = typedRecent.find((o) => o.id.toLowerCase().startsWith(clean.toLowerCase()));
       if (match) {
-        setSearchedOrder(match as any);
+        setSearchedOrder(match);
       } else {
         setSearchError(`No order found matching "${clean}". Please check your order confirmation.`);
       }
-    } catch (err: any) {
-      setSearchError(err.message || 'Error looking up order');
+    } catch (err: unknown) {
+      setSearchError(err instanceof Error ? err.message : 'Error looking up order');
     } finally {
       setIsSearching(false);
     }
