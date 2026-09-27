@@ -309,7 +309,6 @@ serve(async (req: Request) => {
         `• <code>/order [id]</code> - Inspect full order details\n` +
         `• <code>/verify [id]</code> - Confirm customer payment\n` +
         `• <code>/deliver [id] [code]</code> - Deliver digital key/credentials\n` +
-        `• <code>/source [id]</code> - Mark order as actively sourcing\n` +
         `• <code>/cancel [id] [reason]</code> - Cancel order & release stock\n` +
         `• <code>/hold [id] [reason]</code> - Place order on hold\n` +
         `• <code>/refund [id] [reason]</code> - Mark order as refunded\n\n` +
@@ -439,7 +438,6 @@ serve(async (req: Request) => {
           card += `\n⚡ <b>Quick Shortcuts:</b>\n` +
             `• <code>/deliver ${shortId} CODE</code>\n` +
             `• <code>/verify ${shortId}</code>\n` +
-            `• <code>/source ${shortId}</code>\n` +
             `• <code>/cancel ${shortId} Reason</code>`
 
           await sendMessage(chatId, card)
@@ -490,51 +488,7 @@ serve(async (req: Request) => {
               `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n\n` +
               `⚡ <b>Next Steps:</b>\n` +
               `• Fulfill: <code>/deliver ${shortId} CODE_HERE</code>\n` +
-              `• Sourcing: <code>/source ${shortId}</code>`
-            await sendMessage(chatId, msg)
-          }
-        }
-      }
-    }
-    else if (text.startsWith('/source')) {
-      const parts = text.substring(7).trim().split(' ')
-      const orderIdentifier = parts[0]?.trim()
-
-      if (!orderIdentifier) {
-        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/source [order_id]</code>\n<i>Example:</i> <code>/source c7c482a2</code>')
-      } else {
-        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
-        if (resolveError) {
-          await sendMessage(chatId, resolveError)
-        } else {
-          const { error } = await supabase
-            .from('orders')
-            .update({
-              status: 'sourcing',
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', order.id)
-
-          if (error) {
-            await sendMessage(chatId, `❌ Failed to mark sourcing: ${escapeHtml(error.message)}`)
-          } else {
-            try {
-              await supabase.from('admin_action_logs').insert({
-                order_id: order.id,
-                action: 'start_sourcing',
-                before_status: order.status,
-                after_status: 'sourcing',
-                notes: 'Marked sourcing via Telegram Bot',
-              })
-            } catch (_) {}
-
-            const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
-            const shortId = order.id.substring(0, 8)
-            const msg = `🔄 <b>Order Marked as Sourcing</b>\n\n` +
-              `📦 <b>Product:</b> ${safeTitle}\n` +
-              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n\n` +
-              `<i>Customer sees "Sourcing" on their orders page.</i>\n` +
-              `👉 Deliver when ready: <code>/deliver ${shortId} CODE</code>`
+              `• Cancel:  <code>/cancel ${shortId} Reason</code>`
             await sendMessage(chatId, msg)
           }
         }
