@@ -547,7 +547,7 @@ RetroHub Knowledge Base & Rules:
     // to the (perfectly good) local responder. That risks the whole edge
     // function call timing out, and Telegram treating it as a failed
     // delivery and redelivering the update. One capped attempt is enough.
-    const model = "grok-2-latest";
+    const model = "grok-beta";
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
