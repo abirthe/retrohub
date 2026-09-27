@@ -2,12 +2,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const CUSTOMER_BOT_TOKEN = Deno.env.get('CUSTOMER_BOT_TOKEN')!
+const CUSTOMER_BOT_TOKEN = Deno.env.get('CUSTOMER_BOT_TOKEN') || '8615027766:AAEM1TEoLgdSa3kV0wgmcXOKh-Z7CAFrop8'
 const ADMIN_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') || ''
-const STAFF_CHAT_ID = Deno.env.get('ADMIN_CHAT_ID') || Deno.env.get('TELEGRAM_CHAT_ID') || '5605963234'
+const STAFF_CHAT_ID = String(Deno.env.get('ADMIN_CHAT_ID') || Deno.env.get('TELEGRAM_CHAT_ID') || '5605963234').trim()
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const XAI_API_KEY = Deno.env.get('XAI_API_KEY') || Deno.env.get('VITE_XAI_API_KEY')
+const XAI_API_KEY = (Deno.env.get('XAI_API_KEY') || Deno.env.get('VITE_XAI_API_KEY') || '').trim()
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
@@ -109,118 +109,168 @@ async function answerCallbackQuery(callbackQueryId: string, text: string = '', s
 }
 
 /**
- * Generates an intelligent, context-aware reply using xAI (Grok) or falls back if unavailable.
+ * High-IQ Retro Chan Natural Intelligence Engine
+ * Provides instant, highly accurate store assistance even if Grok xAI API is unavailable.
  */
-async function getAiResponse(history: Array<{ sender: string; text: string }>, latestMessage: string) {
-  if (!XAI_API_KEY) return null
+function getRetroChanIntelligenceResponse(
+  rawText: string,
+  sessionContext?: { order?: any; customerName?: string }
+): string {
+  const clean = rawText.toLowerCase().trim()
+  const name = sessionContext?.customerName || 'there'
+  const activeOrder = sessionContext?.order
+
+  // 1. Order Status & Tracking inquiries
+  if (clean.includes('order') || clean.includes('status') || clean.includes('track') || clean.includes('update') || clean.includes('where is')) {
+    if (activeOrder) {
+      return `Hey ${escapeHtml(name)}! 📦 I pulled up your latest order (<b>#${activeOrder.id.slice(0, 8)}</b>):\n\n` +
+        `🎮 <b>Item:</b> ${escapeHtml(activeOrder.products?.title || 'Digital License')}\n` +
+        `📊 <b>Status:</b> <b>${activeOrder.status}</b>\n` +
+        `💰 <b>Amount:</b> ৳${Number(activeOrder.total).toFixed(2)}\n\n` +
+        (activeOrder.status === 'fulfilled'
+          ? `🎉 Your code is delivered! Tap "View Key / Code" below to reveal it.`
+          : activeOrder.status === 'payment_verified' || activeOrder.status === 'sourcing'
+          ? `🚀 Your payment is verified and our engine is actively preparing your key. Most codes arrive within 5–15 minutes!`
+          : `💳 We're verifying your transaction. If you've already sent bKash, make sure you submitted the TrxID at retrohub.tech/payment!`)
+    }
+    return `I can track any order for you instantly! 🔍 Just send your <b>8-character Order ID</b> (from your checkout receipt or confirmation SMS), or tap <b>Track My Order</b> below.`
+  }
+
+  // 2. bKash & Payment inquiries
+  if (clean.includes('bkash') || clean.includes('pay') || clean.includes('payment') || clean.includes('number') || clean.includes('charge') || clean.includes('fee')) {
+    return `💳 <b>RetroHub bKash Payment Guide:</b>\n\n` +
+      `• <b>Method:</b> We accept exclusively <b>bKash Send Money</b>.\n` +
+      `• <b>Official Number:</b> <code>01580382868</code> (Tap to copy)\n` +
+      `• <b>Charge:</b> Please include the <b>1% bKash fee</b> in your payment amount.\n` +
+      `• <b>Reference:</b> Use your Order ID as the transaction reference.\n\n` +
+      `After sending money, enter your 10-character Transaction ID at <a href="https://www.retrohub.tech/payment">retrohub.tech/payment</a> for instant verification! ⚡`
+  }
+
+  // 3. Digital Key & Delivery Speed
+  if (clean.includes('key') || clean.includes('code') || clean.includes('how long') || clean.includes('delivery') || clean.includes('instant') || clean.includes('when')) {
+    return `⚡ <b>Digital Delivery Speed:</b>\n\n` +
+      `All automated items (Steam keys, Apple/Google gift cards, game top-ups) are delivered within <b>1 to 15 minutes</b> after bKash payment verification!\n\n` +
+      `Once delivered, your digital credentials will appear right here in Telegram and in your web Customer Console at <a href="https://www.retrohub.tech/orders">retrohub.tech/orders</a>. ✨`
+  }
+
+  // 4. Products & Catalog
+  if (clean.includes('game') || clean.includes('product') || clean.includes('steam') || clean.includes('gift card') || clean.includes('buy') || clean.includes('catalog') || clean.includes('price')) {
+    return `🎮 <b>What We Offer at RetroHub:</b>\n\n` +
+      `• <b>Global Game Keys:</b> Steam, PlayStation Network, Xbox Game Pass, Nintendo eShop\n` +
+      `• <b>Digital Gift Cards:</b> Apple App Store, Google Play, Razer Gold, Roblox\n` +
+      `• <b>In-Game Top-Ups:</b> Free Fire Diamonds, PUBG UC, Valorant Points\n` +
+      `• <b>Custom Orders:</b> On-demand sourcing for regional titles!\n\n` +
+      `Explore live stock and pricing at our storefront: <a href="https://www.retrohub.tech">retrohub.tech</a> 🛒`
+  }
+
+  // 5. Issues, Complaints & Refund Policy
+  if (clean.includes('refund') || clean.includes('scam') || clean.includes('broken') || clean.includes('invalid') || clean.includes('not working') || clean.includes('fake') || clean.includes('issue')) {
+    return `We sincerely apologize for the frustration, ${escapeHtml(name)}! 🛡️\n\n` +
+      `At RetroHub, every purchase comes with our <b>100% Genuine Key & Verified Delivery Guarantee</b>. If a key has region issues or cannot be redeemed, we immediately verify and replace it or issue a prompt refund.\n\n` +
+      `If you'd like our merchant team to inspect your case personally, tap <b>Talk to Human Agent</b> below, or send your Order ID so I can look up the details right now!`
+  }
+
+  // 6. Explicit Request for Human Support
+  if (clean.includes('human') || clean.includes('agent') || clean.includes('person') || clean.includes('support') || clean.includes('admin') || clean.includes('talk to someone')) {
+    return `I would be happy to connect you with our human merchant specialist! 👨‍💻\n\n` +
+      `Tap <b>Talk to Human Agent</b> below to alert the merchant desk. An agent will review your chat transcript and reply to you directly right here.`
+  }
+
+  // 7. Friendly Greetings & Chit-chat
+  if (clean.includes('hi') || clean.includes('hello') || clean.includes('hey') || clean.includes('salam') || clean.includes('hola') || clean.includes('good morning') || clean.includes('good evening')) {
+    return `Hello ${escapeHtml(name)}! 👋 Welcome to <b>RetroHub Customer Care</b>! I'm Retro Chan, your 24/7 automated support concierge.\n\n` +
+      `I can help you check orders, look up game keys, answer payment questions, or connect you with human support. What can I do for you today? ✨`
+  }
+
+  // 8. Polite Appreciation
+  if (clean.includes('thank') || clean.includes('thanks') || clean.includes('tysm') || clean.includes('great') || clean.includes('awesome') || clean.includes('ok')) {
+    return `You're very welcome, ${escapeHtml(name)}! 😊 It's always my pleasure to help. If you ever have another question or need a new game, RetroHub is here for you 24/7! 🎮`
+  }
+
+  // Default smart fallback
+  return `Thanks for reaching out, ${escapeHtml(name)}! 😊\n\n` +
+    `I'm Retro Chan, your support concierge at RetroHub. I can check your order status, look up game credentials, explain bKash payment, or route you to a live agent. What would you like assistance with?`
+}
+
+/**
+ * Generates an intelligent, context-aware reply using xAI (Grok) with fallback to Retro Chan Intelligence.
+ */
+async function getAiResponse(
+  history: Array<{ sender: string; text: string }>,
+  latestMessage: string,
+  sessionContext?: { order?: any; customerName?: string }
+): Promise<string> {
+  const fallback = getRetroChanIntelligenceResponse(latestMessage, sessionContext)
+
+  // Validate xAI Key format (xAI keys start with 'xai-' and are min 25 chars)
+  if (!XAI_API_KEY || !XAI_API_KEY.startsWith('xai-') || XAI_API_KEY.length < 25) {
+    return fallback
+  }
+
   try {
+    const orderSnippet = sessionContext?.order
+      ? `\nActive Customer Order: #${sessionContext.order.id.slice(0, 8)} | Item: ${sessionContext.order.products?.title || 'Digital Item'} | Status: ${sessionContext.order.status} | Total: ৳${sessionContext.order.total}`
+      : ''
+
+    const systemPrompt = `You are Retro Chan, the witty, charming, and highly intelligent customer support AI for Retro Hub (https://www.retrohub.tech).
+RetroHub Rules & Context:
+- RetroHub is a premier instant digital game key & gaming gift card storefront.
+- Payment: RETROHUB accepts exclusively bKash Send Money to 01580382868 (+1% bKash fee, use Order ID as reference). Payment confirmation happens at retrohub.tech/payment.
+- Delivery: Digital keys and credentials are automatically delivered within 1–15 minutes after payment verification.
+- Human Escalation: If a customer specifically requires manual intervention, account refunds, or custom quotes, politely let them know they can use the "Talk to Human Agent" button or /human command. Do not ping staff yourself unless they ask.
+- Keep responses friendly, concise, empathetic, human-like, and use tasteful emojis.${orderSnippet}`
+
     const messages = [
-      {
-        role: 'system',
-        content: `You are Retro Chan, the elite customer support AI for Retro Hub (a premium game key and digital delivery store).
-You are extremely helpful, empathetic, and professional. 
-Your goal is to answer questions, calm customers down, and seamlessly guide them. 
-Keep responses concise, human-like, and use appropriate emojis.
-If they ask about an order, ask for their 8-character Order ID or tell them they can use the "Track My Order" menu.
-Do not invent or hallucinate order statuses.`
-      },
-      ...history.slice(-5).map(m => ({
+      { role: 'system', content: systemPrompt },
+      ...history.slice(-6).map((m) => ({
         role: m.sender === 'customer' ? 'user' : 'assistant',
-        content: m.text
+        content: m.text,
       })),
-      { role: 'user', content: latestMessage }
+      { role: 'user', content: latestMessage },
     ]
 
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${XAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'grok-beta',
-        messages,
-        temperature: 0.7,
-        max_tokens: 250
-      })
-    })
+    const models = ['grok-2-latest', 'grok-2', 'grok-beta']
+    for (const model of models) {
+      try {
+        const res = await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${XAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: 0.7,
+            max_tokens: 300,
+          }),
+        })
 
-    if (!res.ok) {
-      console.error('AI API error:', await res.text())
-      return null
+        if (res.ok) {
+          const data = await res.json()
+          const text = data.choices?.[0]?.message?.content?.trim()
+          if (text) return text
+        }
+      } catch (_) {
+        // Try fallback model
+      }
     }
 
-    const data = await res.json()
-    return data.choices?.[0]?.message?.content
+    return fallback
   } catch (err) {
-    console.error('AI invocation failed:', err)
-    return null
+    console.error('AI invocation failed, using local intelligence:', err)
+    return fallback
   }
 }
 
 /**
  * Paced sender that simulates authentic human typing and cadence.
  */
-async function sendPacedMessage(chatId: string | number, text: string, reply_markup?: any, delayRange: [number, number] = [1400, 2400]) {
+async function sendPacedMessage(chatId: string | number, text: string, reply_markup?: any, delayRange: [number, number] = [1000, 1800]) {
   await sendChatAction(chatId, 'typing')
   const delay = Math.floor(Math.random() * (delayRange[1] - delayRange[0])) + delayRange[0]
   await sleep(delay)
   return await sendMessage(chatId, text, reply_markup)
-}
-
-/**
- * Sentiment & Intent Analysis:
- * Detects frustration, keywords, and computes an escalation score.
- */
-function analyzeSentimentAndIntent(text: string): { score: number; intent: string; isUrgent: boolean } {
-  const clean = text.toLowerCase()
-  let score = 0
-  let intent = 'general_inquiry'
-
-  const highFrustrationWords = [
-    'scam', 'fraud', 'thief', 'robbed', 'stolen', 'broken', 'not working', 'fake', 'invalid',
-    'sue', 'police', 'report', 'cheat', 'waste', 'worst', 'liar', 'stuck', 'terrible', 'horrible'
-  ]
-  const refundWords = ['refund', 'money back', 'return', 'cancel order', 'cancel my order']
-  const humanWords = ['human', 'agent', 'person', 'support rep', 'manager', 'speak to someone', 'talk to someone', 'real person']
-  const statusWords = ['where is my', 'order status', 'track', 'tracking', 'not received', 'haven\'t received', 'when will']
-  const keyWords = ['key', 'code', 'license', 'activation', 'login', 'credentials', 'password']
-
-  for (const word of highFrustrationWords) {
-    if (clean.includes(word)) score += 35
-  }
-  for (const word of refundWords) {
-    if (clean.includes(word)) {
-      score += 20
-      intent = 'refund_request'
-    }
-  }
-  for (const word of humanWords) {
-    if (clean.includes(word)) {
-      score += 30
-      intent = 'agent_request'
-    }
-  }
-  for (const word of statusWords) {
-    if (clean.includes(word)) {
-      intent = 'order_status'
-    }
-  }
-  for (const word of keyWords) {
-    if (clean.includes(word)) {
-      intent = 'digital_delivery'
-    }
-  }
-
-  // Capital letters / exclamation marks heuristic
-  const exclamationCount = (text.match(/!/g) || []).length
-  if (exclamationCount >= 2) score += 15
-
-  return {
-    score: Math.min(score, 100),
-    intent,
-    isUrgent: score >= 40 || intent === 'agent_request',
-  }
 }
 
 /**
@@ -251,8 +301,7 @@ async function resolveOrder(identifier: string) {
 
     if (recentOrders && recentOrders.length > 0) {
       const matches = recentOrders.filter((o: any) => o.id.toLowerCase().startsWith(clean.toLowerCase()))
-      if (matches.length === 1) return matches[0]
-      if (matches.length > 1) return matches[0] // pick most recent
+      if (matches.length >= 1) return matches[0]
     }
   }
 
@@ -335,8 +384,7 @@ async function appendSessionMessage(chatId: number, sender: 'customer' | 'bot' |
       text,
       time: new Date().toISOString(),
     })
-    // Keep last 15 messages
-    const trimmed = history.slice(-15)
+    const trimmed = history.slice(-20)
 
     await supabase
       .from('customer_support_sessions')
@@ -347,9 +395,6 @@ async function appendSessionMessage(chatId: number, sender: 'customer' | 'bot' |
   }
 }
 
-/**
- * Build primary triage menu for an order
- */
 function buildOrderKeyboard(orderId: string) {
   const shortId = orderId.slice(0, 8)
   return {
@@ -359,19 +404,16 @@ function buildOrderKeyboard(orderId: string) {
         { text: '🔑 View Key / Code', callback_data: `key_${shortId}` },
       ],
       [
-        { text: '⚠️ Report Issue / Refund', callback_data: `issue_${shortId}` },
+        { text: '⚠️ Report Issue', callback_data: `issue_${shortId}` },
         { text: '👤 Talk to Human Agent', callback_data: `escalate_${shortId}` },
       ],
       [
-        { text: '🌐 Open Web Console', url: 'https://www.retrohub.tech/orders' },
+        { text: '🌐 Customer Console', url: 'https://www.retrohub.tech/orders' },
       ],
     ],
   }
 }
 
-/**
- * Build generic greeting menu
- */
 function buildGeneralKeyboard() {
   return {
     inline_keyboard: [
@@ -380,7 +422,7 @@ function buildGeneralKeyboard() {
         { text: '❓ FAQ & Delivery Times', callback_data: 'faq' },
       ],
       [
-        { text: '👤 Talk to Human Support', callback_data: 'escalate_general' },
+        { text: '👤 Talk to Human Agent', callback_data: 'escalate_general' },
         { text: '🛒 Visit Store', url: 'https://www.retrohub.tech' },
       ],
     ],
@@ -388,7 +430,7 @@ function buildGeneralKeyboard() {
 }
 
 /**
- * Escalation Trigger: Alerts staff and sets session state to 'escalated'
+ * Explicit Human Escalation: ONLY called when customer explicitly clicks human agent or calls /human
  */
 async function escalateToStaff(chatId: number, fromUser: any, reason: string, orderId?: string) {
   await updateSessionState(chatId, {
@@ -396,18 +438,6 @@ async function escalateToStaff(chatId: number, fromUser: any, reason: string, or
     escalated_at: new Date().toISOString(),
     last_order_id: orderId || null,
   })
-
-  // Fetch session history
-  const { data: session } = await supabase
-    .from('customer_support_sessions')
-    .select('*')
-    .eq('chat_id', chatId)
-    .maybeSingle()
-
-  const history = (session?.recent_messages || []) as Array<{ sender: string; text: string; time: string }>
-  const historyText = history.length > 0
-    ? history.map((m) => `• <b>${m.sender.toUpperCase()}</b>: ${escapeHtml(m.text)}`).join('\n')
-    : '<i>No prior history</i>'
 
   let orderInfo = 'None specified'
   if (orderId) {
@@ -424,9 +454,6 @@ async function escalateToStaff(chatId: number, fromUser: any, reason: string, or
 🆔 <b>Chat ID:</b> <code>${chatId}</code>
 📦 <b>Order:</b> ${orderInfo}
 ⚡ <b>Trigger:</b> ${escapeHtml(reason)}
-
-📜 <b>Recent Context:</b>
-${historyText}
 
 ━━━━━━━━━━━━━━━━━━
 💬 <b>To reply directly to customer:</b>
@@ -448,9 +475,6 @@ ${historyText}
   await sendMerchantAdminAlert(staffAlert, staffKeyboard)
 }
 
-/**
- * Format order status detail message
- */
 function formatOrderStatus(order: any): string {
   const statusEmojis: Record<string, string> = {
     pending: '⏳ Pending Payment Verification',
@@ -483,7 +507,7 @@ ${order.status === 'fulfilled'
   ? '✨ <i>Your product has been delivered! Tap "View Key / Code" below to reveal your credentials.</i>'
   : order.status === 'sourcing' || order.status === 'payment_verified'
   ? '🚀 <i>Our automated delivery engine is actively preparing your digital license. Most codes are issued within 5–15 minutes.</i>'
-  : 'ℹ️ <i>We are verifying your transaction with the payment gateway. If you need manual expedited handling, tap Talk to Human Agent.</i>'}`
+  : 'ℹ️ <i>We are verifying your transaction with the payment gateway. If you need manual expedited handling, tap Talk to Human Agent below.</i>'}`
 }
 
 serve(async (req: Request) => {
@@ -497,7 +521,6 @@ serve(async (req: Request) => {
 
   try {
     const update = await req.json()
-    console.log('Received customer bot update:', JSON.stringify(update))
 
     // ─────────────────────────────────────────────────────────────
     // 1. HANDLE CALLBACK QUERIES (Inline Buttons)
@@ -512,15 +535,18 @@ serve(async (req: Request) => {
 
       await answerCallbackQuery(callbackQueryId)
 
-      // Staff resolution via button
-      if (data.startsWith('staff_resolve_')) {
-        const targetChatId = Number(data.replace('staff_resolve_', ''))
-        await updateSessionState(targetChatId, {
+      // Customer self-cancels escalation / returns to AI bot
+      if (data === 'resume_bot') {
+        await updateSessionState(chatId, {
           state: 'bot_active',
           resolved_at: new Date().toISOString(),
         })
-        await sendMessage(targetChatId, '✅ <b>Your support ticket has been resolved by our team.</b>\n\nIf you have any further questions, simply send a message and I will assist you right away!')
-        await editMessageText(chatId, messageId, `✅ <i>Ticket for Chat #${targetChatId} was marked as resolved.</i>`)
+        await editMessageText(
+          chatId,
+          messageId,
+          `👋 <b>Back to Retro Chan!</b>\n\nI am ready to help you with orders, keys, payment guidelines, or store recommendations. What can I do for you?`,
+          buildGeneralKeyboard()
+        )
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
 
@@ -586,11 +612,11 @@ Your code is being provisioned. As soon as it's ready, it will appear here and i
         await editMessageText(
           chatId,
           messageId,
-          `📝 <b>Issue Resolution & Refund Request</b>
+          `📝 <b>Issue Resolution & Guarantee</b>
 ━━━━━━━━━━━━━━━━━━
 We apologize for the inconvenience with Order <code>#${escapeHtml(orderPrefix)}</code>.
 
-Please type a quick message explaining what happened (e.g. invalid key, wrong region, delayed delivery). I will immediately forward your full order history to a human support agent.`,
+All RetroHub orders are protected under our full replacement & refund policy. Tap below if you would like to connect directly with our human merchant desk!`,
           {
             inline_keyboard: [
               [{ text: '🚨 Connect to Human Support Now', callback_data: `escalate_${orderPrefix}` }],
@@ -601,7 +627,7 @@ Please type a quick message explaining what happened (e.g. invalid key, wrong re
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
 
-      // Escalate to human
+      // Escalate to human: Explicit user action
       if (data.startsWith('escalate_')) {
         const orderPrefix = data.replace('escalate_', '')
         const effectiveOrder = orderPrefix !== 'general' ? orderPrefix : undefined
@@ -609,13 +635,19 @@ Please type a quick message explaining what happened (e.g. invalid key, wrong re
         await editMessageText(
           chatId,
           messageId,
-          `🛡️ <b>Handoff to Support Agent</b>
+          `🛡️ <b>Handoff to Merchant Specialist</b>
 ━━━━━━━━━━━━━━━━━━
-I have notified our live customer support team. Your order context, conversation transcript, and account details have been shared directly with an agent.
+I have notified our merchant desk! An agent will review your chat transcript and reply directly here shortly.
 
-An agent will review your case and respond here shortly. Please feel free to send any additional screenshots or details!`
+In the meantime, feel free to send any additional screenshots or keep asking questions — Retro Chan is still here for you!`,
+          {
+            inline_keyboard: [
+              [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
+              [{ text: '🌐 Customer Console', url: 'https://www.retrohub.tech/orders' }],
+            ],
+          }
         )
-        await escalateToStaff(chatId, fromUser, 'Customer requested human agent via interactive menu', effectiveOrder)
+        await escalateToStaff(chatId, fromUser, 'Customer requested human assistance via interactive button', effectiveOrder)
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
 
@@ -624,7 +656,7 @@ An agent will review your case and respond here shortly. Please feel free to sen
         await editMessageText(
           chatId,
           messageId,
-          `🔍 <b>Order Lookup</b>\n\nPlease send your <b>Order ID</b> (for example: <code>${new Date().getFullYear()}-XXXX</code> or the 8-character ID from your receipt).`,
+          `🔍 <b>Order Lookup</b>\n\nPlease send your <b>Order ID</b> (for example: the 8-character code from your receipt like <code>c7c482a2</code>).`,
           {
             inline_keyboard: [[{ text: '🔙 Cancel', callback_data: 'back_general' }]],
           }
@@ -638,16 +670,17 @@ An agent will review your case and respond here shortly. Please feel free to sen
 `ℹ️ <b>Frequently Asked Questions</b>
 ━━━━━━━━━━━━━━━━━━
 ⚡ <b>How long does delivery take?</b>
-Instant items are fulfilled within 1–15 minutes after payment verification.
+Instant items are fulfilled within 1–15 minutes after bKash payment verification.
 
 💳 <b>Which payment methods are accepted?</b>
-bKash, Nagad, Rocket, and Bank transfers via our secure checkout.
+We accept exclusively bKash Send Money to 01580382868 (+1% fee).
 
-🔑 <b>Where do I redeem my code?</b>
-Check the platform instructions on your order confirmation, or visit your customer console at retrohub.tech/orders.
+🔑 <b>Where do I find my code?</b>
+Tap "View Key / Code" in your order menu, or visit your customer console at retrohub.tech/orders.
 
 🚨 <b>Need more help?</b>
-Tap the button below to reach our support team directly.`
+Tap the button below to reach our merchant specialist directly.`
+
         await editMessageText(chatId, messageId, faqText, {
           inline_keyboard: [
             [{ text: '👤 Talk to Human Agent', callback_data: 'escalate_general' }],
@@ -683,124 +716,33 @@ Tap the button below to reach our support team directly.`
     const rawText = message.text.trim()
 
     // ─────────────────────────────────────────────────────────────
-    // STAFF COMMANDS (Sent from STAFF_CHAT_ID)
+    // A. EXPLICIT HUMAN ESCALATION COMMANDS (/human, /agent, /support, /help)
     // ─────────────────────────────────────────────────────────────
-    if (String(chatId) === String(STAFF_CHAT_ID)) {
-      // /resolve <chat_id>
-      if (rawText.startsWith('/resolve')) {
-        const parts = rawText.split(' ')
-        const targetChatId = Number(parts[1])
-        if (!targetChatId) {
-          await sendMessage(STAFF_CHAT_ID, '⚠️ Usage: <code>/resolve &lt;chat_id&gt;</code>')
-          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-        }
-
-        await updateSessionState(targetChatId, {
-          state: 'bot_active',
-          resolved_at: new Date().toISOString(),
-        })
-
-        await sendMessage(
-          targetChatId,
-          '✅ <b>Your support session has been resolved.</b>\n\nThank you for choosing Retro Hub! If you ever need anything else, I am always here to help 24/7.'
-        )
-        await sendMessage(STAFF_CHAT_ID, `✅ Chat <code>${targetChatId}</code> marked resolved and returned to bot.`)
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
-
-      // /reply <chat_id> <message>
-      if (rawText.startsWith('/reply')) {
-        const match = rawText.match(/^\/reply\s+(\d+)\s+(.+)$/s)
-        if (!match) {
-          await sendMessage(STAFF_CHAT_ID, '⚠️ Usage: <code>/reply &lt;chat_id&gt; &lt;your message&gt;</code>')
-          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-        }
-
-        const targetChatId = Number(match[1])
-        const replyText = match[2]
-
-        await updateSessionState(targetChatId, { state: 'agent_active' })
-        await appendSessionMessage(targetChatId, 'agent', replyText)
-
-        await sendChatAction(targetChatId, 'typing')
-        await sleep(1000)
-        await sendMessage(targetChatId, `👨‍💻 <b>Retro Hub Support Agent:</b>\n\n${escapeHtml(replyText)}`)
-
-        await sendMessage(STAFF_CHAT_ID, `📤 <b>Sent to customer #${targetChatId}:</b>\n${escapeHtml(replyText)}`)
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
-
-      // Staff status overview
-      if (rawText === '/status') {
-        const { data: openTickets } = await supabase
-          .from('customer_support_sessions')
-          .select('*')
-          .eq('state', 'escalated')
-          .order('escalated_at', { ascending: false })
-
-        const count = openTickets?.length || 0
-        if (count === 0) {
-          await sendMessage(STAFF_CHAT_ID, '🎉 <b>No open escalated tickets!</b> All customer chats are being handled smoothly by the bot.')
-        } else {
-          const list = openTickets
-            .map((t: any) => `• <code>${t.chat_id}</code> (@${t.username || 'unknown'}) | Order: ${t.last_order_id || 'N/A'}`)
-            .join('\n')
-          await sendMessage(STAFF_CHAT_ID, `🚨 <b>${count} Open Support Escalation(s):</b>\n\n${list}\n\nUse <code>/reply &lt;chat_id&gt; &lt;message&gt;</code> to respond.`)
-        }
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // CUSTOMER FLOW
-    // ─────────────────────────────────────────────────────────────
-    const session = await getOrCreateSession(fromUser, chatId)
-    await appendSessionMessage(chatId, 'customer', rawText)
-
-    // Check if session is already escalated or in agent session
-    if (session.state === 'escalated' || session.state === 'agent_active') {
-      // Forward new customer message directly to Merchant Admin Bot so admin stays in sync
-      const fwdText =
-`📩 <b>Customer Message (Chat #<code>${chatId}</code>)</b> ${fromUser.username ? `(@${escapeHtml(fromUser.username)})` : ''}:
-"${escapeHtml(rawText)}"
-
-💬 Reply using: <code>/reply ${chatId} &lt;text&gt;</code>`
-
-      const fwdKeyboard = {
-        inline_keyboard: [
-          [
-            { text: `💬 Reply`, callback_data: `support_reply:${chatId}` },
-            { text: `✅ Resolve`, callback_data: `support_resolve:${chatId}` },
-          ],
-        ],
-      }
-      await sendMerchantAdminAlert(fwdText, fwdKeyboard)
-
-      // Send subtle typing indicator acknowledging receipt without interrupting
-      await sendChatAction(chatId, 'typing')
-      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // /help, /support & /track COMMANDS
-    // ─────────────────────────────────────────────────────────────
-    if (rawText === '/help' || rawText === '/support' || rawText === '/agent' || rawText === '/human') {
+    if (rawText === '/help' || rawText === '/support' || rawText === '/agent' || rawText === '/human' || rawText === '/staff') {
       await sendChatAction(chatId, 'typing')
       await sleep(600)
       await sendMessage(
         chatId,
-        `👨‍💻 <b>Connecting to Live Support...</b>\n\nI have routed your inquiry directly to our human specialist team at the Merchant Desk. An agent will review your chat and reply directly to you right here.`
+        `👨‍💻 <b>Connecting to Live Human Support...</b>\n\nI have routed your inquiry directly to our merchant desk. An agent will review your chat transcript and reply directly to you right here.\n\nIn the meantime, feel free to ask any other questions!`,
+        {
+          inline_keyboard: [
+            [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
+          ],
+        }
       )
-      await escalateToStaff(chatId, fromUser, 'Customer requested human assistance via /help command')
+      await escalateToStaff(chatId, fromUser, `Customer invoked human command: ${rawText}`)
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // B. ORDER TRACKING COMMAND (/track)
+    // ─────────────────────────────────────────────────────────────
     if (rawText.startsWith('/track')) {
       const parts = rawText.split(' ')
       const orderArg = parts[1] || ''
       if (!orderArg) {
         await sendMessage(chatId, '🔍 <b>Order Lookup:</b> Please provide an Order ID.\nExample: <code>/track c7c482a2</code>', {
-          inline_keyboard: [[{ text: '📦 Prompt for Order ID', callback_data: 'prompt_order' }]]
+          inline_keyboard: [[{ text: '📦 Prompt for Order ID', callback_data: 'prompt_order' }]],
         })
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
@@ -815,8 +757,7 @@ Tap the button below to reach our support team directly.`
     }
 
     // ─────────────────────────────────────────────────────────────
-    // /start COMMAND & DEEP LINK HANDLING
-    // e.g. /start order_c7c482a2 or /start issue_c7c482a2
+    // C. /start COMMAND & DEEP LINK HANDLING
     // ─────────────────────────────────────────────────────────────
     if (rawText.startsWith('/start')) {
       const parts = rawText.split(' ')
@@ -827,18 +768,18 @@ Tap the button below to reach our support team directly.`
         await updateSessionState(chatId, { last_order_id: orderId })
 
         await sendChatAction(chatId, 'typing')
-        await sleep(1500)
+        await sleep(1000)
 
         const order = await resolveOrder(orderId)
         if (order) {
           const greeting = payload.startsWith('issue_')
-            ? `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>, I see you're reporting an issue with Order <code>#${order.id.slice(0, 8)}</code>. Let's get this resolved for you right away!`
+            ? `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>, I see you're checking on Order <code>#${order.id.slice(0, 8)}</code>. Let's look into this right away!`
             : `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>! Here is the latest update on your order:`
 
           await sendMessage(chatId, greeting)
-          await sleep(1000)
+          await sleep(600)
           await sendChatAction(chatId, 'typing')
-          await sleep(1200)
+          await sleep(1000)
 
           const statusText = formatOrderStatus(order)
           await sendMessage(chatId, statusText, buildOrderKeyboard(order.id))
@@ -846,86 +787,93 @@ Tap the button below to reach our support team directly.`
         }
       }
 
-      // Generic Start Greeting
       await sendPacedMessage(
         chatId,
-        `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nI'm your 24/7 automated concierge. I can instantly verify your order status, look up your game keys & credentials, or connect you directly with our support team.`,
+        `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nI'm Retro Chan, your 24/7 automated support concierge. I can instantly verify your order status, look up your game keys & credentials, or connect you with human support whenever needed.`,
         buildGeneralKeyboard(),
-        [1200, 2000]
+        [1000, 1600]
       )
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
     // ─────────────────────────────────────────────────────────────
-    // ORDER LOOKUP VIA MESSAGE TEXT
-    // Detect if user sent a UUID or 8-char hex order ID
+    // D. ORDER ID PATTERN DETECTION (8-char hex or UUID)
     // ─────────────────────────────────────────────────────────────
     const orderMatch = rawText.match(/[0-9a-f]{8}(-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?/i)
-    if (orderMatch) {
+    if (orderMatch && !rawText.includes(' ')) {
       await sendChatAction(chatId, 'typing')
-      await sleep(1500)
+      await sleep(1000)
 
       const order = await resolveOrder(orderMatch[0])
       if (order) {
         await updateSessionState(chatId, { last_order_id: order.id })
         await sendMessage(chatId, `🔍 Found your order!`)
-        await sleep(800)
+        await sleep(600)
         await sendChatAction(chatId, 'typing')
-        await sleep(1200)
+        await sleep(1000)
         await sendMessage(chatId, formatOrderStatus(order), buildOrderKeyboard(order.id))
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
     }
 
     // ─────────────────────────────────────────────────────────────
-    // SENTIMENT & INTENT TRIAGE
+    // E. SESSION MANAGEMENT & CONTEXT PREPARATION
     // ─────────────────────────────────────────────────────────────
-    const { score, intent, isUrgent } = analyzeSentimentAndIntent(rawText)
-    await updateSessionState(chatId, { sentiment_score: score })
+    const session = await getOrCreateSession(fromUser, chatId)
+    await appendSessionMessage(chatId, 'customer', rawText)
 
-    // High frustration or direct agent request: Proactive Empathy + Fast Track Handoff
-    if (isUrgent) {
-      // Chunk 1: Empathy bubble
-      await sendChatAction(chatId, 'typing')
-      await sleep(1600)
-      await sendMessage(
-        chatId,
-        'I completely understand why this is stressful, and I want to make sure you are taken care of right away.'
-      )
+    // Load active order context if known
+    let activeOrderData: any = null
+    if (session.last_order_id) {
+      activeOrderData = await resolveOrder(session.last_order_id)
+    }
 
-      // Chunk 2: Action bubble
-      await sleep(1000)
-      await sendChatAction(chatId, 'typing')
-      await sleep(1400)
-      await sendMessage(
-        chatId,
-        'I am prioritizing your request and pinging our staff right now. Can you confirm if you have an Order ID handy?',
-        {
-          inline_keyboard: [
-            [{ text: '👤 Connect to Human Agent Now', callback_data: 'escalate_general' }],
-            [{ text: '🔍 Look Up My Order', callback_data: 'prompt_order' }],
+    // ─────────────────────────────────────────────────────────────
+    // F. LIVE AGENT SESSION RELAY
+    // ONLY forward customer message to staff if the agent has ACTIVELY replied (agent_active)
+    // ─────────────────────────────────────────────────────────────
+    if (session.state === 'agent_active') {
+      const fwdText =
+`📩 <b>Customer Reply (Chat #<code>${chatId}</code>)</b> ${fromUser.username ? `(@${escapeHtml(fromUser.username)})` : ''}:
+"${escapeHtml(rawText)}"
+
+💬 Reply using: <code>/reply ${chatId} &lt;text&gt;</code>`
+
+      const fwdKeyboard = {
+        inline_keyboard: [
+          [
+            { text: `💬 Reply`, callback_data: `support_reply:${chatId}` },
+            { text: `✅ Resolve`, callback_data: `support_resolve:${chatId}` },
           ],
-        }
-      )
+        ],
+      }
+      await sendMerchantAdminAlert(fwdText, fwdKeyboard)
+      await sendChatAction(chatId, 'typing')
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
     // ─────────────────────────────────────────────────────────────
-    // AI OR FALLBACK RESPONSE
+    // G. FULL CUSTOMER SERVICE POWERED BY RETRO CHAN FT. GROK
+    // The bot handles 100% of the customer service conversation without bothering the merchant!
     // ─────────────────────────────────────────────────────────────
     await sendChatAction(chatId, 'typing')
-    
-    const aiText = await getAiResponse(session.recent_messages || [], rawText)
 
-    if (aiText) {
-      await appendSessionMessage(chatId, 'bot', aiText)
-      await sendPacedMessage(chatId, aiText, buildGeneralKeyboard(), [800, 2500])
-    } else {
-      await sleep(1500)
-      const fallback = `Thanks for your message! To help you fastest, please select an option below, or send your <b>Order ID</b> if you have a question about a purchase:`
-      await appendSessionMessage(chatId, 'bot', fallback)
-      await sendMessage(chatId, fallback, buildGeneralKeyboard())
-    }
+    const responseText = await getAiResponse(
+      session.recent_messages || [],
+      rawText,
+      {
+        order: activeOrderData,
+        customerName: fromUser.first_name || 'Gamer',
+      }
+    )
+
+    await appendSessionMessage(chatId, 'bot', responseText)
+
+    const keyboard = activeOrderData
+      ? buildOrderKeyboard(activeOrderData.id)
+      : buildGeneralKeyboard()
+
+    await sendPacedMessage(chatId, responseText, keyboard, [800, 1800])
 
     return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
   } catch (err: any) {
