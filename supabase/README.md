@@ -103,6 +103,20 @@ npx supabase functions deploy send-order-email --no-verify-jwt
 
 ---
 
+### 4. `generate-ai-text` — Backend AI Proxy
+
+A secure proxy for the frontend application to generate AI text using xAI Grok. This abstraction layer ensures that the frontend never accesses the `XAI_API_KEY` directly.
+
+- **Frontend Security**: Prevents `VITE_XAI_API_KEY` leakage in client bundles.
+- **Unified Text Generation**: Standardizes fulfillment email generation and text generation requests.
+
+```bash
+# Deploy text generation proxy
+npx supabase functions deploy generate-ai-text --no-verify-jwt
+```
+
+---
+
 ## 🤝 Bidirectional Live Support Relay Sequence
 
 When a customer explicitly requests human assistance in `@retrochanbot`, the two bots orchestrate a live relay:
