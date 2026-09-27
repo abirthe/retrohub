@@ -97,6 +97,71 @@ async function resolveOrder(identifier: string) {
   return { error: `❌ Order not found with identifier: <code>${escapeHtml(clean)}</code>` }
 }
 
+async function sendOrderInspection(chatId: string | number, orderIdentifier: string) {
+  const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+  if (resolveError) {
+    await sendMessage(chatId, resolveError)
+    return
+  }
+
+  const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+  const safePlatform = escapeHtml(order.products?.platform || 'General')
+  const safeCategory = escapeHtml(order.products?.category || 'Item')
+  const safeTotal = escapeHtml(order.total)
+  const shortId = order.id.substring(0, 8)
+  const statusEmoji = order.status === 'fulfilled' ? '🎉 Fulfilled' :
+                      order.status === 'payment_verified' ? '✅ Payment Verified' :
+                      order.status === 'payment_submitted' ? '💳 Payment Submitted' :
+                      order.status === 'sourcing' ? '🔄 Sourcing' :
+                      order.status === 'cancelled' ? '🚫 Cancelled' :
+                      order.status === 'refunded' ? '💸 Refunded' : '⏳ Pending'
+
+  let card = `🔍 <b>Order Details:</b> <code>${shortId}</code>\n\n` +
+    `📦 <b>Product:</b> ${safeTitle}\n` +
+    `🎮 <b>Platform / Category:</b> ${safePlatform} (${safeCategory})\n` +
+    `💰 <b>Price:</b> ৳${safeTotal}\n` +
+    `📊 <b>Status:</b> ${statusEmoji}\n` +
+    `🆔 <b>Full ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+    `📅 <b>Created:</b> ${new Date(order.created_at).toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })}\n`
+
+  if (order.customer_input?.game_id || order.customer_input?.player_id) {
+    const uid = order.customer_input.game_id || order.customer_input.player_id
+    card += `🎯 <b>Player ID / UID:</b> <code>${escapeHtml(uid)}</code>\n`
+  }
+  if (order.customer_input?.server_id || order.customer_input?.zone_id) {
+    const server = order.customer_input.server_id || order.customer_input.zone_id
+    card += `🌐 <b>Server / Zone:</b> <code>${escapeHtml(server)}</code>\n`
+  }
+  if (order.customer_input?.transaction_id) {
+    card += `🧾 <b>bKash TrxID:</b> <code>${escapeHtml(order.customer_input.transaction_id)}</code>\n`
+  }
+  if (order.customer_input?.contact_number) {
+    card += `📱 <b>Contact:</b> <code>${escapeHtml(order.customer_input.contact_number)}</code>\n`
+  }
+  if (order.customer_input?.cancel_reason) {
+    card += `📝 <b>Cancel Reason:</b> <i>${escapeHtml(order.customer_input.cancel_reason)}</i>\n`
+  }
+  if (order.final_output) {
+    card += `🔑 <b>Delivered Output:</b> <code>${escapeHtml(order.final_output)}</code>\n`
+  }
+
+  card += `\n⚡ <b>Quick Shortcuts:</b>\n` +
+    `• <code>/deliver ${shortId} CODE</code>\n` +
+    `• <code>/verify ${shortId}</code>\n` +
+    `• <code>/cancel ${shortId} Reason</code>`
+
+  const reply_markup = {
+    inline_keyboard: [
+      [
+        { text: '✅ Verify', callback_data: `verify:${shortId}` },
+        { text: '❌ Cancel', callback_data: `cancel:${shortId}` }
+      ]
+    ]
+  }
+
+  await sendMessage(chatId, card, reply_markup)
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -367,6 +432,9 @@ serve(async (req: Request) => {
             await answerCallbackQuery(cq.id, 'Failed to verify', true)
           }
         }
+      } else if ((action === 'order' || action === 'inspect') && orderIdentifier) {
+        await answerCallbackQuery(cq.id, '🔍 Inspecting order...')
+        await sendOrderInspection(chatId, orderIdentifier)
       } else {
         await answerCallbackQuery(cq.id)
       }
@@ -481,63 +549,12 @@ serve(async (req: Request) => {
         await sendMessage(chatId, msg)
       }
     }
-    else if (text.startsWith('/order')) {
-      const orderIdentifier = text.substring(6).trim()
+    else if (text.startsWith('/order') || text.startsWith('/inspect')) {
+      const orderIdentifier = text.replace(/^\/(order|inspect)/, '').trim()
       if (!orderIdentifier) {
-        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/order [order_id]</code>\n<i>Example:</i> <code>/order c7c482a2</code>')
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/order [order_id]</code> or <code>/inspect [order_id]</code>\n<i>Example:</i> <code>/order c7c482a2</code>')
       } else {
-        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
-        if (resolveError) {
-          await sendMessage(chatId, resolveError)
-        } else {
-          const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
-          const safePlatform = escapeHtml(order.products?.platform || 'General')
-          const safeCategory = escapeHtml(order.products?.category || 'Item')
-          const safeTotal = escapeHtml(order.total)
-          const shortId = order.id.substring(0, 8)
-          const statusEmoji = order.status === 'fulfilled' ? '🎉 Fulfilled' :
-                              order.status === 'payment_verified' ? '✅ Payment Verified' :
-                              order.status === 'payment_submitted' ? '💳 Payment Submitted' :
-                              order.status === 'sourcing' ? '🔄 Sourcing' :
-                              order.status === 'cancelled' ? '🚫 Cancelled' :
-                              order.status === 'refunded' ? '💸 Refunded' : '⏳ Pending'
-
-          let card = `🔍 <b>Order Details:</b> <code>${shortId}</code>\n\n` +
-            `📦 <b>Product:</b> ${safeTitle}\n` +
-            `🎮 <b>Platform / Category:</b> ${safePlatform} (${safeCategory})\n` +
-            `💰 <b>Price:</b> ৳${safeTotal}\n` +
-            `📊 <b>Status:</b> ${statusEmoji}\n` +
-            `🆔 <b>Full ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
-            `📅 <b>Created:</b> ${new Date(order.created_at).toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })}\n`
-
-          if (order.customer_input?.game_id || order.customer_input?.player_id) {
-            const uid = order.customer_input.game_id || order.customer_input.player_id
-            card += `🎯 <b>Player ID / UID:</b> <code>${escapeHtml(uid)}</code>\n`
-          }
-          if (order.customer_input?.server_id || order.customer_input?.zone_id) {
-            const server = order.customer_input.server_id || order.customer_input.zone_id
-            card += `🌐 <b>Server / Zone:</b> <code>${escapeHtml(server)}</code>\n`
-          }
-          if (order.customer_input?.transaction_id) {
-            card += `🧾 <b>bKash TrxID:</b> <code>${escapeHtml(order.customer_input.transaction_id)}</code>\n`
-          }
-          if (order.customer_input?.contact_number) {
-            card += `📱 <b>Contact:</b> <code>${escapeHtml(order.customer_input.contact_number)}</code>\n`
-          }
-          if (order.customer_input?.cancel_reason) {
-            card += `📝 <b>Cancel Reason:</b> <i>${escapeHtml(order.customer_input.cancel_reason)}</i>\n`
-          }
-          if (order.final_output) {
-            card += `🔑 <b>Delivered Output:</b> <code>${escapeHtml(order.final_output)}</code>\n`
-          }
-
-          card += `\n⚡ <b>Quick Shortcuts:</b>\n` +
-            `• <code>/deliver ${shortId} CODE</code>\n` +
-            `• <code>/verify ${shortId}</code>\n` +
-            `• <code>/cancel ${shortId} Reason</code>`
-
-          await sendMessage(chatId, card)
-        }
+        await sendOrderInspection(chatId, orderIdentifier)
       }
     }
     else if (text.startsWith('/verify')) {
