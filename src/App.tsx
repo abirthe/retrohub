@@ -8,21 +8,25 @@ import { CartProvider } from "@/contexts/CartContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 
-// Helper to auto-recover when a new Vercel deployment replaces JS chunk hashes
+// Helper to auto-recover when a new deployment replaces JS chunk hashes
 const lazyWithRetry = <T extends React.ComponentType<Record<string, unknown>>>(
   componentImport: () => Promise<{ default: T }>
 ) =>
   lazy(async () => {
     try {
-      return await componentImport();
+      const module = await componentImport();
+      if (!module || !module.default) {
+        throw new Error('Chunk loaded without default export, refreshing page');
+      }
+      return module;
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      const isChunkError = /failed to fetch dynamically imported module|importing a module script failed/i.test(msg);
+      const isChunkError = /failed to fetch dynamically imported module|importing a module script failed|Chunk loaded without default export|undefined \(reading 'default'\)/i.test(msg);
       const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
       const now = Date.now();
 
       // Automatically reload once if a chunk fails due to a new deployment replacing chunk hashes
-      if (isChunkError && now - lastReload > 10000) {
+      if (isChunkError && now - lastReload > 3000) {
         window.sessionStorage.setItem('last_chunk_reload', String(now));
         window.location.reload();
         return new Promise(() => {}); // hold until reload

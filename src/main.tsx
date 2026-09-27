@@ -3,10 +3,9 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Auto-recover from stale chunks when a new deployment replaces hashed assets
-window.addEventListener('vite:preloadError', (event) => {
-  event.preventDefault();
+window.addEventListener('vite:preloadError', () => {
   const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
-  if (Date.now() - lastReload > 10000) {
+  if (Date.now() - lastReload > 4000) {
     window.sessionStorage.setItem('last_chunk_reload', String(Date.now()));
     window.location.reload();
   }
