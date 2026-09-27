@@ -88,8 +88,8 @@ const Payment = () => {
                         <h1 className="text-4xl md:text-5xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent animate-in fade-in slide-in-from-bottom-4 duration-700">
                             Complete Your Payment
                         </h1>
-                        <p className="text-muted-foreground max-w-lg mx-auto text-lg">
-                            RETROHUB accepts exclusively <strong className="text-pink-400 font-semibold">bKash Send Money</strong> for instant order verification and key delivery.
+                        <p className="text-slate-200 max-w-lg mx-auto text-base md:text-lg font-medium leading-relaxed drop-shadow-sm">
+                            RETROHUB accepts exclusively <strong className="text-pink-400 font-semibold drop-shadow-[0_0_12px_rgba(244,114,182,0.4)]">bKash Send Money</strong> for instant order verification and key delivery.
                         </p>
                     </div>
 
@@ -103,7 +103,7 @@ const Payment = () => {
                                         <Smartphone className="w-5 h-5 text-pink-400" />
                                         Official bKash Account
                                     </CardTitle>
-                                    <CardDescription>
+                                    <CardDescription className="text-slate-300">
                                         Send money to our official bKash account for instant verification
                                     </CardDescription>
                                 </CardHeader>
@@ -120,20 +120,20 @@ const Payment = () => {
 
                                 <CardHeader>
                                     <CardTitle className="font-display">Confirm Payment</CardTitle>
-                                    <CardDescription>
+                                    <CardDescription className="text-slate-300">
                                         Enter the transaction ID from your payment provider.
                                     </CardDescription>
                                 </CardHeader>
 
                                 <div className="bg-secondary/30 px-6 py-4 border-y border-border/50">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-muted-foreground">Amount to Pay</span>
+                                        <span className="text-slate-300 font-medium">Amount to Pay</span>
                                         <span className="font-display font-bold text-xl text-primary">৳{calculateTotal().toFixed(2)}</span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground text-right">*Includes 1% bKash charge</p>
+                                    <p className="text-xs text-slate-400 text-right">*Includes 1% bKash charge</p>
                                     {orderIds.length > 0 && (
                                         <div className="mt-4 pt-4 border-t border-border/50">
-                                            <span className="text-xs text-muted-foreground block mb-1">Order Reference IDs:</span>
+                                            <span className="text-xs text-slate-400 block mb-1">Order Reference IDs:</span>
                                             <div className="flex flex-wrap gap-2">
                                                 {orderIds.map((id: string) => (
                                                     <span key={id} className="inline-flex items-center px-2 py-1 rounded bg-accent/10 border border-accent/20 text-xs font-mono text-accent">
@@ -163,7 +163,7 @@ const Payment = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-muted-foreground">
+                                            <p className="text-xs text-slate-400">
                                                 Usually a 10-character alphanumeric code sent via SMS.
                                             </p>
                                         </div>
@@ -189,7 +189,7 @@ const Payment = () => {
                                 </CardContent>
                             </Card>
 
-                            <div className="bg-secondary/30 p-4 rounded-lg border border-border/50 backdrop-blur text-sm text-center text-muted-foreground">
+                            <div className="bg-secondary/30 p-4 rounded-lg border border-border/50 backdrop-blur text-sm text-center text-slate-300">
                                 Need help? <Link to="/custom-order" className="text-primary hover:underline underline-offset-4 font-semibold">Contact Support / Custom Request</Link>
                             </div>
                         </div>
