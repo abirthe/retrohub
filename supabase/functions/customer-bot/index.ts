@@ -468,6 +468,38 @@ function getRetroChanIntelligenceResponse(
   );
 }
 
+let cachedCatalog = "";
+let lastCatalogFetch = 0;
+
+async function getCatalogSnippet(): Promise<string> {
+  const now = Date.now();
+  if (cachedCatalog && now - lastCatalogFetch < 1000 * 60 * 5) {
+    return cachedCatalog;
+  }
+  try {
+    const { data: products, error } = await supabase
+      .from("products")
+      .select("title, platform, sale_price, in_stock")
+      .eq("is_active", true);
+
+    if (error || !products) return "";
+
+    cachedCatalog =
+      "8. Live Product Catalog (Suggest from these):\n" +
+      products
+        .map(
+          (p) =>
+            `- ${p.title} [${p.platform}]: ৳${p.sale_price} (Stock: ${p.in_stock})`,
+        )
+        .join("\n");
+    lastCatalogFetch = now;
+    return cachedCatalog;
+  } catch (e) {
+    console.error("Failed to fetch catalog for AI", e);
+    return "";
+  }
+}
+
 /**
  * Generates an intelligent, context-aware reply using xAI (Grok) with fallback to Retro Chan Intelligence.
  */
@@ -489,6 +521,8 @@ async function getAiResponse(
     const orderSnippet = sessionContext?.order
       ? `\nActive Customer Order: #${sessionContext.order.id.slice(0, 8)} | Item: ${sessionContext.order.products?.title || "Digital Item"} | Status: ${sessionContext.order.status} | Total: ৳${formatMoney(sessionContext.order.total)}`
       : "";
+      
+    const catalogSnippet = await getCatalogSnippet();
 
     const systemPrompt = `You are Retro Chan, the witty, charming, and highly intelligent customer support AI for Retro Hub (https://www.retrohub.tech).
 RetroHub Knowledge Base & Rules:
@@ -498,7 +532,7 @@ RetroHub Knowledge Base & Rules:
 4. Refunds & Issues: 100% Genuine Key Guarantee. If a key is invalid/region-locked, we verify and replace or refund immediately.
 5. Interaction Policy: Handle ALL customer queries confidently and accurately. Do NOT hallucinate prices or policies. If you do not know something, politely offer to escalate. Be extremely concise to save tokens and provide rapid, accurate answers.
 6. Escalation: If they explicitly demand human help, refunds, or custom quotes, tell them to use the "Talk to Human Agent" button or /human command. Do not ping staff yourself.
-7. Engaging Gamer Tone: Be warm, playful, and enthusiastic! Use gamer terminology where appropriate (e.g., "GG", "GLHF", "level up"). Occasionally ask them what game they are currently playing or excited about to spark brief, fun engagement. Keep it friendly and use tasteful emojis!${orderSnippet}`;
+7. Engaging Gamer Tone: Be warm, playful, and enthusiastic! Use gamer terminology where appropriate (e.g., "GG", "GLHF", "level up"). Occasionally ask them what game they are currently playing or excited about to spark brief, fun engagement. Keep it friendly and use tasteful emojis!\n${catalogSnippet}${orderSnippet}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
