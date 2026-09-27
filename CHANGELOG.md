@@ -19,6 +19,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
   - Graceful AI-to-interactive-menu fallback when API quotas or network issues occur.
   - Deployed as `supabase/functions/customer-bot` (no JWT verification required for public customer access).
   - Automated Telegram command registration via `setMyCommands` (`/start`, `/track`, `/faq`, `/help`).
+- **Bidirectional Live Support Relay**: Seamlessly connects customers in `@retrochanbot` requesting human assistance directly into the Merchant Admin Bot (`@Notifyretro_bot`). The merchant receives real-time escalation alerts, replies directly to the customer using `/reply <chat_id> <message>` or tap-to-reply inline buttons, reviews open tickets via `/tickets`, and resolves tickets with `/resolve <chat_id>` to transition the customer back to Retro Chan.
 - **Per-User Cart Isolation**: `CartContext` now scopes each cart to `cart_${userId}` (authenticated) vs `cart_guest` (anonymous), eliminating cross-account cart leakage when multiple Google accounts are used on the same device.
 - **Universal Cross-Device Background Video Engine**: Complete overhaul of `BackgroundAnimation.tsx`.
   - HLS.js MSE engine with dedicated Web Worker offloading (`enableWorker: true`) — main UI thread fully free.

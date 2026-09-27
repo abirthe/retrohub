@@ -3,7 +3,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CUSTOMER_BOT_TOKEN = Deno.env.get('CUSTOMER_BOT_TOKEN')!
-const STAFF_CHAT_ID = Deno.env.get('STAFF_CHAT_ID') || Deno.env.get('TELEGRAM_CHAT_ID') || '5605963234'
+const ADMIN_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') || ''
+const STAFF_CHAT_ID = Deno.env.get('ADMIN_CHAT_ID') || Deno.env.get('TELEGRAM_CHAT_ID') || '5605963234'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const XAI_API_KEY = Deno.env.get('XAI_API_KEY') || Deno.env.get('VITE_XAI_API_KEY')
@@ -53,6 +54,25 @@ async function sendMessage(chatId: string | number, text: string, reply_markup?:
   if (!res.ok) {
     const errText = await res.text()
     console.error('Telegram sendMessage error:', errText)
+  }
+  return res
+}
+
+async function sendMerchantAdminAlert(text: string, reply_markup?: any) {
+  const token = ADMIN_BOT_TOKEN || CUSTOMER_BOT_TOKEN
+  const url = `https://api.telegram.org/bot${token}/sendMessage`
+  const body: any = { chat_id: STAFF_CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true }
+  if (reply_markup) {
+    body.reply_markup = reply_markup
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const errText = await res.text()
+    console.error('Telegram sendMerchantAdminAlert error:', errText)
   }
   return res
 }
@@ -418,13 +438,14 @@ ${historyText}
   const staffKeyboard = {
     inline_keyboard: [
       [
-        { text: `💬 Quick Reply`, url: `tg://user?id=${chatId}` },
-        { text: `✅ Mark Resolved`, callback_data: `staff_resolve_${chatId}` },
+        { text: `💬 Reply (/reply ${chatId})`, callback_data: `support_reply:${chatId}` },
+        { text: `✅ Mark Resolved`, callback_data: `support_resolve:${chatId}` },
       ],
+      ...(fromUser.username ? [[{ text: `👤 Open Direct PM`, url: `https://t.me/${fromUser.username}` }]] : []),
     ],
   }
 
-  await sendMessage(STAFF_CHAT_ID, staffAlert, staffKeyboard)
+  await sendMerchantAdminAlert(staffAlert, staffKeyboard)
 }
 
 /**
@@ -738,16 +759,58 @@ Tap the button below to reach our support team directly.`
 
     // Check if session is already escalated or in agent session
     if (session.state === 'escalated' || session.state === 'agent_active') {
-      // Forward new customer message to staff chat so agent stays in sync
+      // Forward new customer message directly to Merchant Admin Bot so admin stays in sync
       const fwdText =
-`📩 <b>New message from customer #${chatId}</b> ${fromUser.username ? `(@${escapeHtml(fromUser.username)})` : ''}:
+`📩 <b>Customer Message (Chat #<code>${chatId}</code>)</b> ${fromUser.username ? `(@${escapeHtml(fromUser.username)})` : ''}:
 "${escapeHtml(rawText)}"
 
-Reply using: <code>/reply ${chatId} &lt;text&gt;</code>`
-      await sendMessage(STAFF_CHAT_ID, fwdText)
+💬 Reply using: <code>/reply ${chatId} &lt;text&gt;</code>`
+
+      const fwdKeyboard = {
+        inline_keyboard: [
+          [
+            { text: `💬 Reply`, callback_data: `support_reply:${chatId}` },
+            { text: `✅ Resolve`, callback_data: `support_resolve:${chatId}` },
+          ],
+        ],
+      }
+      await sendMerchantAdminAlert(fwdText, fwdKeyboard)
 
       // Send subtle typing indicator acknowledging receipt without interrupting
       await sendChatAction(chatId, 'typing')
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // /help, /support & /track COMMANDS
+    // ─────────────────────────────────────────────────────────────
+    if (rawText === '/help' || rawText === '/support' || rawText === '/agent' || rawText === '/human') {
+      await sendChatAction(chatId, 'typing')
+      await sleep(600)
+      await sendMessage(
+        chatId,
+        `👨‍💻 <b>Connecting to Live Support...</b>\n\nI have routed your inquiry directly to our human specialist team at the Merchant Desk. An agent will review your chat and reply directly to you right here.`
+      )
+      await escalateToStaff(chatId, fromUser, 'Customer requested human assistance via /help command')
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
+
+    if (rawText.startsWith('/track')) {
+      const parts = rawText.split(' ')
+      const orderArg = parts[1] || ''
+      if (!orderArg) {
+        await sendMessage(chatId, '🔍 <b>Order Lookup:</b> Please provide an Order ID.\nExample: <code>/track c7c482a2</code>', {
+          inline_keyboard: [[{ text: '📦 Prompt for Order ID', callback_data: 'prompt_order' }]]
+        })
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+      }
+      const order = await resolveOrder(orderArg)
+      if (order) {
+        await updateSessionState(chatId, { last_order_id: order.id })
+        await sendMessage(chatId, formatOrderStatus(order), buildOrderKeyboard(order.id))
+      } else {
+        await sendMessage(chatId, `⚠️ Order <code>#${escapeHtml(orderArg)}</code> was not found. Please verify the ID on your receipt.`, buildGeneralKeyboard())
+      }
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
