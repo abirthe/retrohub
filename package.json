@@ -1,7 +1,7 @@
 {
   "name": "retrohub",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "RETROHUB - Game Keys & Top-ups E-commerce Platform. Dev by ABIR HOSSAIN",
   "type": "module",
   "engines": {

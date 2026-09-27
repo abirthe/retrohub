@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 
 const BackgroundAnimation: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -14,11 +15,19 @@ const BackgroundAnimation: React.FC = () => {
     video.muted = true;
     video.volume = 0;
     video.playsInline = true;
+    video.controls = false;
+    video.removeAttribute('controls');
     video.setAttribute('muted', '');
     video.setAttribute('playsinline', 'true');
     video.setAttribute('webkit-playsinline', 'true');
     video.setAttribute('autoplay', '');
     video.setAttribute('loop', '');
+    video.setAttribute('x5-playsinline', 'true');
+    video.setAttribute('x5-video-player-type', 'h5');
+    video.setAttribute('x5-video-player-fullscreen', 'false');
+    video.setAttribute('x-webkit-airplay', 'deny');
+    video.setAttribute('disablepictureinpicture', 'true');
+    video.setAttribute('disableremoteplayback', 'true');
 
     const videoSrc = 'https://stream.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys.m3u8';
     let hls: Hls | null = null;
@@ -30,12 +39,24 @@ const BackgroundAnimation: React.FC = () => {
       try {
         const promise = video.play();
         if (promise !== undefined) {
-          promise.catch(() => {
-            // Autoplay waiting for interaction on battery-saver or strict policy
-          });
+          promise
+            .then(() => {
+              if (isMounted) {
+                setIsPlaying(true);
+              }
+            })
+            .catch(() => {
+              // Autoplay waiting for interaction on battery-saver or strict policy
+            });
         }
       } catch {
         // Fallback for synchronous play exceptions
+      }
+    };
+
+    const handlePlaying = () => {
+      if (isMounted) {
+        setIsPlaying(true);
       }
     };
 
@@ -92,6 +113,8 @@ const BackgroundAnimation: React.FC = () => {
     video.addEventListener('canplay', playVideo);
     video.addEventListener('loadeddata', playVideo);
     video.addEventListener('canplaythrough', playVideo);
+    video.addEventListener('playing', handlePlaying);
+    video.addEventListener('timeupdate', handlePlaying);
 
     // 2. Playback Engine Initialization:
     // Engine A (Primary for Desktop Chrome/Edge/Firefox, Android): MSE HLS.js
@@ -183,12 +206,23 @@ const BackgroundAnimation: React.FC = () => {
       video.removeEventListener('canplay', playVideo);
       video.removeEventListener('loadeddata', playVideo);
       video.removeEventListener('canplaythrough', playVideo);
+      video.removeEventListener('playing', handlePlaying);
+      video.removeEventListener('timeupdate', handlePlaying);
     };
   }, []);
 
   return (
     <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden bg-background">
-      {/* Background Video Animation with Electric Cyan / Neon Teal Color Grading */}
+      {/* Decoupled Poster Backdrop: Rendered as pure CSS/HTML outside the <video> tag so mobile browsers NEVER render native play sign overlays */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center scale-[1.05] origin-center opacity-85 sm:opacity-90 [filter:hue-rotate(25deg)_saturate(1.35)_brightness(1.1)] [transform:translateZ(0)] pointer-events-none transition-opacity duration-1000"
+        style={{
+          backgroundImage: `url('https://image.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys/thumbnail.webp?time=1')`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Background Video Animation without native poster attribute to avoid mobile OS play badges */}
       <video
         ref={videoRef}
         autoPlay
@@ -196,8 +230,14 @@ const BackgroundAnimation: React.FC = () => {
         muted
         playsInline
         preload="auto"
-        poster="https://image.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys/thumbnail.webp?time=1"
-        className="absolute inset-0 w-full h-full object-cover scale-[1.05] origin-center opacity-85 sm:opacity-90 [filter:hue-rotate(25deg)_saturate(1.35)_brightness(1.1)] [transform:translateZ(0)] will-change-transform transition-opacity duration-1000"
+        controls={false}
+        disablePictureInPicture
+        disableRemotePlayback
+        tabIndex={-1}
+        aria-hidden="true"
+        className={`absolute inset-0 w-full h-full object-cover scale-[1.05] origin-center [filter:hue-rotate(25deg)_saturate(1.35)_brightness(1.1)] [transform:translateZ(0)] will-change-transform pointer-events-none transition-opacity duration-1000 ${
+          isPlaying ? 'opacity-85 sm:opacity-90' : 'opacity-0'
+        }`}
       />
 
       {/* Theme Color Harmonization Overlay */}
