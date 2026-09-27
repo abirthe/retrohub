@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
-import BackgroundAnimation from "@/components/BackgroundAnimation";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -44,6 +43,7 @@ const CustomOrder = lazyWithRetry(() => import("./pages/CustomOrder"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 const Privacy = lazyWithRetry(() => import("./pages/Privacy"));
 const Terms = lazyWithRetry(() => import("./pages/Terms"));
+const BackgroundAnimation = lazyWithRetry(() => import("@/components/BackgroundAnimation"));
 
 const queryClient = new QueryClient();
 
@@ -59,7 +59,9 @@ const App = () => (
       <TooltipProvider>
         <div className="relative w-full min-h-screen">
           <div className="fixed inset-0 z-0 pointer-events-none">
-            <BackgroundAnimation />
+            <Suspense fallback={null}>
+              <BackgroundAnimation />
+            </Suspense>
           </div>
           <div className="relative z-10 flex flex-col w-full min-h-screen">
             <Toaster />

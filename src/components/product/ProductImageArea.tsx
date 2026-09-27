@@ -30,6 +30,9 @@ export const ProductImageArea = ({ product }: ProductImageAreaProps) => {
         <img
           src={product.image_url}
           alt={product.title}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 relative z-0"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = 'none';

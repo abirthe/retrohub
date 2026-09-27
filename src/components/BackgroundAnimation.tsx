@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import Hls from 'hls.js';
 
 const BackgroundAnimation: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -15,7 +14,8 @@ const BackgroundAnimation: React.FC = () => {
     video.setAttribute('webkit-playsinline', '');
 
     const videoSrc = 'https://stream.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys.m3u8';
-    let hls: Hls | null = null;
+    let hlsInstance: { destroy: () => void } | null = null;
+    let isCancelled = false;
 
     const playVideo = async () => {
       try {
@@ -36,7 +36,6 @@ const BackgroundAnimation: React.FC = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     const forcePlayOnInteraction = () => {
-      // Defer video play to the next animation frame so user click/touch paint is never blocked (prevents INP delays)
       requestAnimationFrame(() => {
         if (video && video.paused) {
           video.play().catch(() => {});
@@ -51,28 +50,52 @@ const BackgroundAnimation: React.FC = () => {
       window.addEventListener('keydown', forcePlayOnInteraction, { once: true });
     };
 
-    if (Hls.isSupported()) {
-      hls = new Hls({
-        enableWorker: true,
+    const initPlayback = async () => {
+      if (isCancelled || !video) return;
+
+      // 1. Native HLS support (Safari/iOS) - zero extra JS required!
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+        video.load();
+        video.addEventListener('loadedmetadata', () => {
+          playVideo();
+          setupInteractionListeners();
+        }, { once: true });
+        return;
+      }
+
+      // 2. Dynamic HLS.js loader for browsers without native HLS support
+      try {
+        const { default: Hls } = await import('hls.js');
+        if (isCancelled) return;
+
+        if (Hls.isSupported()) {
+          const hls = new Hls({
+            enableWorker: true,
+          });
+          hlsInstance = hls;
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            playVideo();
+            setupInteractionListeners();
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load Hls.js dynamically:', err);
+      }
+    };
+
+    // Defer HLS setup to idle time so main thread / LCP paint is 100% unimpeded
+    let idleId: number | null = null;
+    let timerId: ReturnType<typeof setTimeout> | null = null;
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(() => {
+        initPlayback();
       });
-      hls.loadSource(videoSrc);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        playVideo();
-        setupInteractionListeners();
-      });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native HLS support (Safari/iOS)
-      video.src = videoSrc;
-      video.load();
-      video.addEventListener('loadedmetadata', () => {
-        playVideo();
-        setupInteractionListeners();
-      });
-      video.addEventListener('canplay', () => {
-        playVideo();
-        setupInteractionListeners();
-      });
+    } else {
+      timerId = setTimeout(initPlayback, 800);
     }
 
     // Backup interval to attempt playback if blocked
@@ -82,11 +105,18 @@ const BackgroundAnimation: React.FC = () => {
       } else {
         clearInterval(forcePlayInterval);
       }
-    }, 2000);
+    }, 2500);
 
     return () => {
-      if (hls) {
-        hls.destroy();
+      isCancelled = true;
+      if (idleId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      }
+      if (timerId !== null) {
+        clearTimeout(timerId);
+      }
+      if (hlsInstance) {
+        hlsInstance.destroy();
       }
       clearInterval(forcePlayInterval);
       window.removeEventListener('click', forcePlayOnInteraction);
@@ -99,7 +129,6 @@ const BackgroundAnimation: React.FC = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden bg-background">
-      {/* Background Video Animation */}
       {/* Background Video Animation with Electric Cyan / Neon Teal Color Grading */}
       <video
         ref={videoRef}
@@ -107,7 +136,7 @@ const BackgroundAnimation: React.FC = () => {
         loop
         muted
         playsInline
-        preload="auto"
+        preload="none"
         className="absolute inset-0 w-full h-full object-cover scale-[1.15] origin-center opacity-60 [filter:hue-rotate(35deg)_saturate(1.4)_brightness(1.05)]"
       />
 

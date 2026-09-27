@@ -36,6 +36,29 @@ export default {
       }
     }
 
+    // 3. Attach performance & cache-control headers for successful asset responses
+    if (response.status >= 200 && response.status < 400) {
+      const headers = new Headers(response.headers);
+      const pathname = url.pathname;
+
+      if (pathname.startsWith('/assets/')) {
+        // Hashed Vite JS/CSS chunks are immutable and safe to cache for 1 year
+        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+      } else if (/\.(webp|png|jpg|jpeg|svg|ico|woff2?)$/i.test(pathname)) {
+        // Static images and fonts cache for 7 days with background revalidation
+        headers.set('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+      } else if (headers.get('content-type')?.includes('text/html')) {
+        // HTML is served fresh to ensure instant deployment rollouts
+        headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+      }
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
+
     return response;
   },
 };
