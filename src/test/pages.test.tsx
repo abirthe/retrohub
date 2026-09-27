@@ -63,9 +63,10 @@ describe('Page Component Renders', () => {
     expect(screen.getByText(/24\/7 Live Triage/i)).toBeInTheDocument();
   });
 
-  it('renders Auth page with Google OAuth button and no email form', () => {
+  it('renders Auth page with Google OAuth button and no email form', async () => {
     renderWithProviders(<Auth />);
-    expect(screen.getByText(/Welcome to/i)).toBeInTheDocument();
+    // Auth page shows a spinner while session resolves, then reveals content when no user is logged in
+    await screen.findByText(/Welcome to/i);
     expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/email/i)).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/password/i)).not.toBeInTheDocument();
