@@ -21,15 +21,17 @@ supabase/
 ## ⚡ Edge Functions Overview
 
 ### 1. `customer-bot` — AI Customer Support Bot (`@retrochanbot`)
-A public-facing Telegram support agent powered by **xAI Grok** (`grok-beta`) and connected directly to the RetroHub PostgreSQL database.
+A public-facing Telegram support agent powered by a **Dual-Engine Architecture**: **xAI Grok** (`grok-2-latest`, `grok-2`, `grok-beta`) combined with a built-in **Retro Chan Natural Intelligence Engine**, connected directly to the RetroHub PostgreSQL database.
 
-* **Natural Language Processing**: Translates user questions into clear, helpful guidance on regional game keys, platform redemption, server UID requirements, and delivery times.
+* **Dual-Engine Architecture**:
+  * **Primary (xAI Grok)**: Context-aware conversational AI with dynamic store prompt injection and active order state tracking.
+  * **Secondary (Retro Chan Natural Intelligence Engine)**: High-speed local store intelligence answering bKash payment walkthroughs, instant delivery guarantees, order status queries, and product catalog details with zero external API dependencies.
+* **Zero-Interruption Invariant**: The merchant admin bot is **only alerted when a customer explicitly requests human assistance** (via `[👤 Talk to Human Agent]`, `/human`, `/agent`, `/support`, `/staff`). General customer care inquiries never ping or bother the merchant desk.
 * **Instant Order Tracking**: Accepts short IDs (e.g. `8f4b12`), 36-char UUIDs, or user email addresses to display live order status, verification stage, item breakdowns, and delivered digital codes.
-* **bKash Payment Assistant**: Step-by-step payment walkthrough for personal and merchant bKash send money, explaining the dynamic 1.0% charge calculation.
-* **Multi-Turn Session Persistence**: Persists user interactions in the `customer_support_sessions` table with automated 15-message rolling memory.
-* **Automated Escalation**: When a buyer requests a human agent or registers high sentiment frustration, the bot bridges them directly to the merchant.
-* **Graceful Degradation**: Automatically falls back to an interactive Telegram inline menu if AI API limits or network issues occur.
-* **Registered Menu Commands**: `/start`, `/track [id]`, `/faq`, `/help`.
+* **bKash Payment Assistant**: Step-by-step payment walkthrough for bKash Send Money to `01580382868`, explaining the dynamic 1.0% charge calculation and reference ID.
+* **Multi-Turn Session Persistence**: Persists user interactions in the `customer_support_sessions` table with automated 20-message rolling memory.
+* **Self-Resume & Cancellation**: Customers can tap `[🤖 Resume with Retro Chan AI]` at any time to return to autonomous AI mode.
+* **Registered Menu Commands**: `/start`, `/track [id]`, `/faq`, `/help`, `/human`.
 
 ```bash
 # Deploy customer bot
@@ -81,7 +83,7 @@ npx supabase functions deploy send-order-email --no-verify-jwt
 
 ## 🤝 Bidirectional Live Support Relay Sequence
 
-When a customer needs human assistance in `@retrochanbot`, the two bots orchestrate a live relay:
+When a customer explicitly requests human assistance in `@retrochanbot`, the two bots orchestrate a live relay:
 
 ```mermaid
 sequenceDiagram
@@ -92,24 +94,24 @@ sequenceDiagram
     participant AB as telegram-webhook (Edge Function)
     actor M as Merchant Admin (@Notifyretro_bot)
 
-    C->>CB: Sends message / clicks "Talk to Human" / /help
+    C->>CB: Taps [👤 Talk to Human Agent] or /human
     CB->>DB: Upsert session: state = 'escalated'
-    CB->>AB: Dispatch staff alert + recent messages
+    CB->>AB: Dispatch staff alert + order context
     AB->>M: 🚨 Escalation Alert [💬 Reply] [✅ Resolve]
     
     M->>AB: /reply <chat_id> <message>
     AB->>DB: Append agent message, state = 'agent_active'
     AB->>CB: Relay message via CUSTOMER_BOT_TOKEN
-    CB->>C: 👤 Support Specialist: <message>
+    CB->>C: 👨‍💻 RetroHub Support Specialist: <message>
 
     C->>CB: Customer replies
-    CB->>AB: Forward customer text
-    AB->>M: 📩 Customer Message (#<chat_id>): <text>
+    CB->>AB: Forward customer text (agent_active)
+    AB->>M: 📩 Customer Reply (#<chat_id>): <text>
 
-    M->>AB: /resolve <chat_id>
+    M->>AB: /resolve <chat_id> (or [✅ Resolve])
     AB->>DB: state = 'bot_active', resolved_at = NOW()
-    AB->>CB: Send resolution greeting
-    CB->>C: ✅ Ticket resolved. Returned to Retro Chan AI!
+    AB->>CB: Notify session resolved
+    CB->>C: ✅ Ticket resolved! Retro Chan is back 24/7.
 ```
 
 ---

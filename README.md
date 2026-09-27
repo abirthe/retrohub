@@ -177,12 +177,14 @@ RetroHub implements a decoupled, high-availability two-bot Telegram architecture
 ```
 
 ### 1. 💬 AI Customer Support Bot (`@retrochanbot`)
-* **Persona**: *"Retro Chan"* — empathetic, professional, and context-aware.
-* **xAI Grok Integration**: Powered by `grok-beta` to resolve questions on regional activation, server requirements, bKash fees, and order lookups.
-* **Instant Order Lookup**: Customers send an 8-character ID, full UUID, or account email to retrieve order status and digital codes.
-* **Sentiment Triage**: Scans for high-frustration keywords (`scam`, `refund`, `broken`, `stuck`), automatically prioritizing tickets.
-* **Multi-Turn Session Table**: Persists conversations in `customer_support_sessions` with automated 15-message rolling memory.
-* **Commands Registered**: `/start`, `/track [id]`, `/faq`, `/help`.
+* **Persona**: *"Retro Chan"* — witty, charming, empathetic, and highly knowledgeable about all RetroHub products, platforms, and payment workflows.
+* **Dual-Engine Customer Care Architecture**:
+  * **Engine A (xAI Grok)**: Powered by `grok-2-latest` (with `grok-2` and `grok-beta` fallback) for conversational NLP, live order context injection, regional platform guidance, and empathetic problem solving.
+  * **Engine B (Retro Chan Natural Intelligence Engine)**: Built-in local high-IQ knowledge engine providing sub-second answers on bKash payments (`01580382868`, 1% fee), instant delivery (1–15 min), order tracking, catalog highlights, and genuine key guarantees.
+* **Zero-Interruption Invariant**: The merchant admin bot is **only alerted when a customer explicitly requests human assistance**. All customer service, order checks, and payment walkthroughs are handled 100% autonomously by the bot without bothering the merchant desk.
+* **Instant Order Lookup**: Customers send an 8-character ID (e.g. `c7c482a2`) or full UUID to instantly retrieve order status, verification stage, and delivered keys.
+* **Multi-Turn Session Table**: Persists conversations in `customer_support_sessions` with automated 20-message rolling memory.
+* **Commands Registered**: `/start`, `/track [id]`, `/faq`, `/help`, `/human`.
 
 ### 2. ⚡ Merchant Admin Bot (`@Notifyretro_bot`)
 * **Real-Time Push Alerts**: Pushes order creations, bKash TrxID submissions with duplicate fraud alerts, custom requests, and low stock warnings (≤ 3 keys).
@@ -200,10 +202,13 @@ RetroHub implements a decoupled, high-availability two-bot Telegram architecture
   * `/stock [search]` — Live inventory health report across all products.
   * `/custom` — Review custom order requests.
   * `/remind` — Trigger immediate scan for unfulfilled orders.
+  * `/tickets` — View active escalated customer support sessions.
+  * `/reply <chat_id> <msg>` — Send live support message to a customer.
+  * `/resolve <chat_id>` — Resolve support ticket and return customer to AI bot.
   * `/help` — Command reference sheet.
 
 ### 3. 🤝 Bidirectional Live Support Relay (Human Assistance Bridge)
-When a customer requests human assistance in `@retrochanbot`, the system bridges the customer directly to the merchant in `@Notifyretro_bot`:
+When a customer explicitly requests human assistance in `@retrochanbot`, the system bridges the customer directly to the merchant in `@Notifyretro_bot`:
 
 ```mermaid
 sequenceDiagram
@@ -214,24 +219,24 @@ sequenceDiagram
     participant A面上 as telegram-webhook (Edge Fn)
     actor Admin as Merchant Admin (@Notifyretro_bot)
 
-    Customer->>C面上: "Talk to Human" / /help
+    Customer->>C面上: Taps [👤 Talk to Human Agent] or /human
     C面上->>DB: Set state = 'escalated', log context
-    C面上->>A面上: Forward escalation alert + context transcript
+    C面上->>A面上: Forward escalation alert + order context
     A面上->>Admin: 🚨 Live Escalation Alert [💬 Reply] [✅ Resolve]
     
     Admin->>A面上: /reply <chat_id> <message>
     A面上->>DB: Set state = 'agent_active', log agent reply
     A面上->>C面上: Dispatch message to customer
-    C面上->>Customer: 👤 Support Specialist: <message>
+    C面上->>Customer: 👨‍💻 RetroHub Support Specialist: <message>
     
     Customer->>C面上: Sends reply
-    C面上->>A面上: Forward customer message
-    A面上->>Admin: 📩 Customer Message (#chat_id): <text>
+    C面上->>A面上: Forward customer message (agent_active)
+    A面上->>Admin: 📩 Customer Reply (#chat_id): <text>
     
-    Admin->>A面上: /resolve <chat_id>
+    Admin->>A面上: /resolve <chat_id> (or [✅ Resolve])
     A面上->>DB: Set state = 'bot_active', log resolved_at
-    A面上->>C面上: Dispatch resolution message
-    C面上->>Customer: ✅ Ticket resolved. Returned to Retro Chan AI!
+    A面上->>C面上: Notify ticket resolved
+    C面上->>Customer: ✅ Ticket resolved! Retro Chan is back 24/7.
 ```
 
 * **Live Support Commands in Admin Bot**:
