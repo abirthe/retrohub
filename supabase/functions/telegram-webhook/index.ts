@@ -4,12 +4,89 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const TELEGRAM_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN')!
 const ADMIN_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID')!
+const CUSTOMER_BOT_TOKEN = Deno.env.get('CUSTOMER_BOT_TOKEN') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const TELEGRAM_WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || ''
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+async function sendToCustomer(chatId: string | number, message: string) {
+  if (!CUSTOMER_BOT_TOKEN) {
+    console.error('CUSTOMER_BOT_TOKEN not configured')
+    return false
+  }
+  const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/sendMessage`
+  const body = {
+    chat_id: chatId,
+    text: `👤 <b>RetroHub Support Specialist:</b>\n\n${escapeHtml(message)}\n\n<i>💬 Reply to this message anytime to continue chatting with support.</i>`,
+    parse_mode: 'HTML',
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    console.error('Failed to send to customer via customer-bot:', await res.text())
+    return false
+  }
+  return true
+}
+
+async function notifyCustomerResolved(chatId: string | number) {
+  if (!CUSTOMER_BOT_TOKEN) return false
+  const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/sendMessage`
+  const body = {
+    chat_id: chatId,
+    text: `✅ <b>Your support inquiry has been resolved by our specialist team.</b>\n\nThank you for choosing RetroHub! If you ever need assistance again, simply send a message and Retro Chan will be right here.`,
+    parse_mode: 'HTML',
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '📦 Track My Order', callback_data: 'prompt_order' },
+          { text: '🛒 Visit Store', url: 'https://www.retrohub.tech' },
+        ],
+      ],
+    },
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return res.ok
+}
+
+async function appendAgentSessionMessage(chatId: number, text: string) {
+  try {
+    const { data: session } = await supabase
+      .from('customer_support_sessions')
+      .select('recent_messages')
+      .eq('chat_id', chatId)
+      .maybeSingle()
+
+    const history = (session?.recent_messages || []) as Array<{ sender: string; text: string; time: string }>
+    history.push({
+      sender: 'agent',
+      text,
+      time: new Date().toISOString(),
+    })
+    const trimmed = history.slice(-20)
+
+    await supabase
+      .from('customer_support_sessions')
+      .update({
+        state: 'agent_active',
+        recent_messages: trimmed,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('chat_id', chatId)
+  } catch (err) {
+    console.error('appendAgentSessionMessage error:', err)
+  }
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -435,6 +512,35 @@ serve(async (req: Request) => {
       } else if ((action === 'order' || action === 'inspect') && orderIdentifier) {
         await answerCallbackQuery(cq.id, '🔍 Inspecting order...')
         await sendOrderInspection(chatId, orderIdentifier)
+      } else if (action === 'support_reply' && orderIdentifier) {
+        await answerCallbackQuery(cq.id, 'Tap command to copy')
+        await sendMessage(
+          chatId,
+          `💬 <b>Reply to Customer #<code>${orderIdentifier}</code>:</b>\n\n` +
+          `Copy and send:\n` +
+          `<code>/reply ${orderIdentifier} Hello, I am here to help you!</code>`
+        )
+      } else if (action === 'support_resolve' && orderIdentifier) {
+        const targetChatId = Number(orderIdentifier)
+        const { error } = await supabase
+          .from('customer_support_sessions')
+          .update({
+            state: 'bot_active',
+            resolved_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('chat_id', targetChatId)
+
+        if (!error) {
+          await notifyCustomerResolved(targetChatId)
+          await answerCallbackQuery(cq.id, 'Ticket resolved!')
+          await sendMessage(
+            chatId,
+            `✅ <b>Ticket for Chat #<code>${targetChatId}</code> marked resolved</b> and customer returned to Retro Chan AI bot.`
+          )
+        } else {
+          await answerCallbackQuery(cq.id, 'Failed to resolve ticket', true)
+        }
       } else {
         await answerCallbackQuery(cq.id)
       }
@@ -476,6 +582,10 @@ serve(async (req: Request) => {
         `• <code>/cancel [id] [reason]</code> - Cancel order & release stock\n` +
         `• <code>/hold [id] [reason]</code> - Place order on hold\n` +
         `• <code>/refund [id] [reason]</code> - Mark order as refunded\n\n` +
+        `🎧 <b>Live Customer Support (@retrochanbot):</b>\n` +
+        `• <code>/tickets</code> - View open customer support requests\n` +
+        `• <code>/reply [chat_id] [text]</code> - Reply directly to customer\n` +
+        `• <code>/resolve [chat_id]</code> - Resolve ticket & return to AI bot\n\n` +
         `📊 <b>Store & Inventory:</b>\n` +
         `• <code>/summary</code> - Today's financial metrics & revenue\n` +
         `• <code>/stock [search]</code> - Check stock or view low inventory\n` +
@@ -887,6 +997,86 @@ serve(async (req: Request) => {
             msg += `   Details: <i>${escapeHtml(req.details)}</i>\n`
           }
           msg += '\n'
+        })
+        await sendMessage(chatId, msg)
+      }
+    }
+    else if (text.startsWith('/reply')) {
+      const trimmed = text.substring(6).trim()
+      const firstSpace = trimmed.indexOf(' ')
+      if (firstSpace === -1) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/reply &lt;chat_id&gt; &lt;your message&gt;</code>\n\nExample:\n<code>/reply 123456789 Hello! We have verified your transaction.</code>')
+      } else {
+        const targetChatId = Number(trimmed.substring(0, firstSpace).trim())
+        const replyContent = trimmed.substring(firstSpace + 1).trim()
+
+        if (isNaN(targetChatId) || !replyContent) {
+          await sendMessage(chatId, '❌ Invalid Chat ID or empty reply message.')
+        } else {
+          const sent = await sendToCustomer(targetChatId, replyContent)
+          if (sent) {
+            await appendAgentSessionMessage(targetChatId, replyContent)
+            await sendMessage(
+              chatId,
+              `✅ <b>Reply delivered to customer</b> (Chat #<code>${targetChatId}</code>):\n\n` +
+              `<i>"${escapeHtml(replyContent)}"</i>\n\n` +
+              `Session marked <code>agent_active</code>. Use <code>/resolve ${targetChatId}</code> when finished.`
+            )
+          } else {
+            await sendMessage(chatId, `❌ Failed to deliver message to customer #<code>${targetChatId}</code>. Ensure the customer has started @retrochanbot.`)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/resolve')) {
+      const targetChatIdStr = text.substring(8).trim()
+      const targetChatId = Number(targetChatIdStr)
+      if (!targetChatIdStr || isNaN(targetChatId)) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/resolve &lt;chat_id&gt;</code>')
+      } else {
+        const { error } = await supabase
+          .from('customer_support_sessions')
+          .update({
+            state: 'bot_active',
+            resolved_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('chat_id', targetChatId)
+
+        if (error) {
+          await sendMessage(chatId, `❌ Error resolving session: ${escapeHtml(error.message)}`)
+        } else {
+          await notifyCustomerResolved(targetChatId)
+          await sendMessage(
+            chatId,
+            `✅ <b>Ticket for Chat #<code>${targetChatId}</code> marked resolved!</b>\nCustomer notified and returned to Retro Chan AI bot.`
+          )
+        }
+      }
+    }
+    else if (text === '/tickets' || text === '/support') {
+      const { data: tickets, error } = await supabase
+        .from('customer_support_sessions')
+        .select('chat_id, username, first_name, state, last_order_id, escalated_at, updated_at, recent_messages')
+        .in('state', ['escalated', 'agent_active'])
+        .order('updated_at', { ascending: false })
+        .limit(10)
+
+      if (error) {
+        await sendMessage(chatId, `❌ Failed to fetch support tickets: ${escapeHtml(error.message)}`)
+      } else if (!tickets || tickets.length === 0) {
+        await sendMessage(chatId, '🎉 <b>No open support tickets!</b> All customer chats are being handled smoothly by Retro Chan AI.')
+      } else {
+        let msg = `🎧 <b>Active Customer Support Tickets (${tickets.length}):</b>\n━━━━━━━━━━━━━━━━━━\n\n`
+        tickets.forEach((t: any, idx: number) => {
+          const stateBadge = t.state === 'agent_active' ? '🟢 Agent Active' : '🔴 Escalated (Waiting)'
+          const lastMsg = (t.recent_messages || []).slice(-1)[0]?.text || 'No messages'
+          const snippet = lastMsg.length > 50 ? lastMsg.substring(0, 47) + '...' : lastMsg
+          msg += `${idx + 1}. <b>${escapeHtml(t.first_name || 'Customer')}</b> ${t.username ? `(@${escapeHtml(t.username)})` : ''}\n` +
+                 `   🆔 Chat: <code>${t.chat_id}</code> | ${stateBadge}\n` +
+                 `   📦 Order: ${t.last_order_id ? `<code>${t.last_order_id.substring(0, 8)}</code>` : 'None'}\n` +
+                 `   💬 <i>"${escapeHtml(snippet)}"</i>\n` +
+                 `   👉 Reply: <code>/reply ${t.chat_id} &lt;msg&gt;</code>\n\n`
         })
         await sendMessage(chatId, msg)
       }
