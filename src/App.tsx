@@ -84,6 +84,8 @@ const App = () => (
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/payment" element={<Payment />} />
                     <Route path="/orders" element={<Orders />} />
+                    <Route path="/console" element={<Orders />} />
+                    <Route path="/support" element={<Orders />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
