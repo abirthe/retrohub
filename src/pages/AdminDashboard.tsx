@@ -16,6 +16,7 @@ import {
 } from '@/lib/shopApi';
 import { sendOrderCompletionEmail } from '@/lib/emailService';
 import { sendTelegramNotification } from '@/lib/telegramService';
+import { logger } from '@/lib/logger';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import { ShopHeader } from '@/components/layout';
@@ -73,7 +74,7 @@ const AdminDashboard = () => {
 
   // Log query errors privately — never expose raw Supabase error objects to the UI
   useEffect(() => {
-    if (ordersError) console.error('[Admin] Failed to load orders:', ordersError);
+    if (ordersError) logger.error('[Admin] Failed to load orders:', { error: String(ordersError) });
   }, [ordersError]);
 
   const { data: products } = useQuery({
@@ -176,7 +177,7 @@ const AdminDashboard = () => {
       );
       toast({ title: 'Summary Sent', description: 'Daily summary sent to Telegram successfully.' });
     } catch (error) {
-      console.error('Failed to send summary:', error);
+      logger.error('Failed to send summary:', { error: String(error) });
       toast({ title: 'Error', description: 'Failed to send daily summary.', variant: 'destructive' });
     }
   };

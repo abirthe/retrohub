@@ -1,5 +1,6 @@
 // Telegram notification service
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 export async function sendTelegramNotification(message: string) {
   try {
@@ -9,11 +10,11 @@ export async function sendTelegramNotification(message: string) {
     });
 
     if (error) {
-      console.warn('Edge function notification failed, trying fallback:', error.message);
+      logger.warn('Edge function notification failed, trying fallback:', { message: error.message });
       await fallbackDirectNotification(message);
     }
   } catch (err) {
-    console.warn('Error invoking telegram-webhook:', err);
+    logger.warn('Error invoking telegram-webhook:', { error: String(err) });
     await fallbackDirectNotification(message);
   }
 }
@@ -32,7 +33,7 @@ export async function notifyNewOrder(params: {
       body: { action: 'order_created', ...params },
     });
   } catch (err) {
-    console.error('Failed to notify new order:', err);
+    logger.error('Failed to notify new order:', { error: String(err) });
   }
 }
 
@@ -46,7 +47,7 @@ export async function notifyPaymentSubmitted(params: {
       body: { action: 'payment_submitted', ...params },
     });
   } catch (err) {
-    console.error('Failed to notify payment submission:', err);
+    logger.error('Failed to notify payment submission:', { error: String(err) });
   }
 }
 
@@ -62,7 +63,7 @@ export async function notifyCustomOrder(params: {
       body: { action: 'custom_order', ...params },
     });
   } catch (err) {
-    console.error('Failed to notify custom order:', err);
+    logger.error('Failed to notify custom order:', { error: String(err) });
   }
 }
 
@@ -73,7 +74,7 @@ export async function triggerPendingReminder() {
     });
     return data;
   } catch (err) {
-    console.error('Failed to trigger pending reminder:', err);
+    logger.error('Failed to trigger pending reminder:', { error: String(err) });
     return null;
   }
 }
@@ -95,6 +96,6 @@ async function fallbackDirectNotification(message: string) {
       }),
     });
   } catch (e) {
-    console.error('Direct fallback telegram notification error:', e);
+    logger.error('Direct fallback telegram notification error:', { error: String(e) });
   }
 }

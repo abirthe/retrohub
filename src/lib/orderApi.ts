@@ -3,6 +3,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { notifyNewOrder } from './telegramService';
+import { logger } from './logger';
 import type { Order, Delivery } from './types';
 
 // ─── Customer Order Creation ──────────────────────────────────────────────────
@@ -62,7 +63,7 @@ export async function createOrder(
       remainingStock: productData.in_stock ?? undefined,
     });
   } catch (e) {
-    console.error('Error sending telegram notification for order:', e);
+    logger.error('Error sending telegram notification for order:', { error: String(e) });
   }
 
   return orderData;
