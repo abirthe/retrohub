@@ -14,15 +14,21 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.npmrc
+.yarnrc
 
 # ------------------------------------------------------------------------------
 # 2. Supabase & Backend Sensitive Cache
 # ------------------------------------------------------------------------------
+.supabase/
 supabase/.temp/
 supabase/.temp
 supabase/.branches/
 supabase/.env
+supabase/.env.*
 supabase/.env.local
+supabase/functions/*/.env
+supabase/functions/*/.env.*
 supabase/config.toml
 config.toml
 
@@ -34,6 +40,7 @@ config.toml
 .dev.vars.*
 wrangler.json
 wrangler.toml
+.mf/
 
 # ------------------------------------------------------------------------------
 # 3. Keys, Certificates & Authentication Tokens
@@ -48,6 +55,9 @@ wrangler.toml
 *.id_rsa
 id_rsa*
 *.pub
+*.keypair
+*.keystore
+*.jks
 credentials.json
 service-account*.json
 serviceAccountKey.json
@@ -93,7 +103,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # ------------------------------------------------------------------------------
-# 7. Dependencies & Build Artifacts
+# 7. Dependencies, Caches & Build Artifacts
 # ------------------------------------------------------------------------------
 node_modules/
 dist/
@@ -102,10 +112,33 @@ dist-ssr/
 .vercel/
 .netlify/
 .output/
+.turbo/
+.vite/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
 bun.lockb
 
 # ------------------------------------------------------------------------------
-# 8. OS & IDE Metadata
+# 8. Testing & Code Coverage
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# ------------------------------------------------------------------------------
+# 9. Archives & Compressed Packages
+# ------------------------------------------------------------------------------
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+
+# ------------------------------------------------------------------------------
+# 10. OS, Modern Editors & IDE Metadata
 # ------------------------------------------------------------------------------
 .DS_Store
 Thumbs.db
@@ -114,6 +147,9 @@ desktop.ini
 .vscode/*
 !.vscode/extensions.json
 .idea/
+.cursor/
+.claude/
+.gemini/
 *.suo
 *.ntvs*
 *.njsproj
@@ -121,3 +157,7 @@ desktop.ini
 *.sw?
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
+*.orig
+*.rej
