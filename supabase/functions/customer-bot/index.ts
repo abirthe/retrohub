@@ -254,6 +254,7 @@ async function answerCallbackQuery(
  *     p_max_messages int default 8
  *   ) returns void
  *   language plpgsql
+ *   set search_path = ''
  *   as $$
  *   declare
  *     v_combined jsonb;
@@ -261,13 +262,13 @@ async function answerCallbackQuery(
  *   begin
  *     select coalesce(recent_messages, '[]'::jsonb) || jsonb_build_array(p_message)
  *       into v_combined
- *       from customer_support_sessions
+ *       from public.customer_support_sessions
  *       where chat_id = p_chat_id
  *       for update;
  *
  *     v_len := jsonb_array_length(v_combined);
  *
- *     update customer_support_sessions
+ *     update public.customer_support_sessions
  *     set recent_messages = (
  *           select jsonb_agg(value order by ord)
  *           from jsonb_array_elements(v_combined) with ordinality as t(value, ord)
