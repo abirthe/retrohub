@@ -184,7 +184,7 @@ retrohub/
 │   ├── maintenance/                     # Product deduplication and stock auditors
 │   ├── pricing/                         # Market price scrapers and sync tools
 │   ├── seeding/                         # Gift cards, game top-ups, and account seeders
-│   └── README.md                        # Documentation for script toolchain
+│   └── README_SCRIPT.md                 # Documentation for script toolchain
 ├── src/
 │   ├── components/
 │   │   ├── admin/                       # Dashboard tabs, order dialogs, stats grid, catalog editor
