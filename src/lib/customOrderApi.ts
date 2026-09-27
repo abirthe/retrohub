@@ -8,19 +8,17 @@ import type { CustomOrderPayload, CustomOrderRow } from './types';
 export async function submitCustomOrder(payload: CustomOrderPayload) {
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('custom_orders')
     .insert({
       user_id: user?.id || null,
-      name: payload.name,
-      email: payload.email,
-      product_name: payload.productName,
-      platform: payload.platform,
-      details: payload.details,
+      name: payload.name.trim(),
+      email: payload.email.trim(),
+      product_name: payload.productName.trim(),
+      platform: payload.platform.trim(),
+      details: payload.details ? payload.details.trim() : null,
       status: 'pending',
-    })
-    .select()
-    .single();
+    });
 
   if (error) throw error;
 
@@ -36,7 +34,7 @@ export async function submitCustomOrder(payload: CustomOrderPayload) {
     console.error('Error sending telegram notification for custom order:', e);
   }
 
-  return data;
+  return { success: true };
 }
 
 export async function fetchCustomOrders() {
