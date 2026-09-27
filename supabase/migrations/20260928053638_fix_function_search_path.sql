@@ -5,7 +5,7 @@ create or replace function append_session_message(
 ) returns void
 language plpgsql
 set search_path = ''
-as $$$
+as $$
 declare
   v_combined jsonb;
   v_len int;
@@ -27,4 +27,4 @@ begin
       updated_at = now()
   where chat_id = p_chat_id;
 end;
-$$$;
+$$;

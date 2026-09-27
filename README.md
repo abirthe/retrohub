@@ -70,6 +70,7 @@ graph TB
         CustomerFn["customer-bot (@retrochanbot)"]
         AdminFn["telegram-webhook (@Notifyretro_bot)"]
         EmailFn["send-order-email (Resend API)"]
+        AiProxyFn["generate-ai-text (xAI Proxy)"]
     end
 
     subgraph AI["🧠 Artificial Intelligence"]
@@ -85,6 +86,8 @@ graph TB
     Query --> DB
     Router --> Auth
     Auth --> DB
+    Router --> AiProxyFn
+    AiProxyFn <--> xAI
 
     TgCustomer <--> CustomerFn
     CustomerFn <--> xAI
@@ -403,6 +406,7 @@ npx wrangler deploy
 npx supabase functions deploy telegram-webhook --no-verify-jwt
 npx supabase functions deploy customer-bot --no-verify-jwt
 npx supabase functions deploy send-order-email --no-verify-jwt
+npx supabase functions deploy generate-ai-text --no-verify-jwt
 ```
 
 ---
