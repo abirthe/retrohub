@@ -31,7 +31,7 @@ Built with **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (Postg
 * **Frictionless Guest Cart Review**: Unauthenticated guests can view their cart, modify quantities, remove items, input game UIDs, and calculate totals without full-page login barriers.
 * **Contextual Authentication State**: Shows an ambient guest notification badge and changes the primary action button to `"Sign In to Complete Order"` (with safe return redirection back to `/checkout`), while logged-in users smoothly transition directly to `"Proceed to Payment"` with zero clutter.
 * **Player UID / Server Input**: For in-game top-up products, checkout prompts and validates the required Player ID, Server, or Zone ID.
-* **Authoritative Price Enforcement**: Product sale prices are validated and enforced directly from the database, preventing client-side price tampering.
+* **Authoritative Price Enforcement**: Product sale prices are validated and enforced directly from the database on every `createOrder` call, preventing client-side price tampering.
 * **Stock Availability Protection**: Real-time validation blocks orders if an item is out of stock.
 
 ---
@@ -83,7 +83,7 @@ Engineered with a **high-availability dual-channel dispatch architecture**: aler
 * 🛍️ **New Order Alert**: Product title, total, customer Game ID, order ID, and interactive inline buttons.
 * 💳 **Payment Submitted Alert**: Customer Transaction ID, order IDs, amount, and automatic duplicate TrxID fraud warnings.
 * 📝 **Custom Order Alert**: Customer name, email, platform, and request details.
-* ⚠️ **Low Stock Warning**: Instant notification when product inventory drops to $\le 3$.
+* ⚠️ **Low Stock Warning**: Instant notification when product inventory drops to ≤ 3.
 
 #### Interactive Telegram Commands & Inline Keyboards
 The bot has all 12 operational commands registered via Telegram's `setMyCommands` API, complete with `callback_query` webhook support for touch-friendly mobile fulfillment:
@@ -115,14 +115,15 @@ The bot has all 12 operational commands registered via Telegram's `setMyCommands
 ### 8. Hardened Security & Anti-Fraud Architecture
 
 * **Role-Gated Bot Commands**: Edge function verifies incoming Telegram chat IDs against `ADMIN_CHAT_ID`, rejecting unauthorized attempts with a `401/403` guard.
-* **Edge Rate Limiting**: Cloudflare Worker binding (`RATE_LIMITER`) throttles aggressive scrapers and DDoS bots by client IP directly at Cloudflare's edge before hitting Supabase.
+* **Edge Rate Limiting**: Cloudflare Worker binding (`RATE_LIMITER`) throttles aggressive scrapers and DDoS bots by client IP (150 req / 60 sec) directly at Cloudflare's edge before hitting Supabase.
 * **Atomic Payment Submission RPC**: Customer payment submission routes through a `SECURITY DEFINER` stored procedure (`submit_order_payment`) that strictly validates user ownership, verifies payment amounts, and atomically transitions status without granting direct table `UPDATE` access to clients.
 * **Duplicate TrxID Fraud Detection**: Scans previous orders for duplicate bKash Transaction IDs, immediately alerting the merchant if an ID is reused across accounts.
-* **Authoritative Catalog Enforcement**: Prices and stock levels are re-verified against the database upon checkout, preventing client-side DOM price tampering.
+* **Authoritative Catalog Enforcement**: Prices and stock levels are re-verified against the database upon every `createOrder` call in [`src/lib/orderApi.ts`](src/lib/orderApi.ts), preventing client-side DOM price tampering.
 * **HTML Sanitization**: Dynamic user input is escaped via `escapeHtml()` prior to Telegram HTML formatting, eliminating entity parsing crashes and injection attacks.
 * **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Digital keys (`inventory_keys`) and internal logs are hidden from non-admin accounts.
 * **Zero Client Credential Leakage**: Bot tokens, webhook secrets, and database service keys are stored strictly in server-side Supabase secrets and Cloudflare encrypted variables.
-* **Comprehensive `.gitignore` Hardening**: Blocks accidental commits of `.env`, `supabase/.env`, `.wrangler/`, `.dev.vars`, `.npmrc`, keystores, and build caches.
+* **Comprehensive `.gitignore` Hardening**: Blocks accidental commits of `.env`, `supabase/.env`, `.wrangler/`, `.dev.vars`, `.npmrc`, keystores, build caches, and all catalog data files (`*.xlsx`, `*.ods`, `*.csv`).
+* **Open Redirect Prevention**: `AuthCallback.tsx` validates the `returnTo` param against the current origin before redirecting, blocking external redirect abuse.
 
 ---
 
@@ -135,13 +136,13 @@ Engineered to pass all Google Core Web Vitals and achieve green performance benc
   * **HTML Preload**: Document `<head>` includes `<link rel="preload" as="image" href="/hero-bg.webp" type="image/webp" fetchpriority="high" />`, enabling immediate parallel network streaming before JS bundles parse.
   * **Optimized Image Tags**: Explicit `width="1440"`, `height="810"`, `fetchPriority="high"`, and `decoding="async"` in [HeroSection.tsx](src/components/home/HeroSection.tsx).
 * **Interaction to Next Paint (INP < 50ms)**:
-  * **Vite Chunk Splitting**: Implemented aggressive `manualChunks` in `vite.config.ts` to divide vendor libraries (`react-vendor`, `supabase-vendor`, `ui-vendor`, `icons-vendor`) into isolated bundles, cutting initial JS parse times drastically and keeping the main thread clear.
+  * **Vite Chunk Splitting**: `vite.config.ts` splits vendor libraries into 8 isolated bundles (`vendor-react`, `vendor-ui`, `vendor-supabase`, `vendor-tanstack`, `vendor-charts`, `vendor-forms`, `vendor-carousel`, `vendor-video`), cutting initial JS parse times drastically.
   * **Web Worker Offloading**: HLS.js video transmuxing in [BackgroundAnimation.tsx](src/components/BackgroundAnimation.tsx) is delegated to a dedicated Web Worker (`enableWorker: true`), freeing the main UI thread.
   * **Passive & Non-Blocking Event Listeners**: Touch and scroll events use `{ passive: true, once: true }`. Background video play is scheduled via `requestAnimationFrame` so user taps register with 0ms input delay.
   * **Concurrent React 18 `startTransition`**: Wrapped category filters, sort selectors, and admin tab triggers in `startTransition`, ensuring click animations and borders render in frame 1 (<16ms) while list mutations happen non-blockingly.
 * **Cumulative Layout Shift (CLS = 0.00)**:
-  * **Geometric Skeleton Grid**: Replaced generic loading spinners in [Index.tsx](src/pages/Index.tsx) with an 8-card responsive skeleton matching the exact card dimensions (`h-[280px] sm:h-[340px]`).
-  * **Layout Height Pre-Allocation**: Added `min-h-[500px]` to catalog wrappers and fixed aspect-ratio containers (`h-32 sm:h-44`) for product imagery.
+  * **Geometric Skeleton Grid**: Replaced generic loading spinners in [Index.tsx](src/pages/Index.tsx) with an 8-card responsive skeleton matching the exact card dimensions.
+  * **Layout Height Pre-Allocation**: Fixed aspect-ratio containers and `min-h` wrappers on catalog sections.
 
 ---
 
@@ -156,88 +157,107 @@ Engineered to pass all Google Core Web Vitals and achieve green performance benc
 | **Routing** | React Router DOM v6 | SPA navigation with guarded admin routes and OAuth handlers |
 | **Authentication** | Supabase Auth | Google OAuth 2.0, email/password, and session persistence |
 | **Database & Storage** | Supabase (PostgreSQL 15+) | Row Level Security, views, triggers, and `SECURITY DEFINER` RPCs |
-| **Serverless Functions**| Supabase Edge Functions (Deno) | Telegram bot webhook ingestion, notifications, and scheduled triggers |
+| **Serverless Functions** | Supabase Edge Functions (Deno) | Telegram bot webhook ingestion, notifications, and scheduled triggers |
 | **Edge Router & Security** | Cloudflare Workers (`worker.js`) | Global static asset serving, SPA 404 rewrite, and edge IP rate limiting |
 | **Automation & Cron** | GitHub Actions | 24/7 background pending order check every 2 hours, automated CI/CD |
+| **Testing** | Vitest 3.2, Testing Library | Unit tests for payment validation, price enforcement, stock helpers |
 | **Deployment Targets** | Cloudflare Workers, Vercel, GitHub Pages | Production SPA build with client fallback routing |
 
 ---
 
-## 📁 Repository Directory Structure
+## 📁 Repository Structure
 
 ```
 retrohub/
 ├── .github/
 │   └── workflows/
-│       ├── deploy-pages.yml             # Vite build & deployment to GitHub Pages
-│       └── pending-orders-reminder.yml  # 24/7 automated 2-hour Telegram reminder cron
+│       ├── deploy-pages.yml              # Vite build & deployment to GitHub Pages
+│       └── pending-orders-reminder.yml   # 24/7 automated 2-hour Telegram reminder cron
 ├── docs/
-│   └── MERCHANT_SYSTEM_OVERVIEW.md      # Authoritative merchant specification & operational guide
+│   └── MERCHANT_SYSTEM_OVERVIEW.md       # Authoritative merchant specification & operational guide
 ├── public/
-│   ├── .assetsignore                    # Directs Wrangler to exclude redirect rules during upload
-│   ├── favicon.png                      # Storefront favicon
-│   ├── hero-bg.webp                     # Next-gen WebP hero background (preloaded for LCP)
-│   └── robots.txt                       # SEO crawler guidelines
-├── scripts/                             # Catalog automation, seeding & pricing tools
-│   ├── database/                        # Migration runners and seed SQL
-│   ├── images/                          # Image mapping and CDN uploaders
-│   ├── maintenance/                     # Product deduplication and stock auditors
-│   ├── pricing/                         # Market price scrapers and sync tools
-│   ├── seeding/                         # Gift cards, game top-ups, and account seeders
-│   └── README_SCRIPT.md                 # Documentation for script toolchain
+│   ├── .assetsignore                     # Directs Wrangler to exclude redirect rules during upload
+│   ├── favicon.png                       # Storefront favicon
+│   ├── hero-bg.webp                      # Next-gen WebP hero background (preloaded for LCP)
+│   └── robots.txt                        # SEO crawler guidelines
+├── scripts/                              # Catalog automation, seeding & pricing tools
+│   ├── database/                         # Migration runner & compiled SQL seeds
+│   ├── images/                           # Image mapping, watermark removal & box art sourcing
+│   ├── maintenance/                      # Deduplication, stock audit & orphan cleanup
+│   ├── pricing/                          # Market scraper & margin sync
+│   ├── seeding/                          # Gift cards, game top-ups, accounts & sub seeders
+│   └── README_SCRIPT.md                  # Full script toolchain documentation
 ├── src/
 │   ├── components/
-│   │   ├── admin/                       # Dashboard tabs, order dialogs, stats grid, catalog editor
-│   │   ├── checkout/                    # Order review cards and stock feedback
-│   │   ├── home/                        # Hero banner, category pills, product grid, filters
-│   │   ├── layout/                      # ShopHeader, Footer, navigation drawers
-│   │   ├── orders/                      # Customer order table, status badges, code reveal
-│   │   ├── payment/                     # bKash payment instructions and account display
-│   │   ├── product/                     # Product cards, detail modals, variant selectors
-│   │   └── ui/                          # Radix / shadcn accessible component primitives
-│   ├── contexts/                        # CartContext (persisted via localStorage)
-│   ├── hooks/                           # useAdmin, useAuth, useToast custom hooks
+│   │   ├── admin/                        # Dashboard tabs, order dialogs, stats grid, catalog editor
+│   │   ├── checkout/                     # Order review cards and stock feedback
+│   │   ├── home/                         # Hero banner, category pills, product grid, filters
+│   │   ├── layout/                       # ShopHeader, Footer, navigation drawers
+│   │   ├── orders/                       # Customer order table, status badges, code reveal
+│   │   ├── payment/                      # bKash payment instructions and account display
+│   │   ├── product/                      # Product cards, detail modals, variant selectors
+│   │   └── ui/                           # Radix / shadcn accessible component primitives
+│   ├── contexts/                         # CartContext (persisted via localStorage)
+│   ├── hooks/                            # useAdmin, useAuth, useMobile, useToast
 │   ├── integrations/
-│   │   └── supabase/                    # Supabase client with production fallbacks & types
+│   │   └── supabase/                     # Supabase client with production fallbacks & types
 │   ├── lib/
-│   │   ├── constants.ts                 # Category and subcategory taxonomy
-│   │   ├── productFilters.ts            # Strict category isolation rules
-│   │   ├── regions.ts                   # 28 region codes and country flags
-│   │   ├── shopApi.ts                   # Data access layer, order creation & RPC callers
-│   │   ├── telegramService.ts           # Client dispatch to Supabase Edge Function
-│   │   └── utils.ts                     # Classname merging and currency formatters
+│   │   ├── types.ts                      # Centralized DB type aliases & shared interfaces
+│   │   ├── productApi.ts                 # Product catalog CRUD, storefront fetch, featured banner
+│   │   ├── orderApi.ts                   # Order creation, admin state transitions, KPI stats
+│   │   ├── paymentApi.ts                 # bKash TrxID submission with RPC + fallback
+│   │   ├── customOrderApi.ts             # Custom quote submission & admin management
+│   │   ├── authApi.ts                    # Admin role check (has_role RPC)
+│   │   ├── shopApi.ts                    # Backwards-compatible barrel re-export
+│   │   ├── constants.ts                  # Category and subcategory taxonomy
+│   │   ├── productFilters.ts             # Strict category isolation query builder
+│   │   ├── regions.ts                    # 28 region codes and country flags
+│   │   ├── telegramService.ts            # Client dispatch to Supabase Edge Function
+│   │   ├── emailService.ts               # Order confirmation email via Resend
+│   │   ├── grokApi.ts                    # AI-powered product description helper
+│   │   ├── logger.ts                     # Structured logging utility
+│   │   └── utils.ts                      # Classname merging and currency formatters
 │   ├── pages/
-│   │   ├── AdminDashboard.tsx           # Merchant back-office (admin-role gated)
-│   │   ├── Auth.tsx                     # Login and registration portal
-│   │   ├── AuthCallback.tsx             # OAuth callback handler (open-redirect secured)
-│   │   ├── Checkout.tsx                 # Cart checkout & Player ID collection
-│   │   ├── CustomOrder.tsx              # Custom quote request form
-│   │   ├── Index.tsx                    # Storefront homepage & product catalog
-│   │   ├── NotFound.tsx                 # 404 handler
-│   │   ├── Orders.tsx                   # Customer order history & code reveal
-│   │   ├── Payment.tsx                  # bKash transaction ID submission
-│   │   ├── Privacy.tsx                  # Privacy policy (OAuth compliance)
-│   │   ├── ProductDetail.tsx            # Full product details page
-│   │   └── Terms.tsx                    # Terms of service (OAuth compliance)
-│   ├── App.tsx                          # Root router, query client, and error boundary
-│   ├── index.css                        # Tailwind directives and cyber-neon design tokens
-│   └── main.tsx                         # React entrypoint
+│   │   ├── AdminDashboard.tsx            # Merchant back-office (admin-role gated)
+│   │   ├── Auth.tsx                      # Login and registration portal
+│   │   ├── AuthCallback.tsx              # OAuth callback handler (open-redirect secured)
+│   │   ├── Checkout.tsx                  # Cart checkout & Player ID collection
+│   │   ├── CustomOrder.tsx               # Custom quote request form
+│   │   ├── Index.tsx                     # Storefront homepage & product catalog
+│   │   ├── NotFound.tsx                  # 404 handler
+│   │   ├── Orders.tsx                    # Customer order history & code reveal
+│   │   ├── Payment.tsx                   # bKash transaction ID submission
+│   │   ├── Privacy.tsx                   # Privacy policy (OAuth compliance)
+│   │   ├── ProductDetail.tsx             # Full product details page
+│   │   └── Terms.tsx                     # Terms of service (OAuth compliance)
+│   ├── test/
+│   │   ├── setup.ts                      # Vitest global test setup
+│   │   └── example.test.ts               # Unit tests: TrxID validation, price tamper, open redirect
+│   ├── App.tsx                           # Root router, query client, and error boundary
+│   ├── index.css                         # Tailwind directives and cyber-neon design tokens
+│   └── main.tsx                          # React entrypoint
 ├── supabase/
 │   ├── functions/
-│   │   ├── telegram-webhook/            # Webhook receiver, notifications & bot commands
-│   │   └── send-order-email/            # Resend email notification function
-│   └── migrations/                      # Version-controlled PostgreSQL schemas, RLS & RPCs
-├── .assetsignore                        # Cloudflare Workers Static Assets upload ignore rules
-├── .env.example                         # Environment variable template
-├── .gitignore                           # Comprehensive security and cache protection rules
-├── .nvmrc                               # Pinned Node.js version 20
-├── package.json                         # Dependencies, scripts, and postinstall auto-build
-├── tailwind.config.ts                   # Tailwind theme styling & animations
-├── vercel.json                          # Vercel SPA routing configuration
-├── vite.config.ts                       # Vite compiler, manual chunk splitting & 200.html generator
-├── worker.js                            # Cloudflare Worker edge router with rate limiting & ASSETS binding
-├── wrangler.json                        # Cloudflare Workers build and asset configuration (sanitized)
-└── wrangler.json.example                # Example template for Wrangler configuration
+│   │   ├── telegram-webhook/             # Webhook receiver, all 12 bot commands & inline buttons
+│   │   └── send-order-email/             # Resend email notification edge function
+│   └── migrations/                       # 23 versioned PostgreSQL migrations (RLS, RPCs, indexes)
+├── CHANGELOG.md                          # Version history (Keep a Changelog format)
+├── CONTRIBUTING.md                       # Branch naming, commit style, PR checklist
+├── .assetsignore                         # Root-level Cloudflare asset upload ignore rules
+├── .env.example                          # Environment variable template
+├── .gitignore                            # Security & cache protection (incl. catalog data files)
+├── .nvmrc                                # Pinned Node.js version (20)
+├── components.json                       # shadcn/ui component registry config
+├── eslint.config.js                      # ESLint flat config (TypeScript + React hooks rules)
+├── package.json                          # Dependencies, npm scripts & postinstall build hook
+├── tailwind.config.ts                    # Tailwind theme, animations & cyber-neon tokens
+├── tsconfig.json / tsconfig.app.json     # TypeScript strict config
+├── vercel.json                           # Vercel SPA routing (/* → /index.html)
+├── vite.config.ts                        # Vite build: 8-chunk vendor splitting, 200.html plugin
+├── vitest.config.ts                      # Vitest test runner config (jsdom environment)
+├── worker.js                             # Cloudflare Worker: rate limiting + SPA 404 rewrite
+├── wrangler.json                         # Cloudflare Workers build & asset binding config
+└── wrangler.json.example                 # Safe template for Wrangler configuration
 ```
 
 ---
@@ -257,7 +277,12 @@ npm install
 ```
 
 ### 2. Environment Configuration
-Create a `.env` file in the root directory:
+Copy the template and fill in your credentials:
+```bash
+cp .env.example .env
+cp wrangler.json.example wrangler.json
+```
+
 ```env
 # Supabase Configuration
 VITE_SUPABASE_PROJECT_ID="your_project_id"
@@ -265,11 +290,11 @@ VITE_SUPABASE_URL="https://your_project_id.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY="your_publishable_anon_key"
 VITE_SUPABASE_ANON_KEY="your_publishable_anon_key"
 
-# Server / Script Variables (Keep Private)
+# Server / Script Variables (Keep Private — Never Commit)
 SUPABASE_URL="https://your_project_id.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
 
-# Telegram Bot (Optional local development overrides)
+# Telegram Bot (Optional — local development overrides)
 VITE_TELEGRAM_CHAT_ID="your_telegram_chat_id"
 VITE_TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
 
@@ -283,36 +308,56 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 4. Build & Verify
+### 4. Validate & Build
 ```bash
-npm run lint         # Run ESLint validation
-npx tsc --noEmit     # Check TypeScript types
-npm run build        # Build optimized production bundle
+npm run lint          # ESLint validation
+npx tsc --noEmit      # TypeScript type check (zero errors expected)
+npm test              # Run Vitest unit tests (15 tests)
+npm run build         # Production bundle
 ```
 
 ---
 
 ## ☁️ Deployment
 
-The project is pre-configured to deploy seamlessly across modern cloud providers:
+### Cloudflare Workers (Primary)
+Static assets compiled to `./dist` are bound via `env.ASSETS` (or `env.CLOUD_FLARE_ASSET` fallback). The `worker.js` edge router handles:
+- **IP Rate Limiting** (`env.RATE_LIMITER` — 150 req/60s per IP)
+- **SPA Fallback** — 404 responses on extensionless paths rewritten to `/index.html`
+- **Dual Binding** — `env.ASSETS || env.CLOUD_FLARE_ASSET` for local and production compatibility
 
-* **Cloudflare Workers (Static Assets)**:
-  * Static assets are compiled into `./dist` and bound via `env.ASSETS` or `env.CLOUD_FLARE_ASSET`.
-  * **Edge Rate Limiting**: Intercepts DDoS attacks and scrapers via `env.RATE_LIMITER` binding.
-  * **Native SPA Fallback (`200.html`)**: Automatically generated by Vite's build lifecycle (`closeBundle` hook in [vite.config.ts](vite.config.ts)). Cloudflare natively serves `200.html` for client-side navigation without external redirect rules.
-  * **`.assetsignore` Rule Enforcement**: Both the project root and `dist/` contain a dedicated `.assetsignore` file that explicitly ignores `_redirects` and `_headers` during upload, shielding the Cloudflare API `/workers/scripts/retrohub/versions` from false-positive infinite redirect loops (`code: 100324`).
-  * **Automated Postinstall Build Hook**: A hardened lifecycle hook in `package.json` (`postinstall`) automatically destroys any stale cached redirect files and executes `vite build` fresh, ensuring that even if Cloudflare runs `wrangler deploy` without an explicit dashboard build command, `./dist` is freshly compiled from the current commit.
-  * **Worker Fallback Engine**: [worker.js](worker.js) intercepts 404 responses for clean client routes (`/orders`, `/checkout`, `/admin`, etc.) and rewrites them to `/index.html` at the edge runtime.
-  * **Synchronized Release Branches**: Production builds on Cloudflare are kept in lockstep by maintaining synchronization across `main`, `Production`, and `Dev` branches.
-  * **Enforced Build Lifecycle**: [wrangler.json](wrangler.json) enforces `"build": { "command": "npm run build" }`, guaranteeing fresh builds and cache invalidation while preventing automatic framework detection conflicts.
-  * **Edge Observability**: Enabled in Wrangler config with real-time invocation logging (`observability.logs.enabled = true`, `traces = true`).
-  * Deployed automatically on push to `main` and `Production` via Cloudflare Workers Builds.
-* **Vercel**: Push to your repository; `vercel.json` automatically manages client-side SPA rewrite routing (`/*` $\rightarrow$ `/index.html`).
-* **GitHub Pages**: Handled automatically on `push` to `main` via `.github/workflows/deploy-pages.yml`.
-* **Supabase Edge Functions**:
-  ```bash
-  npx supabase functions deploy telegram-webhook --no-verify-jwt
-  ```
+Key deployment notes:
+- `wrangler.json` includes explicit `"build": { "command": "npm run build" }` to prevent Vite auto-detection errors on Vite < 6.
+- `vite.config.ts` post-build plugin generates `dist/200.html` (Cloudflare SPA standard) and writes `dist/.assetsignore` to block `_redirects` from uploading.
+- `postinstall` hook purges stale redirect artifacts and runs `vite build` fresh — ensures clean builds even when Cloudflare runs `npm install` only.
+
+```bash
+npx wrangler deploy
+```
+
+### Vercel
+Push to your repository; `vercel.json` automatically manages client-side SPA rewrites.
+
+### GitHub Pages
+Handled automatically on `push` to `main` via `.github/workflows/deploy-pages.yml` (Node 20, `npm ci`, `npm run build`).
+
+### Supabase Edge Functions
+```bash
+npx supabase functions deploy telegram-webhook --no-verify-jwt
+npx supabase functions deploy send-order-email --no-verify-jwt
+```
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming conventions, commit style, PR checklist, and the full project map.
+
+---
+
+## 📄 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a full version history.
 
 ---
 

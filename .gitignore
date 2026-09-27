@@ -159,3 +159,11 @@ desktop.ini
 *.sublime-workspace
 *.orig
 *.rej
+# ------------------------------------------------------------------------------
+# 11. Catalog Data Files (use cloud storage, not git)
+# ------------------------------------------------------------------------------
+Products/
+*.xlsx
+*.ods
+*.xls
+*.csv
