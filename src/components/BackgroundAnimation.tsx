@@ -8,7 +8,8 @@ const BackgroundAnimation: React.FC = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Strict mobile and desktop autoplay readiness
+    // 1. Strict cross-browser muted attributes for unconditional autoplay clearance
+    // Required by iOS Safari, Chrome MEI, Android Chrome, and Firefox
     video.defaultMuted = true;
     video.muted = true;
     video.volume = 0;
@@ -23,50 +24,87 @@ const BackgroundAnimation: React.FC = () => {
     let hls: Hls | null = null;
     let isMounted = true;
 
+    // Synchronous execution within user gesture is mandatory for iOS Safari activation token
     const playVideo = () => {
       if (!video) return;
-      const promise = video.play();
-      if (promise !== undefined) {
-        promise.catch(() => {
-          // Autoplay restricted until user interaction
-        });
+      try {
+        const promise = video.play();
+        if (promise !== undefined) {
+          promise.catch(() => {
+            // Autoplay waiting for interaction on battery-saver or strict policy
+          });
+        }
+      } catch (_) {
+        // Fallback for synchronous play exceptions
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        playVideo();
-      }
-    };
-
-    const forcePlayOnInteraction = () => {
+    // User gesture handler: do NOT defer with requestAnimationFrame or setTimeout
+    // Safari requires video.play() to be on the immediate call stack of the gesture event
+    const handleUserInteraction = () => {
       if (video && video.paused) {
         playVideo();
       }
     };
 
-    const setupInteractionListeners = () => {
-      window.addEventListener('click', forcePlayOnInteraction, { once: true, passive: true });
-      window.addEventListener('touchstart', forcePlayOnInteraction, { once: true, passive: true });
-      window.addEventListener('scroll', forcePlayOnInteraction, { once: true, passive: true });
-      window.addEventListener('keydown', forcePlayOnInteraction, { once: true, passive: true });
+    // Lifecycle events: wake up playback when tab is restored or device unlocked
+    const handleResume = () => {
+      if (document.visibilityState === 'visible' && video && video.paused) {
+        playVideo();
+      }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    setupInteractionListeners();
+    // Loop continuity: guarantee seamless restart even if VOD buffer ends
+    const handleEnded = () => {
+      if (!video) return;
+      video.currentTime = 0;
+      playVideo();
+    };
 
-    // 1. Native HLS support (Safari, iOS WebKit)
+    // Network recovery: if mobile cellular drops and comes back
+    const handleOnline = () => {
+      if (video && video.paused) {
+        playVideo();
+      }
+    };
+
+    // Bind interaction listeners across pointer, touch, scroll, and key
+    const interactionEvents: (keyof WindowEventMap)[] = [
+      'pointerdown',
+      'touchstart',
+      'touchend',
+      'click',
+      'scroll',
+      'wheel',
+      'keydown',
+    ];
+
+    interactionEvents.forEach((evt) => {
+      window.addEventListener(evt, handleUserInteraction, { passive: true });
+    });
+
+    document.addEventListener('visibilitychange', handleResume);
+    window.addEventListener('pageshow', handleResume);
+    window.addEventListener('focus', handleResume);
+    window.addEventListener('online', handleOnline);
+    video.addEventListener('ended', handleEnded);
+
+    // 2. Playback Engine Initialization:
+    // Engine A: Native HLS (iOS Safari, iPadOS, macOS Safari)
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = videoSrc;
       video.load();
       video.addEventListener('loadedmetadata', playVideo, { once: true });
       video.addEventListener('canplay', playVideo, { once: true });
+      video.addEventListener('loadeddata', playVideo, { once: true });
     } else if (Hls.isSupported()) {
-      // 2. MSE HLS.js for Chromium, Edge, Firefox
+      // Engine B: MSE Hls.js (Chrome, Android Chrome, Edge, Firefox, Samsung Internet)
       hls = new Hls({
-        enableWorker: false, // Prevents blob worker restrictions across browser environments
+        enableWorker: false, // Prevents blob worker restrictions across extensions/sandboxes
         lowLatencyMode: true,
-        backBufferLength: 60,
+        backBufferLength: 30,
+        maxBufferLength: 30,
+        startLevel: -1, // Auto bitrate for device network
       });
 
       hls.loadSource(videoSrc);
@@ -78,6 +116,7 @@ const BackgroundAnimation: React.FC = () => {
         }
       });
 
+      // Self-healing recovery for network or media decoding hiccups
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) {
           switch (data.type) {
@@ -88,33 +127,43 @@ const BackgroundAnimation: React.FC = () => {
               hls?.recoverMediaError();
               break;
             default:
-              hls?.destroy();
+              try {
+                hls?.destroy();
+                if (video && isMounted) {
+                  hls = new Hls({ enableWorker: false });
+                  hls.loadSource(videoSrc);
+                  hls.attachMedia(video);
+                }
+              } catch {
+                // Ignore instance reconstruction error
+              }
               break;
           }
         }
       });
     }
 
-    // Fallback interval to kickstart playback if initially blocked by browser autoplay policy
-    const checkInterval = setInterval(() => {
-      if (video && video.paused) {
+    // Safety watchdog: periodically ensures video is running
+    const watchdog = setInterval(() => {
+      if (video && video.paused && document.visibilityState === 'visible') {
         playVideo();
-      } else if (video && !video.paused) {
-        clearInterval(checkInterval);
       }
-    }, 1500);
+    }, 2000);
 
     return () => {
       isMounted = false;
-      clearInterval(checkInterval);
+      clearInterval(watchdog);
       if (hls) {
         hls.destroy();
       }
-      window.removeEventListener('click', forcePlayOnInteraction);
-      window.removeEventListener('touchstart', forcePlayOnInteraction);
-      window.removeEventListener('scroll', forcePlayOnInteraction);
-      window.removeEventListener('keydown', forcePlayOnInteraction);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      interactionEvents.forEach((evt) => {
+        window.removeEventListener(evt, handleUserInteraction);
+      });
+      document.removeEventListener('visibilitychange', handleResume);
+      window.removeEventListener('pageshow', handleResume);
+      window.removeEventListener('focus', handleResume);
+      window.removeEventListener('online', handleOnline);
+      video.removeEventListener('ended', handleEnded);
     };
   }, []);
 
@@ -128,7 +177,7 @@ const BackgroundAnimation: React.FC = () => {
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover scale-[1.08] origin-center opacity-75 [filter:hue-rotate(28deg)_saturate(1.35)_brightness(1.08)] transition-opacity duration-1000"
+        className="absolute inset-0 w-full h-full object-cover scale-[1.08] origin-center opacity-75 [filter:hue-rotate(28deg)_saturate(1.35)_brightness(1.08)] [transform:translateZ(0)] will-change-transform transition-opacity duration-1000"
       />
 
       {/* Theme Color Harmonization Overlay */}
