@@ -21,6 +21,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
 - **Favicon**: Compressed and properly sized `favicon.png` from 463 KB down to 16.8 KB (96% bandwidth reduction).
 - **Deployment Chunk Self-Healing**: Added global `vite:preloadError` event listener in `main.tsx`, timestamp-cooldown auto-reload in `App.tsx` (`lazyWithRetry`), and `ErrorBoundary.tsx` fallback to automatically refresh the page when background deployments replace hashed asset chunks (eliminating `Failed to fetch dynamically imported module`).
 - **Telegram Bot Inspect Action**: Added missing `order` and `inspect` callback query handler in `telegram-webhook` edge function, and registered `/inspect` as an alias for `/order` so tapping `🔍 Inspect` or typing `/inspect [id]` immediately displays the full order inspection card with quick action shortcuts.
+- **Google OAuth Only Authentication**: Simplified `Auth.tsx` to exclusively feature one-click Google OAuth 2.0 authentication, removing manual email/password forms, signup tabs, and forgot password inputs for a frictionless, high-security gaming marketplace experience.
 
 ### Added
 - `src/lib/productApi.ts` — Product catalog CRUD, featured banner, storefront search
