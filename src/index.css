@@ -88,6 +88,22 @@
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
   }
+
+  /* Suppress all native mobile & WebKit video play buttons, overlays, and controls */
+  video::-webkit-media-controls,
+  video::-webkit-media-controls-start-playback-button,
+  video::-webkit-media-controls-play-button,
+  video::-webkit-media-controls-overlay-play-button,
+  video::-webkit-media-controls-enclosure,
+  video::-webkit-media-controls-panel {
+    display: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }
 
 @layer utilities {

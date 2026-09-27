@@ -228,13 +228,6 @@ const CustomOrder = () => {
               <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
                 Can't find the game, subscription, or top-up you're looking for? Submit your request below. We source directly from authorized digital distributors at wholesale rates with rapid 15–60 minute turnaround, exclusive bKash payment, and 100% valid key guarantees.
               </p>
-
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-[11px] text-muted-foreground">
-                <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 font-medium text-foreground/90">⚡ 15–60 Min Turnaround</span>
-                <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 font-medium text-emerald-400">🛡️ 100% Valid Code Guarantee</span>
-                <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 font-medium text-pink-400">💳 bKash Payment Only</span>
-                <a href="https://t.me/retrochanbot" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 hover:bg-cyan-500/20 transition-colors">💬 @retrochanbot</a>
-              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
