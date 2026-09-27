@@ -41,65 +41,80 @@ async function sendChatAction(chatId: string | number, action: string = 'typing'
 }
 
 async function sendMessage(chatId: string | number, text: string, reply_markup?: any) {
-  const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/sendMessage`
-  const body: any = { chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }
-  if (reply_markup) {
-    body.reply_markup = reply_markup
-  }
-  let res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) {
-    const errText = await res.text()
-    console.error('Telegram sendMessage HTML error, retrying plain text:', errText)
-    // Strip HTML tags and retry as clean plain text
-    const cleanText = text.replace(/<[^>]*>/g, '')
-    res = await fetch(url, {
+  try {
+    const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/sendMessage`
+    const body: any = { chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }
+    if (reply_markup) {
+      body.reply_markup = reply_markup
+    }
+    let res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: cleanText, reply_markup, disable_web_page_preview: true }),
+      body: JSON.stringify(body),
     })
+    if (!res.ok) {
+      const errText = await res.text()
+      console.error('Telegram sendMessage HTML error, retrying plain text:', errText)
+      // Strip HTML tags and retry as clean plain text
+      const cleanText = text.replace(/<[^>]*>/g, '')
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: cleanText, reply_markup, disable_web_page_preview: true }),
+      })
+    }
+    return res
+  } catch (err) {
+    console.error('Telegram sendMessage network error:', err)
+    return null
   }
-  return res
 }
 
 async function sendMerchantAdminAlert(text: string, reply_markup?: any) {
-  const token = ADMIN_BOT_TOKEN || CUSTOMER_BOT_TOKEN
-  const url = `https://api.telegram.org/bot${token}/sendMessage`
-  const body: any = { chat_id: STAFF_CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true }
-  if (reply_markup) {
-    body.reply_markup = reply_markup
+  try {
+    const token = ADMIN_BOT_TOKEN || CUSTOMER_BOT_TOKEN
+    const url = `https://api.telegram.org/bot${token}/sendMessage`
+    const body: any = { chat_id: STAFF_CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true }
+    if (reply_markup) {
+      body.reply_markup = reply_markup
+    }
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const errText = await res.text()
+      console.error('Telegram sendMerchantAdminAlert error:', errText)
+    }
+    return res
+  } catch (err) {
+    console.error('Telegram sendMerchantAdminAlert network error:', err)
+    return null
   }
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) {
-    const errText = await res.text()
-    console.error('Telegram sendMerchantAdminAlert error:', errText)
-  }
-  return res
 }
 
 async function editMessageText(chatId: string | number, messageId: number, text: string, reply_markup?: any) {
-  const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/editMessageText`
-  const body: any = { chat_id: chatId, message_id: messageId, text, parse_mode: 'HTML', disable_web_page_preview: true }
-  if (reply_markup !== undefined) {
-    body.reply_markup = reply_markup
+  try {
+    const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/editMessageText`
+    const body: any = { chat_id: chatId, message_id: messageId, text, parse_mode: 'HTML', disable_web_page_preview: true }
+    if (reply_markup !== undefined) {
+      body.reply_markup = reply_markup
+    }
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const errText = await res.text()
+      console.error('Telegram editMessageText error:', errText)
+    }
+    return res
+  } catch (err) {
+    console.error('Telegram editMessageText network error:', err)
+    return null
   }
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) {
-    const errText = await res.text()
-    console.error('Telegram editMessageText error:', errText)
-  }
-  return res
 }
 
 async function answerCallbackQuery(callbackQueryId: string, text: string = '', showAlert: boolean = false) {
@@ -113,6 +128,126 @@ async function answerCallbackQuery(callbackQueryId: string, text: string = '', s
   } catch (err) {
     console.error('answerCallbackQuery error:', err)
   }
+}
+
+/**
+ * ============================================================================
+ * RetroHub Telegram support bot — HARDENED VERSION
+ * ============================================================================
+ * This file is a drop-in replacement for everything you pasted, starting at
+ * `getRetroChanIntelligenceResponse` and ending at the closing of `serve(...)`.
+ * It assumes your existing file still has, above this point and unchanged:
+ *   - imports (Deno std `serve`, `supabase-js`, etc.)
+ *   - the `supabase` client
+ *   - `corsHeaders`
+ *   - `escapeHtml(str)`
+ *   - `sleep(ms)`
+ *   - the Telegram senders: `sendMessage`, `editMessageText`, `sendChatAction`,
+ *     `answerCallbackQuery`, `sendMerchantAdminAlert`
+ *   - `XAI_API_KEY`
+ *
+ * WHAT CHANGED AND WHY (see inline "ROBUSTNESS FIX" comments for detail):
+ *
+ *   1. Cross-customer order leak (CRITICAL). The old `resolveOrder` matched
+ *      on a prefix as short as 4 hex characters against the last 100 orders
+ *      system-wide, and silently returned the newest match on a collision.
+ *      That meant a short, even accidental, prefix could surface — and let
+ *      someone view/deliver — a different customer's order and key. Fixed to
+ *      require the full 8-char short ID customers actually see, and to
+ *      report ambiguity instead of guessing.
+ *
+ *   2. No webhook authentication. Anyone who found the webhook URL could
+ *      POST forged Telegram updates. Added a secret-token check.
+ *
+ *   3. No idempotency. Telegram redelivers updates on any slow/failed
+ *      response, which could double-send messages or double-escalate.
+ *      Added a claim/release pattern keyed on `update_id`.
+ *
+ *   4. Session creation race. Two near-simultaneous first messages from a
+ *      new customer could both fall through the "no existing session"
+ *      branch. Switched to `upsert`.
+ *
+ *   5. Message-history race. `appendSessionMessage` did a plain
+ *      read-then-write, so two fast messages could clobber each other.
+ *      Moved the append to a row-locking Postgres function (SQL below),
+ *      with a same-behavior fallback if that migration hasn't run yet.
+ *
+ *   6. AI fallback chain could take ~30s (3 models x 10s) before falling
+ *      back to the perfectly good local responder. Capped to one attempt.
+ *
+ *   7. `Number(order.total).toFixed(2)` could render "NaN" if `total` were
+ *      ever null/undefined. Added `formatMoney`.
+ *
+ *   8. The "is this message just an order ID" detector used an unanchored
+ *      regex, so any 8 consecutive hex characters anywhere in a spaceless
+ *      message (e.g. a promo code) would trigger an order lookup. Anchored.
+ *
+ *   9. Added a light per-chat rate limit so one user can't cheaply flood
+ *      the bot into burning xAI/Telegram quota.
+ *
+ * REQUIRED — run this once in the Supabase SQL editor:
+ *
+ *   create table if not exists telegram_processed_updates (
+ *     update_id bigint primary key,
+ *     processed_at timestamptz not null default now()
+ *   );
+ *
+ *   create or replace function append_session_message(
+ *     p_chat_id bigint,
+ *     p_message jsonb,
+ *     p_max_messages int default 8
+ *   ) returns void
+ *   language plpgsql
+ *   as $$
+ *   declare
+ *     v_combined jsonb;
+ *     v_len int;
+ *   begin
+ *     select coalesce(recent_messages, '[]'::jsonb) || jsonb_build_array(p_message)
+ *       into v_combined
+ *       from customer_support_sessions
+ *       where chat_id = p_chat_id
+ *       for update;
+ *
+ *     v_len := jsonb_array_length(v_combined);
+ *
+ *     update customer_support_sessions
+ *     set recent_messages = (
+ *           select jsonb_agg(value order by ord)
+ *           from jsonb_array_elements(v_combined) with ordinality as t(value, ord)
+ *           where ord > greatest(v_len - p_max_messages, 0)
+ *         ),
+ *         updated_at = now()
+ *     where chat_id = p_chat_id;
+ *   end;
+ *   $$;
+ *
+ * REQUIRED — set this env var and pass it as `secret_token` when you call
+ * Telegram's setWebhook, so Telegram signs every request to you:
+ *
+ *   TELEGRAM_WEBHOOK_SECRET
+ *
+ * NOT fixed here (worth doing next): order lookups are still only as safe
+ * as "does the full 8-char ID match" — nothing binds an order to the
+ * Telegram chat_id that's allowed to view it. If these keys have real
+ * resale value, the robust fix is to require a second factor the first
+ * time a chat looks up an order (e.g. the phone number used for the bKash
+ * payment) and remember that chat<->order binding afterwards.
+ * ============================================================================
+ */
+
+const ORDER_SELECT = '*, products(id, title, platform, category, delivery_type), deliveries(*)'
+const ORDER_SCAN_LIMIT = 200
+
+function formatMoney(value: any): string {
+  const n = Number(value)
+  return Number.isFinite(n) ? n.toFixed(2) : '0.00'
+}
+
+function orderNotFoundMessage(identifier: string, ambiguous: boolean): string {
+  return ambiguous
+    ? `⚠️ That ID matches more than one order. Please send the <b>full</b> order ID from your receipt or confirmation email.`
+    : `⚠️ Order <code>#${escapeHtml(identifier)}</code> was not found. Please verify the ID on your receipt.`
 }
 
 /**
@@ -133,7 +268,7 @@ function getRetroChanIntelligenceResponse(
       return `Hey ${escapeHtml(name)}! 📦 I pulled up your latest order (<b>#${activeOrder.id.slice(0, 8)}</b>):\n\n` +
         `🎮 <b>Item:</b> ${escapeHtml(activeOrder.products?.title || 'Digital License')}\n` +
         `📊 <b>Status:</b> <b>${activeOrder.status}</b>\n` +
-        `💰 <b>Amount:</b> ৳${Number(activeOrder.total).toFixed(2)}\n\n` +
+        `💰 <b>Amount:</b> ৳${formatMoney(activeOrder.total)}\n\n` +
         (activeOrder.status === 'fulfilled'
           ? `🎉 Your code is delivered! Tap "View Key / Code" below to reveal it.`
           : activeOrder.status === 'payment_verified' || activeOrder.status === 'sourcing'
@@ -209,23 +344,24 @@ async function getAiResponse(
 ): Promise<string> {
   const fallback = getRetroChanIntelligenceResponse(latestMessage, sessionContext)
 
-  // Check if API key is provided
   if (!XAI_API_KEY || XAI_API_KEY.length < 10) {
     return fallback
   }
 
   try {
     const orderSnippet = sessionContext?.order
-      ? `\nActive Customer Order: #${sessionContext.order.id.slice(0, 8)} | Item: ${sessionContext.order.products?.title || 'Digital Item'} | Status: ${sessionContext.order.status} | Total: ৳${sessionContext.order.total}`
+      ? `\nActive Customer Order: #${sessionContext.order.id.slice(0, 8)} | Item: ${sessionContext.order.products?.title || 'Digital Item'} | Status: ${sessionContext.order.status} | Total: ৳${formatMoney(sessionContext.order.total)}`
       : ''
 
     const systemPrompt = `You are Retro Chan, the witty, charming, and highly intelligent customer support AI for Retro Hub (https://www.retrohub.tech).
-RetroHub Rules & Context:
-- RetroHub is a premier instant digital game key & gaming gift card storefront.
-- Payment: RETROHUB accepts exclusively bKash Send Money to 01580382868 (+1% bKash fee, use Order ID as reference). Payment confirmation happens at retrohub.tech/payment.
-- Delivery: Digital keys and credentials are automatically delivered within 1–15 minutes after payment verification.
-- Human Escalation: If a customer specifically requires manual intervention, account refunds, or custom quotes, politely let them know they can use the "Talk to Human Agent" button or /human command. Do not ping staff yourself unless they ask.
-- Keep responses friendly, concise, empathetic, human-like, and use tasteful emojis.${orderSnippet}`
+RetroHub Knowledge Base & Rules:
+1. Core Business: Premier instant digital game key & gaming gift card storefront. We sell Steam, PSN, Xbox, Nintendo keys, Apple/Google gift cards, and game top-ups (Free Fire, PUBG, Valorant).
+2. Payments: EXCLUSIVELY bKash Send Money to 01580382868. Customers must add a 1% bKash fee and use their Order ID as reference. Verification happens at retrohub.tech/payment.
+3. Delivery: 1–15 minutes automated delivery after payment verification.
+4. Refunds & Issues: 100% Genuine Key Guarantee. If a key is invalid/region-locked, we verify and replace or refund immediately.
+5. Interaction Policy: Handle ALL customer queries confidently and accurately. Do NOT hallucinate prices or policies. If you do not know something, politely offer to escalate. Be extremely concise to save tokens and provide rapid, accurate answers.
+6. Escalation: If they explicitly demand human help, refunds, or custom quotes, tell them to use the "Talk to Human Agent" button or /human command. Do not ping staff yourself.
+7. Engaging Gamer Tone: Be warm, playful, and enthusiastic! Use gamer terminology where appropriate (e.g., "GG", "GLHF", "level up"). Occasionally ask them what game they are currently playing or excited about to spark brief, fun engagement. Keep it friendly and use tasteful emojis!${orderSnippet}`
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -236,30 +372,45 @@ RetroHub Rules & Context:
       { role: 'user', content: latestMessage },
     ]
 
-    const models = ['grok-2-latest', 'grok-2', 'grok-beta']
-    for (const model of models) {
-      try {
-        const res = await fetch('https://api.x.ai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${XAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model,
-            messages,
-            temperature: 0.7,
-            max_tokens: 300,
-          }),
-        })
+    // ROBUSTNESS FIX: the original tried up to 3 models sequentially, each
+    // with its own 10s timeout — worst case ~30s before ever falling back
+    // to the (perfectly good) local responder. That risks the whole edge
+    // function call timing out, and Telegram treating it as a failed
+    // delivery and redelivering the update. One capped attempt is enough.
+    const model = 'grok-2-latest'
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-        if (res.ok) {
-          const data = await res.json()
-          const text = data.choices?.[0]?.message?.content?.trim()
-          if (text) return text
-        }
-      } catch (_) {
-        // Try fallback model
+    try {
+      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${XAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.5,
+          max_tokens: 300,
+        }),
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+
+      if (res.ok) {
+        const data = await res.json()
+        const text = data.choices?.[0]?.message?.content?.trim()
+        if (text) return text
+      } else {
+        console.error(`AI API error with model ${model}: ${res.status} ${res.statusText}`)
+      }
+    } catch (err: any) {
+      clearTimeout(timeoutId)
+      if (err.name === 'AbortError') {
+        console.error(`AI API timeout with model ${model}`)
+      } else {
+        console.error(`AI API fetch failed with model ${model}:`, err)
       }
     }
 
@@ -281,38 +432,62 @@ async function sendPacedMessage(chatId: string | number, text: string, reply_mar
 }
 
 /**
- * Resolve order from UUID or short prefix
+ * Resolve an order from a full UUID or the full 8-character short ID
+ * customers see on their receipt.
+ *
+ * ROBUSTNESS FIX (CRITICAL): the original accepted prefixes as short as 4
+ * hex characters and, on a collision, silently returned the *most recent*
+ * matching order — scanned across ALL customers, not just this chat. With
+ * only 65,536 possible 4-char prefixes and up to 100 recent orders in the
+ * scan, collisions are realistic, which meant a short or even accidental
+ * prefix could surface — and let someone view or "View Key/Code" — a
+ * different customer's order.
+ *
+ * This version requires the full 8-char ID and returns `ambiguous: true`
+ * instead of guessing when more than one order matches, so the caller can
+ * ask for the complete ID rather than silently showing the wrong order.
+ * It narrows the hole; it doesn't close it — see the file header note on
+ * binding orders to chat_id for the complete fix.
  */
-async function resolveOrder(identifier: string) {
+async function resolveOrder(identifier: string): Promise<{ order: any | null; ambiguous: boolean }> {
   const clean = identifier.trim()
-  if (!clean) return null
+  if (!clean) return { order: null, ambiguous: false }
 
-  // Direct UUID match
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (uuidRegex.test(clean)) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('orders')
-      .select('*, products(id, title, platform, category, delivery_type), deliveries(*)')
+      .select(ORDER_SELECT)
       .eq('id', clean)
       .maybeSingle()
-    if (data) return data
-  }
-
-  // Short prefix match
-  if (clean.length >= 4) {
-    const { data: recentOrders } = await supabase
-      .from('orders')
-      .select('*, products(id, title, platform, category, delivery_type), deliveries(*)')
-      .order('created_at', { ascending: false })
-      .limit(100)
-
-    if (recentOrders && recentOrders.length > 0) {
-      const matches = recentOrders.filter((o: any) => o.id.toLowerCase().startsWith(clean.toLowerCase()))
-      if (matches.length >= 1) return matches[0]
+    if (error) {
+      console.error('resolveOrder exact-match error:', error)
+      return { order: null, ambiguous: false }
     }
+    return { order: data, ambiguous: false }
   }
 
-  return null
+  // Require the full 8-char short ID (not an arbitrary shorter prefix).
+  if (clean.length >= 8) {
+    const { data: recentOrders, error } = await supabase
+      .from('orders')
+      .select(ORDER_SELECT)
+      .order('created_at', { ascending: false })
+      .limit(ORDER_SCAN_LIMIT)
+
+    if (error) {
+      console.error('resolveOrder prefix-scan error:', error)
+      return { order: null, ambiguous: false }
+    }
+
+    const matches = (recentOrders || []).filter((o: any) =>
+      o.id.toLowerCase().startsWith(clean.toLowerCase())
+    )
+    if (matches.length === 1) return { order: matches[0], ambiguous: false }
+    if (matches.length > 1) return { order: null, ambiguous: true }
+  }
+
+  return { order: null, ambiguous: false }
 }
 
 /**
@@ -343,15 +518,25 @@ async function getOrCreateSession(fromUser: any, chatId: number) {
       updated_at: new Date().toISOString(),
     }
 
+    // ROBUSTNESS FIX: upsert instead of insert. Two messages arriving in
+    // quick succession from a brand-new customer can both reach this
+    // branch before either write completes; a plain insert either throws
+    // on a unique constraint or creates two session rows for one chat.
     const { data: created, error } = await supabase
       .from('customer_support_sessions')
-      .insert(newSession)
+      .upsert(newSession, { onConflict: 'chat_id', ignoreDuplicates: false })
       .select()
       .maybeSingle()
 
     if (error) {
       console.error('Error creating support session:', error)
-      return newSession
+      // The concurrent request may have won the upsert — re-read before giving up.
+      const { data: retryRead } = await supabase
+        .from('customer_support_sessions')
+        .select('*')
+        .eq('chat_id', chatId)
+        .maybeSingle()
+      return retryRead || newSession
     }
     return created || newSession
   } catch (err) {
@@ -362,6 +547,7 @@ async function getOrCreateSession(fromUser: any, chatId: number) {
       first_name: fromUser.first_name || null,
       state: 'bot_active',
       recent_messages: [],
+      metadata: {},
     }
   }
 }
@@ -378,27 +564,98 @@ async function updateSessionState(chatId: number, updates: any) {
 }
 
 async function appendSessionMessage(chatId: number, sender: 'customer' | 'bot' | 'agent', text: string) {
+  const message = {
+    sender,
+    text: text.substring(0, 800),
+    time: new Date().toISOString(),
+  }
+
+  // ROBUSTNESS FIX: the original was a plain read-then-write, so two
+  // messages landing within the same few hundred ms (a double-send, or a
+  // Telegram retry) could race — both read the same `recent_messages`,
+  // and whichever write lands second silently drops the other message.
+  // `append_session_message` (SQL in the file header) row-locks the
+  // session for the duration of the read-modify-write, so appends from
+  // the same chat serialize correctly. Falls back to the old behavior if
+  // that migration hasn't been run yet.
   try {
-    const { data: session } = await supabase
-      .from('customer_support_sessions')
-      .select('recent_messages')
-      .eq('chat_id', chatId)
-      .maybeSingle()
-
-    const history = (session?.recent_messages || []) as Array<{ sender: string; text: string; time: string }>
-    history.push({
-      sender,
-      text,
-      time: new Date().toISOString(),
+    const { error } = await supabase.rpc('append_session_message', {
+      p_chat_id: chatId,
+      p_message: message,
+      p_max_messages: 8,
     })
-    const trimmed = history.slice(-20)
-
-    await supabase
-      .from('customer_support_sessions')
-      .update({ recent_messages: trimmed, updated_at: new Date().toISOString() })
-      .eq('chat_id', chatId)
+    if (error) throw error
   } catch (err) {
-    console.error('appendSessionMessage error:', err)
+    console.error('appendSessionMessage RPC failed, falling back to read-modify-write:', err)
+    try {
+      const { data: session } = await supabase
+        .from('customer_support_sessions')
+        .select('recent_messages')
+        .eq('chat_id', chatId)
+        .maybeSingle()
+
+      const history = (session?.recent_messages || []) as Array<{ sender: string; text: string; time?: string }>
+      history.push(message)
+      const trimmed = history.slice(-8)
+
+      await supabase
+        .from('customer_support_sessions')
+        .update({ recent_messages: trimmed, updated_at: new Date().toISOString() })
+        .eq('chat_id', chatId)
+    } catch (fallbackErr) {
+      console.error('appendSessionMessage fallback also failed:', fallbackErr)
+    }
+  }
+}
+
+/**
+ * Very light per-chat rate limit so a single user (or a script) can't
+ * cheaply flood the bot into burning xAI calls and Telegram quota. Not a
+ * substitute for a real limiter — just enough to blunt obvious abuse.
+ */
+function isRateLimited(session: any): boolean {
+  const now = Date.now()
+  const windowMs = 10_000
+  const maxInWindow = 6
+
+  const timestamps: number[] = (session.metadata?.recent_msg_times || []).filter(
+    (t: number) => now - t < windowMs
+  )
+  timestamps.push(now)
+  session.metadata = { ...(session.metadata || {}), recent_msg_times: timestamps.slice(-(maxInWindow + 5)) }
+
+  return timestamps.length > maxInWindow
+}
+
+/**
+ * ROBUSTNESS FIX: idempotency for Telegram's at-least-once delivery.
+ * `claimUpdate` inserts a row for this update_id; a unique-constraint
+ * conflict means we've already claimed (and are processing or finished)
+ * this exact update, so the caller should treat it as a duplicate and
+ * no-op. If processing later throws, `releaseUpdateClaim` removes the
+ * claim so a genuine Telegram retry can actually try again instead of
+ * being silently swallowed.
+ */
+async function claimUpdate(updateId: number): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('telegram_processed_updates').insert({ update_id: updateId })
+    if (error) {
+      if (error.code === '23505') return false // already claimed
+      console.error('claimUpdate insert error, failing open (will process):', error)
+      return true
+    }
+    return true
+  } catch (err) {
+    console.error('claimUpdate threw, failing open (will process):', err)
+    return true
+  }
+}
+
+async function releaseUpdateClaim(updateId: number) {
+  try {
+    await supabase.from('telegram_processed_updates').delete().eq('update_id', updateId)
+  } catch (err) {
+    console.error('releaseUpdateClaim failed:', err)
   }
 }
 
@@ -448,9 +705,11 @@ async function escalateToStaff(chatId: number, fromUser: any, reason: string, or
 
   let orderInfo = 'None specified'
   if (orderId) {
-    const order = await resolveOrder(orderId)
+    const { order, ambiguous } = await resolveOrder(orderId)
     if (order) {
-      orderInfo = `#<code>${order.id.slice(0, 8)}</code> | <b>${escapeHtml(order.products?.title || 'Unknown')}</b> | ৳${Number(order.total).toFixed(2)} (${order.status})`
+      orderInfo = `#<code>${order.id.slice(0, 8)}</code> | <b>${escapeHtml(order.products?.title || 'Unknown')}</b> | ৳${formatMoney(order.total)} (${order.status})`
+    } else if (ambiguous) {
+      orderInfo = `Ambiguous ID "${escapeHtml(orderId)}" — matches multiple orders, ask the customer for the full ID`
     }
   }
 
@@ -506,7 +765,7 @@ function formatOrderStatus(order: any): string {
 ━━━━━━━━━━━━━━━━━━
 🎮 <b>Product:</b> ${escapeHtml(order.products?.title || 'Digital Item')}
 🏷️ <b>Platform:</b> ${escapeHtml(order.products?.platform || 'Global')}
-💰 <b>Total:</b> ৳${Number(order.total).toFixed(2)}
+💰 <b>Total:</b> ৳${formatMoney(order.total)}
 🕒 <b>Placed:</b> ${createdDate} (BST)
 📊 <b>Current Status:</b> <b>${label}</b>
 
@@ -517,75 +776,66 @@ ${order.status === 'fulfilled'
   : 'ℹ️ <i>We are verifying your transaction with the payment gateway. If you need manual expedited handling, tap Talk to Human Agent below.</i>'}`
 }
 
-serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+/**
+ * All actual update handling, extracted out of `serve` so the outer
+ * handler can release an update's idempotency claim if this throws
+ * partway through (see claimUpdate/releaseUpdateClaim above).
+ */
+async function handleUpdate(update: any): Promise<Response> {
+  // ─────────────────────────────────────────────────────────────
+  // 1. HANDLE CALLBACK QUERIES (Inline Buttons)
+  // ─────────────────────────────────────────────────────────────
+  if (update.callback_query) {
+    const query = update.callback_query
+    const callbackQueryId = query.id
+    const data = query.data || ''
+    const chatId = query.message?.chat?.id
+    const messageId = query.message?.message_id
+    const fromUser = query.from
 
-  if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405, headers: corsHeaders })
-  }
+    await answerCallbackQuery(callbackQueryId)
 
-  try {
-    const update = await req.json()
+    if (data === 'resume_bot') {
+      await updateSessionState(chatId, {
+        state: 'bot_active',
+        resolved_at: new Date().toISOString(),
+      })
+      await editMessageText(
+        chatId,
+        messageId,
+        `👋 <b>Back to Retro Chan!</b>\n\nI am ready to help you with orders, keys, payment guidelines, or store recommendations. What can I do for you?`,
+        buildGeneralKeyboard()
+      )
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
 
-    // ─────────────────────────────────────────────────────────────
-    // 1. HANDLE CALLBACK QUERIES (Inline Buttons)
-    // ─────────────────────────────────────────────────────────────
-    if (update.callback_query) {
-      const query = update.callback_query
-      const callbackQueryId = query.id
-      const data = query.data || ''
-      const chatId = query.message?.chat?.id
-      const messageId = query.message?.message_id
-      const fromUser = query.from
+    if (data.startsWith('status_')) {
+      const orderPrefix = data.replace('status_', '')
+      const { order, ambiguous } = await resolveOrder(orderPrefix)
+      if (!order) {
+        await editMessageText(chatId, messageId, orderNotFoundMessage(orderPrefix, ambiguous), buildGeneralKeyboard())
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+      }
+      const text = formatOrderStatus(order)
+      await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
 
-      await answerCallbackQuery(callbackQueryId)
-
-      // Customer self-cancels escalation / returns to AI bot
-      if (data === 'resume_bot') {
-        await updateSessionState(chatId, {
-          state: 'bot_active',
-          resolved_at: new Date().toISOString(),
-        })
-        await editMessageText(
-          chatId,
-          messageId,
-          `👋 <b>Back to Retro Chan!</b>\n\nI am ready to help you with orders, keys, payment guidelines, or store recommendations. What can I do for you?`,
-          buildGeneralKeyboard()
-        )
+    if (data.startsWith('key_')) {
+      const orderPrefix = data.replace('key_', '')
+      const { order, ambiguous } = await resolveOrder(orderPrefix)
+      if (!order) {
+        await editMessageText(chatId, messageId, orderNotFoundMessage(orderPrefix, ambiguous), buildGeneralKeyboard())
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
 
-      // Check Status
-      if (data.startsWith('status_')) {
-        const orderPrefix = data.replace('status_', '')
-        const order = await resolveOrder(orderPrefix)
-        if (!order) {
-          await editMessageText(chatId, messageId, `⚠️ Order <code>#${escapeHtml(orderPrefix)}</code> was not found. Please verify the ID on your receipt.`, buildGeneralKeyboard())
-          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-        }
-        const text = formatOrderStatus(order)
-        await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
+      const deliveries = order.deliveries || []
+      if (deliveries.length > 0) {
+        const codes = deliveries
+          .map((d: any, idx: number) => `🔑 <b>Item #${idx + 1}:</b>\n<code>${escapeHtml(d.delivery_code)}</code>${d.delivery_notes ? `\n<i>Note: ${escapeHtml(d.delivery_notes)}</i>` : ''}`)
+          .join('\n\n')
 
-      // View Key / Code
-      if (data.startsWith('key_')) {
-        const orderPrefix = data.replace('key_', '')
-        const order = await resolveOrder(orderPrefix)
-        if (!order) {
-          await editMessageText(chatId, messageId, `⚠️ Order <code>#${escapeHtml(orderPrefix)}</code> was not found.`, buildGeneralKeyboard())
-          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-        }
-
-        const deliveries = order.deliveries || []
-        if (deliveries.length > 0) {
-          const codes = deliveries
-            .map((d: any, idx: number) => `🔑 <b>Item #${idx + 1}:</b>\n<code>${escapeHtml(d.delivery_code)}</code>${d.delivery_notes ? `\n<i>Note: ${escapeHtml(d.delivery_notes)}</i>` : ''}`)
-            .join('\n\n')
-
-          const text =
+        const text =
 `🎉 <b>Digital Delivery for Order #${order.id.slice(0, 8)}</b>
 ━━━━━━━━━━━━━━━━━━
 🎮 <b>Product:</b> ${escapeHtml(order.products?.title || 'Digital License')}
@@ -594,86 +844,82 @@ ${codes}
 
 ⚠️ <i>Keep your code safe and do not share it with third parties.</i>`
 
-          await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
-        } else if (order.final_output) {
-          const text =
+        await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
+      } else if (order.final_output) {
+        const text =
 `🎉 <b>Delivery Credentials for Order #${order.id.slice(0, 8)}</b>
 ━━━━━━━━━━━━━━━━━━
 <code>${escapeHtml(order.final_output)}</code>`
-          await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
-        } else {
-          const text =
+        await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
+      } else {
+        const text =
 `⏳ <b>Credentials Not Ready Yet</b>
 ━━━━━━━━━━━━━━━━━━
 Order <code>#${order.id.slice(0, 8)}</code> is currently in state: <b>${order.status}</b>.
 
 Your code is being provisioned. As soon as it's ready, it will appear here and in your web Customer Console!`
-          await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
-        }
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+        await editMessageText(chatId, messageId, text, buildOrderKeyboard(order.id))
       }
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
 
-      // Report Issue / Refund
-      if (data.startsWith('issue_')) {
-        const orderPrefix = data.replace('issue_', '')
-        await editMessageText(
-          chatId,
-          messageId,
-          `📝 <b>Issue Resolution & Guarantee</b>
+    if (data.startsWith('issue_')) {
+      const orderPrefix = data.replace('issue_', '')
+      await editMessageText(
+        chatId,
+        messageId,
+        `📝 <b>Issue Resolution & Guarantee</b>
 ━━━━━━━━━━━━━━━━━━
 We apologize for the inconvenience with Order <code>#${escapeHtml(orderPrefix)}</code>.
 
 All RetroHub orders are protected under our full replacement & refund policy. Tap below if you would like to connect directly with our human merchant desk!`,
-          {
-            inline_keyboard: [
-              [{ text: '🚨 Connect to Human Support Now', callback_data: `escalate_${orderPrefix}` }],
-              [{ text: '🔙 Back to Order Options', callback_data: `status_${orderPrefix}` }],
-            ],
-          }
-        )
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
+        {
+          inline_keyboard: [
+            [{ text: '🚨 Connect to Human Support Now', callback_data: `escalate_${orderPrefix}` }],
+            [{ text: '🔙 Back to Order Options', callback_data: `status_${orderPrefix}` }],
+          ],
+        }
+      )
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
 
-      // Escalate to human: Explicit user action
-      if (data.startsWith('escalate_')) {
-        const orderPrefix = data.replace('escalate_', '')
-        const effectiveOrder = orderPrefix !== 'general' ? orderPrefix : undefined
+    if (data.startsWith('escalate_')) {
+      const orderPrefix = data.replace('escalate_', '')
+      const effectiveOrder = orderPrefix !== 'general' ? orderPrefix : undefined
 
-        await editMessageText(
-          chatId,
-          messageId,
-          `🛡️ <b>Handoff to Merchant Specialist</b>
+      await editMessageText(
+        chatId,
+        messageId,
+        `🛡️ <b>Handoff to Merchant Specialist</b>
 ━━━━━━━━━━━━━━━━━━
 I have notified our merchant desk! An agent will review your chat transcript and reply directly here shortly.
 
 In the meantime, feel free to send any additional screenshots or keep asking questions — Retro Chan is still here for you!`,
-          {
-            inline_keyboard: [
-              [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
-              [{ text: '🌐 Customer Console', url: 'https://www.retrohub.tech/orders' }],
-            ],
-          }
-        )
-        await escalateToStaff(chatId, fromUser, 'Customer requested human assistance via interactive button', effectiveOrder)
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
+        {
+          inline_keyboard: [
+            [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
+            [{ text: '🌐 Customer Console', url: 'https://www.retrohub.tech/orders' }],
+          ],
+        }
+      )
+      await escalateToStaff(chatId, fromUser, 'Customer requested human assistance via interactive button', effectiveOrder)
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
 
-      // Prompt for order ID
-      if (data === 'prompt_order') {
-        await editMessageText(
-          chatId,
-          messageId,
-          `🔍 <b>Order Lookup</b>\n\nPlease send your <b>Order ID</b> (for example: the 8-character code from your receipt like <code>c7c482a2</code>).`,
-          {
-            inline_keyboard: [[{ text: '🔙 Cancel', callback_data: 'back_general' }]],
-          }
-        )
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
+    if (data === 'prompt_order') {
+      await editMessageText(
+        chatId,
+        messageId,
+        `🔍 <b>Order Lookup</b>\n\nPlease send your <b>Order ID</b> (for example: the 8-character code from your receipt like <code>c7c482a2</code>).`,
+        {
+          inline_keyboard: [[{ text: '🔙 Cancel', callback_data: 'back_general' }]],
+        }
+      )
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
 
-      // FAQ
-      if (data === 'faq') {
-        const faqText =
+    if (data === 'faq') {
+      const faqText =
 `ℹ️ <b>Frequently Asked Questions</b>
 ━━━━━━━━━━━━━━━━━━
 ⚡ <b>How long does delivery take?</b>
@@ -688,203 +934,267 @@ Tap "View Key / Code" in your order menu, or visit your customer console at retr
 🚨 <b>Need more help?</b>
 Tap the button below to reach our merchant specialist directly.`
 
-        await editMessageText(chatId, messageId, faqText, {
-          inline_keyboard: [
-            [{ text: '👤 Talk to Human Agent', callback_data: 'escalate_general' }],
-            [{ text: '🔙 Back', callback_data: 'back_general' }],
-          ],
-        })
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
-
-      if (data === 'back_general') {
-        await editMessageText(
-          chatId,
-          messageId,
-          `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nHow can we help you today?`,
-          buildGeneralKeyboard()
-        )
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
-
+      await editMessageText(chatId, messageId, faqText, {
+        inline_keyboard: [
+          [{ text: '👤 Talk to Human Agent', callback_data: 'escalate_general' }],
+          [{ text: '🔙 Back', callback_data: 'back_general' }],
+        ],
+      })
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. HANDLE INCOMING TEXT MESSAGES
-    // ─────────────────────────────────────────────────────────────
-    if (!update.message || !update.message.text) {
-      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-    }
-
-    const message = update.message
-    const chatId = message.chat.id
-    const fromUser = message.from
-    const rawText = message.text.trim()
-
-    // ─────────────────────────────────────────────────────────────
-    // A. EXPLICIT HUMAN ESCALATION COMMANDS (/human, /agent, /support, /help)
-    // ─────────────────────────────────────────────────────────────
-    if (rawText === '/help' || rawText === '/support' || rawText === '/agent' || rawText === '/human' || rawText === '/staff') {
-      await sendChatAction(chatId, 'typing')
-      await sleep(600)
-      await sendMessage(
+    if (data === 'back_general') {
+      await editMessageText(
         chatId,
-        `👨‍💻 <b>Connecting to Live Human Support...</b>\n\nI have routed your inquiry directly to our merchant desk. An agent will review your chat transcript and reply directly to you right here.\n\nIn the meantime, feel free to ask any other questions!`,
-        {
-          inline_keyboard: [
-            [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
-          ],
-        }
-      )
-      await escalateToStaff(chatId, fromUser, `Customer invoked human command: ${rawText}`)
-      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // B. ORDER TRACKING COMMAND (/track)
-    // ─────────────────────────────────────────────────────────────
-    if (rawText.startsWith('/track')) {
-      const parts = rawText.split(' ')
-      const orderArg = parts[1] || ''
-      if (!orderArg) {
-        await sendMessage(chatId, '🔍 <b>Order Lookup:</b> Please provide an Order ID.\nExample: <code>/track c7c482a2</code>', {
-          inline_keyboard: [[{ text: '📦 Prompt for Order ID', callback_data: 'prompt_order' }]],
-        })
-        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-      }
-      const order = await resolveOrder(orderArg)
-      if (order) {
-        await updateSessionState(chatId, { last_order_id: order.id })
-        await sendMessage(chatId, formatOrderStatus(order), buildOrderKeyboard(order.id))
-      } else {
-        await sendMessage(chatId, `⚠️ Order <code>#${escapeHtml(orderArg)}</code> was not found. Please verify the ID on your receipt.`, buildGeneralKeyboard())
-      }
-      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // C. /start COMMAND & DEEP LINK HANDLING
-    // ─────────────────────────────────────────────────────────────
-    if (rawText.startsWith('/start')) {
-      const parts = rawText.split(' ')
-      const payload = parts[1] || ''
-
-      if (payload.startsWith('order_') || payload.startsWith('issue_')) {
-        const orderId = payload.replace(/^(order_|issue_)/, '')
-        await updateSessionState(chatId, { last_order_id: orderId })
-
-        await sendChatAction(chatId, 'typing')
-        await sleep(1000)
-
-        const order = await resolveOrder(orderId)
-        if (order) {
-          const greeting = payload.startsWith('issue_')
-            ? `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>, I see you're checking on Order <code>#${order.id.slice(0, 8)}</code>. Let's look into this right away!`
-            : `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>! Here is the latest update on your order:`
-
-          await sendMessage(chatId, greeting)
-          await sleep(600)
-          await sendChatAction(chatId, 'typing')
-          await sleep(1000)
-
-          const statusText = formatOrderStatus(order)
-          await sendMessage(chatId, statusText, buildOrderKeyboard(order.id))
-          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
-        }
-      }
-
-      await sendPacedMessage(
-        chatId,
-        `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nI'm Retro Chan, your 24/7 automated support concierge. I can instantly verify your order status, look up your game keys & credentials, or connect you with human support whenever needed.`,
-        buildGeneralKeyboard(),
-        [1000, 1600]
+        messageId,
+        `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nHow can we help you today?`,
+        buildGeneralKeyboard()
       )
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // D. ORDER ID PATTERN DETECTION (8-char hex or UUID)
-    // ─────────────────────────────────────────────────────────────
-    const orderMatch = rawText.match(/[0-9a-f]{8}(-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?/i)
-    if (orderMatch && !rawText.includes(' ')) {
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 2. HANDLE INCOMING TEXT MESSAGES
+  // ─────────────────────────────────────────────────────────────
+  if (!update.message || !update.message.text) {
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+  }
+
+  const message = update.message
+  const chatId = message.chat.id
+  const fromUser = message.from
+  const rawText = message.text.trim()
+
+  // Load/create the session once, up front, so it's available both for
+  // rate limiting and for every branch below (previously fetched again,
+  // later, only for the AI-response branch).
+  const session = await getOrCreateSession(fromUser, chatId)
+
+  // ROBUSTNESS FIX: basic per-chat flood guard.
+  if (isRateLimited(session)) {
+    await updateSessionState(chatId, { metadata: session.metadata })
+    return new Response(JSON.stringify({ ok: true, rateLimited: true }), { headers: corsHeaders })
+  }
+  await updateSessionState(chatId, { metadata: session.metadata })
+
+  // ─────────────────────────────────────────────────────────────
+  // A. EXPLICIT HUMAN ESCALATION COMMANDS (/human, /agent, /support, /help)
+  // ─────────────────────────────────────────────────────────────
+  if (rawText === '/help' || rawText === '/support' || rawText === '/agent' || rawText === '/human' || rawText === '/staff') {
+    await sendChatAction(chatId, 'typing')
+    await sleep(600)
+    await sendMessage(
+      chatId,
+      `👨‍💻 <b>Connecting to Live Human Support...</b>\n\nI have routed your inquiry directly to our merchant desk. An agent will review your chat transcript and reply directly to you right here.\n\nIn the meantime, feel free to ask any other questions!`,
+      {
+        inline_keyboard: [
+          [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
+        ],
+      }
+    )
+    await escalateToStaff(chatId, fromUser, `Customer invoked human command: ${rawText}`)
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // B. ORDER TRACKING COMMAND (/track)
+  // ─────────────────────────────────────────────────────────────
+  if (rawText.startsWith('/track')) {
+    const parts = rawText.split(' ')
+    const orderArg = parts[1] || ''
+    if (!orderArg) {
+      await sendMessage(chatId, '🔍 <b>Order Lookup:</b> Please provide an Order ID.\nExample: <code>/track c7c482a2</code>', {
+        inline_keyboard: [[{ text: '📦 Prompt for Order ID', callback_data: 'prompt_order' }]],
+      })
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    }
+    const { order, ambiguous } = await resolveOrder(orderArg)
+    if (order) {
+      await updateSessionState(chatId, { last_order_id: order.id })
+      await sendMessage(chatId, formatOrderStatus(order), buildOrderKeyboard(order.id))
+    } else {
+      await sendMessage(chatId, orderNotFoundMessage(orderArg, ambiguous), buildGeneralKeyboard())
+    }
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // C. /start COMMAND & DEEP LINK HANDLING
+  // ─────────────────────────────────────────────────────────────
+  if (rawText.startsWith('/start')) {
+    const parts = rawText.split(' ')
+    const payload = parts[1] || ''
+
+    if (payload.startsWith('order_') || payload.startsWith('issue_')) {
+      const orderId = payload.replace(/^(order_|issue_)/, '')
+      await updateSessionState(chatId, { last_order_id: orderId })
+
       await sendChatAction(chatId, 'typing')
       await sleep(1000)
 
-      const order = await resolveOrder(orderMatch[0])
+      const { order } = await resolveOrder(orderId)
       if (order) {
-        await updateSessionState(chatId, { last_order_id: order.id })
-        await sendMessage(chatId, `🔍 Found your order!`)
+        const greeting = payload.startsWith('issue_')
+          ? `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>, I see you're checking on Order <code>#${order.id.slice(0, 8)}</code>. Let's look into this right away!`
+          : `👋 Hi <b>${escapeHtml(fromUser.first_name || 'there')}</b>! Here is the latest update on your order:`
+
+        await sendMessage(chatId, greeting)
         await sleep(600)
         await sendChatAction(chatId, 'typing')
         await sleep(1000)
-        await sendMessage(chatId, formatOrderStatus(order), buildOrderKeyboard(order.id))
+
+        const statusText = formatOrderStatus(order)
+        await sendMessage(chatId, statusText, buildOrderKeyboard(order.id))
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
       }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // E. SESSION MANAGEMENT & CONTEXT PREPARATION
-    // ─────────────────────────────────────────────────────────────
-    const session = await getOrCreateSession(fromUser, chatId)
-    await appendSessionMessage(chatId, 'customer', rawText)
+    await sendPacedMessage(
+      chatId,
+      `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nI'm Retro Chan, your 24/7 automated support concierge. I can instantly verify your order status, look up your game keys & credentials, or connect you with human support whenever needed.`,
+      buildGeneralKeyboard(),
+      [1000, 1600]
+    )
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+  }
 
-    // Load active order context if known
-    let activeOrderData: any = null
-    if (session.last_order_id) {
-      activeOrderData = await resolveOrder(session.last_order_id)
+  // ─────────────────────────────────────────────────────────────
+  // D. ORDER ID PATTERN DETECTION (full 8-char hex or UUID, and ONLY that)
+  // ─────────────────────────────────────────────────────────────
+  // ROBUSTNESS FIX: the original regex wasn't anchored, so any message
+  // containing 8 consecutive hex characters anywhere (e.g. a promo code,
+  // a product SKU) would be treated as an order-ID lookup. Anchored to
+  // require the whole trimmed message to be exactly an ID.
+  const orderIdOnlyRegex = /^[0-9a-f]{8}(-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$/i
+  if (orderIdOnlyRegex.test(rawText)) {
+    await sendChatAction(chatId, 'typing')
+    await sleep(1000)
+
+    const { order } = await resolveOrder(rawText)
+    if (order) {
+      await updateSessionState(chatId, { last_order_id: order.id })
+      await sendMessage(chatId, `🔍 Found your order!`)
+      await sleep(600)
+      await sendChatAction(chatId, 'typing')
+      await sleep(1000)
+      await sendMessage(chatId, formatOrderStatus(order), buildOrderKeyboard(order.id))
+      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
+    // No match (or ambiguous, deliberately unlikely for a full 8-char ID) —
+    // fall through to the normal AI/local-intelligence response below,
+    // same as the original behavior.
+  }
 
-    // ─────────────────────────────────────────────────────────────
-    // F. LIVE AGENT SESSION RELAY
-    // ONLY forward customer message to staff if the agent has ACTIVELY replied (agent_active)
-    // ─────────────────────────────────────────────────────────────
-    if (session.state === 'agent_active') {
-      const fwdText =
+  // ─────────────────────────────────────────────────────────────
+  // E. LOG THIS MESSAGE
+  // ─────────────────────────────────────────────────────────────
+  await appendSessionMessage(chatId, 'customer', rawText)
+
+  let activeOrderData: any = null
+  if (session.last_order_id) {
+    const { order } = await resolveOrder(session.last_order_id)
+    activeOrderData = order
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // F. LIVE AGENT SESSION RELAY
+  // ONLY forward customer message to staff if the agent has ACTIVELY replied (agent_active)
+  // ─────────────────────────────────────────────────────────────
+  if (session.state === 'agent_active') {
+    const fwdText =
 `📩 <b>Customer Reply (Chat #<code>${chatId}</code>)</b> ${fromUser.username ? `(@${escapeHtml(fromUser.username)})` : ''}:
 "${escapeHtml(rawText)}"
 
 💬 Reply using: <code>/reply ${chatId} &lt;text&gt;</code>`
 
-      const fwdKeyboard = {
-        inline_keyboard: [
-          [
-            { text: `💬 Reply`, callback_data: `support_reply:${chatId}` },
-            { text: `✅ Resolve`, callback_data: `support_resolve:${chatId}` },
-          ],
+    const fwdKeyboard = {
+      inline_keyboard: [
+        [
+          { text: `💬 Reply`, callback_data: `support_reply:${chatId}` },
+          { text: `✅ Resolve`, callback_data: `support_resolve:${chatId}` },
         ],
+      ],
+    }
+    await sendMerchantAdminAlert(fwdText, fwdKeyboard)
+    await sendChatAction(chatId, 'typing')
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // G. FULL CUSTOMER SERVICE POWERED BY RETRO CHAN FT. GROK
+  // The bot handles 100% of the customer service conversation without bothering the merchant!
+  // ─────────────────────────────────────────────────────────────
+  await sendChatAction(chatId, 'typing')
+
+  const responseText = await getAiResponse(
+    session.recent_messages || [],
+    rawText,
+    {
+      order: activeOrderData,
+      customerName: fromUser.first_name || 'Gamer',
+    }
+  )
+
+  await appendSessionMessage(chatId, 'bot', responseText)
+
+  const keyboard = activeOrderData
+    ? buildOrderKeyboard(activeOrderData.id)
+    : buildGeneralKeyboard()
+
+  await sendPacedMessage(chatId, responseText, keyboard, [800, 1800])
+
+  return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+}
+
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  if (req.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405, headers: corsHeaders })
+  }
+
+  // ROBUSTNESS FIX: verify the request actually came from Telegram. Without
+  // this, anyone who finds the webhook URL can POST forged updates — fake
+  // escalations, fake order views, etc. Set TELEGRAM_WEBHOOK_SECRET and pass
+  // the same value as `secret_token` in your setWebhook call.
+  const expectedSecret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET')
+  if (expectedSecret) {
+    const gotSecret = req.headers.get('x-telegram-bot-api-secret-token')
+    if (gotSecret !== expectedSecret) {
+      console.error('Rejected webhook call with invalid or missing secret token')
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders })
+    }
+  }
+
+  let claimedUpdateId: number | null = null
+
+  try {
+    const update = await req.json()
+
+    // ROBUSTNESS FIX: idempotency. Telegram guarantees at-least-once
+    // delivery and will redeliver an update if your response is slow or
+    // errors. Without this, a single retry can double-send messages or
+    // double-escalate the same customer message.
+    if (typeof update.update_id === 'number') {
+      const fresh = await claimUpdate(update.update_id)
+      if (!fresh) {
+        return new Response(JSON.stringify({ ok: true, duplicate: true }), { headers: corsHeaders })
       }
-      await sendMerchantAdminAlert(fwdText, fwdKeyboard)
-      await sendChatAction(chatId, 'typing')
-      return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+      claimedUpdateId = update.update_id
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // G. FULL CUSTOMER SERVICE POWERED BY RETRO CHAN FT. GROK
-    // The bot handles 100% of the customer service conversation without bothering the merchant!
-    // ─────────────────────────────────────────────────────────────
-    await sendChatAction(chatId, 'typing')
-
-    const responseText = await getAiResponse(
-      session.recent_messages || [],
-      rawText,
-      {
-        order: activeOrderData,
-        customerName: fromUser.first_name || 'Gamer',
-      }
-    )
-
-    await appendSessionMessage(chatId, 'bot', responseText)
-
-    const keyboard = activeOrderData
-      ? buildOrderKeyboard(activeOrderData.id)
-      : buildGeneralKeyboard()
-
-    await sendPacedMessage(chatId, responseText, keyboard, [800, 1800])
-
-    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
+    return await handleUpdate(update)
   } catch (err: any) {
     console.error('Customer bot webhook handler error:', err)
+    // Processing failed after we claimed this update — release the claim
+    // so a real Telegram retry can try again instead of being silently
+    // treated as a duplicate forever.
+    if (claimedUpdateId !== null) await releaseUpdateClaim(claimedUpdateId)
     return new Response(JSON.stringify({ error: err.message || 'Internal Server Error' }), {
       status: 500,
       headers: corsHeaders,

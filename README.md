@@ -177,13 +177,18 @@ RetroHub implements a decoupled, high-availability two-bot Telegram architecture
 ```
 
 ### 1. 💬 AI Customer Support Bot (`@retrochanbot`)
-* **Persona**: *"Retro Chan"* — witty, charming, empathetic, and highly knowledgeable about all RetroHub products, platforms, and payment workflows.
+* **[Read Full Documentation](supabase/functions/customer-bot/README.md)**
+* **Persona**: *"Retro Chan"* — witty, charming, empathetic, and highly knowledgeable about all RetroHub products, platforms, and payment workflows (uses gamer terminology like *GG* and *GLHF*).
 * **Dual-Engine Customer Care Architecture**:
-  * **Engine A (xAI Grok)**: Powered by `grok-2-latest` (with `grok-2` and `grok-beta` fallback) for conversational NLP, live order context injection, regional platform guidance, and empathetic problem solving.
-  * **Engine B (Retro Chan Natural Intelligence Engine)**: Built-in local high-IQ knowledge engine providing sub-second answers on bKash payments (`01580382868`, 1% fee), instant delivery (1–15 min), order tracking, catalog highlights, and genuine key guarantees.
+  * **Engine A (xAI Grok)**: Powered by `grok-2-latest` for conversational NLP, live order context injection, regional platform guidance, and empathetic problem solving.
+  * **Engine B (Retro Chan Natural Intelligence Engine)**: Built-in local high-IQ knowledge engine providing sub-second fallback answers on bKash payments, instant delivery, order tracking, and guarantees.
+* **Hardened Enterprise Resilience**:
+  * **Idempotency Locks**: Neutralizes Telegram webhook redeliveries via the `telegram_processed_updates` PostgreSQL table.
+  * **Row-Level Session Locks**: `append_session_message()` PL/pgSQL function entirely eliminates race conditions during rapid message bursts.
+  * **Webhook Cryptography**: Requests are validated against `TELEGRAM_WEBHOOK_SECRET` headers to block forged escalations.
 * **Zero-Interruption Invariant**: The merchant admin bot is **only alerted when a customer explicitly requests human assistance**. All customer service, order checks, and payment walkthroughs are handled 100% autonomously by the bot without bothering the merchant desk.
-* **Instant Order Lookup**: Customers send an 8-character ID (e.g. `c7c482a2`) or full UUID to instantly retrieve order status, verification stage, and delivered keys.
-* **Multi-Turn Session Table**: Persists conversations in `customer_support_sessions` with automated 20-message rolling memory.
+* **Instant Order Lookup**: Customers send an exact 8-character ID (e.g. `c7c482a2`) or full UUID to instantly retrieve order status, verification stage, and delivered keys.
+* **Multi-Turn Session Table**: Persists conversations in `customer_support_sessions` (capped at 8 rolling messages / 800 chars each for ultra-low token latency).
 * **Commands Registered**: `/start`, `/track [id]`, `/faq`, `/help`, `/human`.
 
 ### 2. ⚡ Merchant Admin Bot (`@Notifyretro_bot`)
