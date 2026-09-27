@@ -13,17 +13,17 @@ const lazyWithRetry = <T extends React.ComponentType<Record<string, unknown>>>(
   componentImport: () => Promise<{ default: T }>
 ) =>
   lazy(async () => {
-    const pageHasBeenForceRefreshed = JSON.parse(
-      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
-    );
-
     try {
-      const component = await componentImport();
-      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
-      return component;
+      return await componentImport();
     } catch (error) {
-      if (!pageHasBeenForceRefreshed) {
-        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+      const msg = error instanceof Error ? error.message : String(error);
+      const isChunkError = /failed to fetch dynamically imported module|importing a module script failed/i.test(msg);
+      const lastReload = parseInt(window.sessionStorage.getItem('last_chunk_reload') || '0', 10);
+      const now = Date.now();
+
+      // Automatically reload once if a chunk fails due to a new deployment replacing chunk hashes
+      if (isChunkError && now - lastReload > 10000) {
+        window.sessionStorage.setItem('last_chunk_reload', String(now));
         window.location.reload();
         return new Promise(() => {}); // hold until reload
       }
