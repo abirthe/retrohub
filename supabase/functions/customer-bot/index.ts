@@ -6,6 +6,7 @@ const CUSTOMER_BOT_TOKEN = Deno.env.get('CUSTOMER_BOT_TOKEN')!
 const STAFF_CHAT_ID = Deno.env.get('STAFF_CHAT_ID') || Deno.env.get('TELEGRAM_CHAT_ID') || '5605963234'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const XAI_API_KEY = Deno.env.get('XAI_API_KEY') || Deno.env.get('VITE_XAI_API_KEY')
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
@@ -84,6 +85,56 @@ async function answerCallbackQuery(callbackQueryId: string, text: string = '', s
     })
   } catch (err) {
     console.error('answerCallbackQuery error:', err)
+  }
+}
+
+/**
+ * Generates an intelligent, context-aware reply using xAI (Grok) or falls back if unavailable.
+ */
+async function getAiResponse(history: Array<{ sender: string; text: string }>, latestMessage: string) {
+  if (!XAI_API_KEY) return null
+  try {
+    const messages = [
+      {
+        role: 'system',
+        content: `You are Retro Chan, the elite customer support AI for Retro Hub (a premium game key and digital delivery store).
+You are extremely helpful, empathetic, and professional. 
+Your goal is to answer questions, calm customers down, and seamlessly guide them. 
+Keep responses concise, human-like, and use appropriate emojis.
+If they ask about an order, ask for their 8-character Order ID or tell them they can use the "Track My Order" menu.
+Do not invent or hallucinate order statuses.`
+      },
+      ...history.slice(-5).map(m => ({
+        role: m.sender === 'customer' ? 'user' : 'assistant',
+        content: m.text
+      })),
+      { role: 'user', content: latestMessage }
+    ]
+
+    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${XAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'grok-beta',
+        messages,
+        temperature: 0.7,
+        max_tokens: 250
+      })
+    })
+
+    if (!res.ok) {
+      console.error('AI API error:', await res.text())
+      return null
+    }
+
+    const data = await res.json()
+    return data.choices?.[0]?.message?.content
+  } catch (err) {
+    console.error('AI invocation failed:', err)
+    return null
   }
 }
 
@@ -796,14 +847,22 @@ Reply using: <code>/reply ${chatId} &lt;text&gt;</code>`
       return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
     }
 
-    // General FAQ or unrecognized query
+    // ─────────────────────────────────────────────────────────────
+    // AI OR FALLBACK RESPONSE
+    // ─────────────────────────────────────────────────────────────
     await sendChatAction(chatId, 'typing')
-    await sleep(1800)
-    await sendMessage(
-      chatId,
-      `Thanks for your message! To help you fastest, please select an option below, or send your <b>Order ID</b> if you have a question about a purchase:`,
-      buildGeneralKeyboard()
-    )
+    
+    const aiText = await getAiResponse(session.recent_messages || [], rawText)
+
+    if (aiText) {
+      await appendSessionMessage(chatId, 'bot', aiText)
+      await sendPacedMessage(chatId, aiText, buildGeneralKeyboard(), [800, 2500])
+    } else {
+      await sleep(1500)
+      const fallback = `Thanks for your message! To help you fastest, please select an option below, or send your <b>Order ID</b> if you have a question about a purchase:`
+      await appendSessionMessage(chatId, 'bot', fallback)
+      await sendMessage(chatId, fallback, buildGeneralKeyboard())
+    }
 
     return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders })
   } catch (err: any) {
