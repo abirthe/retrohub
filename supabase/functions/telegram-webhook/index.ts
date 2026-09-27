@@ -289,6 +289,61 @@ async function sendOrderInspection(
   await sendMessage(chatId, card, reply_markup);
 }
 
+
+async function syncOrderToRetroChan(order: any, newStatus: string, additionalText: string = "") {
+  try {
+    if (!CUSTOMER_BOT_TOKEN) return;
+    
+    // Find customer session by last_order_id
+    const { data: session } = await supabase
+      .from("customer_support_sessions")
+      .select("chat_id")
+      .eq("last_order_id", order.id)
+      .maybeSingle();
+      
+    if (!session || !session.chat_id) return;
+
+    const shortId = order.id.substring(0, 8);
+    const safeTitle = escapeHtml(order.products?.title || "Digital Item");
+    
+    let msg = `🔔 <b>Order Update: #${shortId}</b>\n━━━━━━━━━━━━━━━━━━\n🎮 ${safeTitle}\n\n`;
+    
+    if (newStatus === "payment_verified") {
+      msg += `✅ <b>Payment Verified!</b> Your transaction has been approved. We are now preparing your order for delivery.`;
+    } else if (newStatus === "fulfilled") {
+      msg += `🎉 <b>Order Delivered!</b>\n\nYour credentials are ready. Tap below to view your key.`;
+    } else if (newStatus === "cancelled") {
+      msg += `🚫 <b>Order Cancelled</b>\nReason: <i>${escapeHtml(additionalText)}</i>`;
+    } else if (newStatus === "pending") {
+      msg += `⚠️ <b>Order On Hold</b>\nReason: <i>${escapeHtml(additionalText)}</i>`;
+    } else if (newStatus === "refunded") {
+      msg += `💸 <b>Order Refunded</b>\nReason: <i>${escapeHtml(additionalText)}</i>`;
+    } else {
+      return;
+    }
+
+    const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/sendMessage`;
+    const body = {
+      chat_id: session.chat_id,
+      text: msg,
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "📦 View Order Details", callback_data: `status_${shortId}` }]
+        ]
+      }
+    };
+    
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    console.error("syncOrderToRetroChan failed:", err);
+  }
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -607,6 +662,7 @@ serve(async (req: Request) => {
               `🚫 <b>Order Cancelled!</b>\nOrder <code>${order.id.substring(0, 8)}</code> cancelled.`,
             );
             await answerCallbackQuery(cq.id, "Order Cancelled");
+            await syncOrderToRetroChan(order, "cancelled", cancelReason);
           } else {
             await answerCallbackQuery(cq.id, "Failed to cancel", true);
           }
@@ -639,6 +695,7 @@ serve(async (req: Request) => {
               `✅ <b>Payment Verified!</b>\nOrder <code>${order.id.substring(0, 8)}</code> verified.`,
             );
             await answerCallbackQuery(cq.id, "Payment Verified");
+            await syncOrderToRetroChan(order, "payment_verified");
           } else {
             await answerCallbackQuery(cq.id, "Failed to verify", true);
           }
@@ -909,6 +966,7 @@ serve(async (req: Request) => {
               `• Fulfill: <code>/deliver ${shortId} CODE_HERE</code>\n` +
               `• Cancel:  <code>/cancel ${shortId} Reason</code>`;
             await sendMessage(chatId, msg);
+            await syncOrderToRetroChan(order, "payment_verified");
           }
         }
       }
@@ -991,6 +1049,7 @@ serve(async (req: Request) => {
               `📝 <b>Reason:</b> ${escapeHtml(cancelReason)}\n\n` +
               `<i>Any reserved stock or inventory keys have been released back to catalog.</i>`;
             await sendMessage(chatId, msg);
+            await syncOrderToRetroChan(order, "cancelled", cancelReason);
           }
         }
       }
@@ -1051,6 +1110,7 @@ serve(async (req: Request) => {
               `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
               `⚠️ <b>Reason:</b> ${escapeHtml(holdReason)}`;
             await sendMessage(chatId, msg);
+            await syncOrderToRetroChan(order, "pending", holdReason);
           }
         }
       }
@@ -1112,6 +1172,7 @@ serve(async (req: Request) => {
               `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
               `📝 <b>Reason:</b> ${escapeHtml(refundReason)}`;
             await sendMessage(chatId, msg);
+            await syncOrderToRetroChan(order, "refunded", refundReason);
           }
         }
       }
@@ -1166,6 +1227,7 @@ serve(async (req: Request) => {
               `🔑 <b>Delivered Code:</b> <code>${escapeHtml(output)}</code>\n\n` +
               `<i>The customer can now see this code immediately on their dashboard.</i>`;
             await sendMessage(chatId, msg);
+            await syncOrderToRetroChan(order, "fulfilled", output);
           }
         }
       }
