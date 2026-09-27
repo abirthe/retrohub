@@ -8,11 +8,11 @@ Comprehensive operational manual for all catalog management, database maintenanc
 
 ```
 scripts/
-├── database/          # Database migrations, compiled SQL seeds & schema runners
-├── images/            # Image mapping, watermarking sanitization & box art sourcing
+├── database/          # Database migration runner, compiled SQL seeds & schema
+├── images/            # Image mapping, watermark removal & box art sourcing
 ├── maintenance/       # Catalog deduplication, orphan cleaners & stock auditors
 ├── pricing/           # Market price scrapers, competitor matching & margin updates
-└── seeding/           # Automated catalog seeders across games, gift cards, subs & top-ups
+└── seeding/           # Automated catalog seeders (games, gift cards, subs, top-ups)
 ```
 
 ---
@@ -104,7 +104,7 @@ Tools for calculating margins, syncing with regional market data, and keeping sa
 | Tool / File | Function |
 | :--- | :--- |
 | `market_scraped.json` | Snapshot dataset containing current market rates, competitor pricing, and regional exchange values. |
-| `match_and_update_prices.mjs` | Compares catalog items against `market_scraped.json`, computes gross margin ($\text{Sale} - \text{Cost}$), and adjusts `sale_price` and `cost_price` to maintain targeted merchant margins. |
+| `match_and_update_prices.mjs` | Compares catalog items against `market_scraped.json`, computes gross margin (Sale − Cost), and adjusts `sale_price` and `cost_price` to maintain targeted merchant margins. |
 
 ```bash
 # Analyze price differences and update catalog prices
@@ -122,9 +122,12 @@ node scripts/pricing/match_and_update_prices.mjs
 | `products-seed.sql` | Compiled SQL dump containing complete catalog inserts for fast database population. |
 
 ```bash
-# Execute migration file
-node scripts/database/apply-migration.cjs supabase/migrations/20260924000003_set_default_instant_code_delivery.sql
+# Execute a specific migration file
+node scripts/database/apply-migration.cjs supabase/migrations/20260927000001_secure_order_payment_and_pricing.sql
 ```
+
+> [!NOTE]
+> For standard schema evolution, prefer the Supabase CLI (`supabase db push`) over the custom runner. The custom runner is useful when Supabase CLI is unavailable (e.g., restricted CI environments).
 
 ---
 
@@ -134,9 +137,13 @@ To prevent stale artifacts, ensure atomic deployments, and guarantee clean asset
 
 | Hook / Script | Purpose | Execution Trigger |
 | :--- | :--- | :--- |
+| `npm run dev` | Starts Vite dev server on `http://localhost:3000` with HMR. Watches `src/` only; ignores `scripts/` and `Products/` for performance. | Manual |
 | `npm run prebuild` | Recursively removes the local `./dist` directory before compiling. | Runs automatically prior to `npm run build`. |
-| `npm run build` | Compiles optimized production bundle, generates `200.html` SPA fallback, and creates `dist/.assetsignore`. | Manual build command or triggered by CI pipeline. |
+| `npm run build` | Compiles optimized production bundle, generates `200.html` SPA fallback, and writes `dist/.assetsignore`. | Manual build or CI pipeline. |
 | `npm run postinstall` | Automatically purges cached redirect files and compiles the Vite application fresh into `./dist`. | Runs automatically upon `npm install` / `npm ci` in Cloudflare build containers. |
+| `npm test` | Runs Vitest unit test suite (15 tests across TrxID validation, price enforcement, stock helpers, open redirect prevention). | Manual or CI. |
+| `npm run test:watch` | Runs Vitest in watch mode for active development. | Manual |
+| `npm run lint` | Runs ESLint flat config validation across all TypeScript source files. | Manual or CI. |
 
 ---
 
@@ -150,13 +157,24 @@ When performing catalog maintenance or batch operations:
 
 ---
 
+## 📁 Catalog Data Files (Not in Git)
+
+The `Products/` folder contains Excel (`.xlsx`) and spreadsheet (`.ods`, `.csv`) files used for catalog reference and bulk import. These files are **excluded from version control** (`.gitignore`) to keep the repository lean and prevent binary file bloat.
+
+Store them in:
+- Local `Products/` folder (already gitignored)
+- Google Drive, Notion, or private S3 bucket for team sharing
+
+---
+
 ## 📚 Related Documentation
 * **[Main Platform README](../README.md)**: Architecture, security protections, tech stack, and setup.
 * **[Merchant System Specification](../docs/MERCHANT_SYSTEM_OVERVIEW.md)**: Business logic, payment flows, and operations guide.
+* **[CONTRIBUTING.md](../CONTRIBUTING.md)**: Branch naming, commit style, PR checklist.
+* **[CHANGELOG.md](../CHANGELOG.md)**: Full version history.
 
 ---
 
 ## 📄 License
 Private & Proprietary — Developed for RetroHub E-Commerce. All rights reserved.  
 © 2026 RETROHUB — Engineered by **Abir Hossain**.
-
