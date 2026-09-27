@@ -91,7 +91,6 @@ Engineered with a **high-availability dual-channel dispatch architecture**: aler
 | `/order <id>` | **Inspect full order details** (Player UID, Server, TrxID, timestamps, status) |
 | `/verify <id>` | **Verify customer payment** directly from chat (`status = 'payment_verified'`) |
 | `/deliver <id> <code>` | **Fulfill an order** with digital key or account credentials |
-| `/source <id>` | Mark order as actively `sourcing` during external procurement |
 | `/cancel <id> [reason]` | **Cancel an order** from phone, release reserved inventory keys, and log reason |
 | `/hold <id> [reason]` | Place order on hold (e.g. incorrect server or player UID) |
 | `/refund <id> [reason]` | Mark order as refunded (`status = 'refunded'`) |
