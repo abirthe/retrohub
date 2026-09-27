@@ -40,6 +40,50 @@ async function sendMessage(chatId: string | number, text: string) {
   return res
 }
 
+/**
+ * Intelligent Order Resolver:
+ * Supports both full UUIDs (e.g. c7c482a2-aaa1-479e-b130-32c67ec02ac5)
+ * and short ID prefixes (e.g. c7c482a2 or c7c4) for friction-free mobile operation.
+ */
+async function resolveOrder(identifier: string) {
+  const clean = identifier.trim()
+  if (!clean) return { error: '⚠️ Please provide an Order ID or short ID prefix.' }
+
+  // 1. Direct match if it is a complete UUID
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (uuidRegex.test(clean)) {
+    const { data: directMatch } = await supabase
+      .from('orders')
+      .select('id, total, status, created_at, customer_input, final_output, user_id, products(id, title, platform, category)')
+      .eq('id', clean)
+      .maybeSingle()
+    if (directMatch) return { order: directMatch }
+  }
+
+  // 2. Prefix matching across the most recent 100 orders
+  if (clean.length >= 4) {
+    const { data: recentOrders } = await supabase
+      .from('orders')
+      .select('id, total, status, created_at, customer_input, final_output, user_id, products(id, title, platform, category)')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (recentOrders && recentOrders.length > 0) {
+      const matches = recentOrders.filter((o: any) => o.id.toLowerCase().startsWith(clean.toLowerCase()))
+      if (matches.length === 1) {
+        return { order: matches[0] }
+      }
+      if (matches.length > 1) {
+        return {
+          error: `⚠️ Multiple recent orders match prefix "<code>${escapeHtml(clean)}</code>". Please provide more characters (e.g. <code>${matches[0].id.substring(0, 10)}</code>).`
+        }
+      }
+    }
+  }
+
+  return { error: `❌ Order not found with identifier: <code>${escapeHtml(clean)}</code>` }
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -72,7 +116,6 @@ serve(async (req: Request) => {
 
       if (body.action === 'notify') {
         if (body.message) {
-          // Escaping is applied by caller or plain text
           await sendMessage(ADMIN_CHAT_ID, body.message)
         }
         return new Response(JSON.stringify({ success: true }), {
@@ -88,6 +131,7 @@ serve(async (req: Request) => {
         const safeTotal = escapeHtml(total)
         const safeGameId = escapeHtml(gameId)
         const safeUser = escapeHtml(userId)
+        const shortId = safeOrder.substring(0, 8)
 
         let msg = `🛍️ <b>New Order Created!</b>\n\n` +
           `📦 <b>Product:</b> ${safeProduct}\n` +
@@ -101,7 +145,10 @@ serve(async (req: Request) => {
           msg += `👤 <b>User ID:</b> <code>${safeUser}</code>\n`
         }
 
-        msg += `\n💡 <b>Deliver via Bot:</b>\n<code>/deliver ${safeOrder} CODE_HERE</code>\n\n` +
+        msg += `\n⚡ <b>Fast Bot Actions:</b>\n` +
+          `• Deliver: <code>/deliver ${shortId} CODE</code>\n` +
+          `• Inspect: <code>/order ${shortId}</code>\n` +
+          `• Cancel:  <code>/cancel ${shortId} Out of stock</code>\n\n` +
           `🔗 <a href="https://retrohub.tech/admin">Go to Admin Dashboard</a>`
 
         await sendMessage(ADMIN_CHAT_ID, msg)
@@ -148,14 +195,17 @@ serve(async (req: Request) => {
           msg += `💰 <b>Total Amount:</b> ৳${escapeHtml(total)}\n`
         }
 
-        msg += `📦 <b>Orders (${orderList.length}):</b>\n`
+        msg += `\n📦 <b>Orders (${orderList.length}):</b>\n`
         orderList.forEach((id: string, idx: number) => {
           const safeId = escapeHtml(id)
+          const shortId = safeId.substring(0, 8)
           msg += `${idx + 1}. <code>${safeId}</code>\n` +
-                 `   👉 <code>/deliver ${safeId} CODE_HERE</code>\n`
+                 `   ✅ Verify:  <code>/verify ${shortId}</code>\n` +
+                 `   🚀 Deliver: <code>/deliver ${shortId} CODE</code>\n` +
+                 `   ❌ Cancel:  <code>/cancel ${shortId} Invalid Trx</code>\n\n`
         })
 
-        msg += `\n🔗 <a href="https://retrohub.tech/admin">Review in Admin Dashboard</a>`
+        msg += `🔗 <a href="https://retrohub.tech/admin">Review in Admin Dashboard</a>`
 
         await sendMessage(ADMIN_CHAT_ID, msg)
 
@@ -187,7 +237,7 @@ serve(async (req: Request) => {
         const { data: pendingOrders } = await supabase
           .from('orders')
           .select('id, total, status, created_at, customer_input, products(title)')
-          .in('status', ['pending', 'payment_submitted', 'payment_verified'])
+          .in('status', ['pending', 'payment_submitted', 'payment_verified', 'sourcing'])
           .order('created_at', { ascending: false })
           .limit(10)
 
@@ -203,14 +253,16 @@ serve(async (req: Request) => {
 
         pendingOrders.forEach((o: any, idx: number) => {
           const statusLabel = o.status === 'payment_submitted' ? '💳 Payment Submitted' :
-                              o.status === 'payment_verified' ? '✅ Payment Verified' : '⏳ Pending'
+                              o.status === 'payment_verified' ? '✅ Payment Verified' :
+                              o.status === 'sourcing' ? '🔄 Sourcing' : '⏳ Pending'
           const safeId = escapeHtml(o.id)
+          const shortId = safeId.substring(0, 8)
           const safeTitle = escapeHtml(o.products?.title || 'Unknown')
           const safeTotal = escapeHtml(o.total)
           const trx = o.customer_input?.transaction_id ? ` (Trx: <code>${escapeHtml(o.customer_input.transaction_id)}</code>)` : ''
           
           reminderMsg += `${idx + 1}. <b>${safeTitle}</b> - ৳${safeTotal} [${statusLabel}${trx}]\n` +
-                         `   <code>/deliver ${safeId} CODE_HERE</code>\n\n`
+                         `   👉 <code>/deliver ${shortId} CODE</code> | <code>/cancel ${shortId}</code>\n\n`
         })
 
         await sendMessage(ADMIN_CHAT_ID, reminderMsg)
@@ -247,109 +299,533 @@ serve(async (req: Request) => {
       return new Response('OK', { status: 200, headers: corsHeaders })
     }
 
+    // -------------------------------------------------------------
+    // Command Router
+    // -------------------------------------------------------------
     if (text === '/start' || text === '/help') {
-      const helpMsg = `🤖 <b>Admin Notification Bot Commands</b>\n\n` +
-        `/orders - View pending & unfulfilled orders\n` +
-        `/deliver [order_id] [code] - Fulfill an order\n` +
-        `/summary - View today's stats (revenue, orders, etc.)\n` +
-        `/custom - View recent custom order requests\n` +
-        `/remind - Trigger pending orders reminder immediately`
+      const helpMsg = `🤖 <b>RetroHub Merchant Command Center</b>\n\n` +
+        `📦 <b>Order Management:</b>\n` +
+        `• <code>/orders</code> - View pending & unfulfilled orders\n` +
+        `• <code>/order [id]</code> - Inspect full order details\n` +
+        `• <code>/verify [id]</code> - Confirm customer payment\n` +
+        `• <code>/deliver [id] [code]</code> - Deliver digital key/credentials\n` +
+        `• <code>/source [id]</code> - Mark order as actively sourcing\n` +
+        `• <code>/cancel [id] [reason]</code> - Cancel order & release stock\n` +
+        `• <code>/hold [id] [reason]</code> - Place order on hold\n` +
+        `• <code>/refund [id] [reason]</code> - Mark order as refunded\n\n` +
+        `📊 <b>Store & Inventory:</b>\n` +
+        `• <code>/summary</code> - Today's financial metrics & revenue\n` +
+        `• <code>/stock [search]</code> - Check stock or view low inventory\n` +
+        `• <code>/custom</code> - View pending custom quote requests\n` +
+        `• <code>/remind</code> - Trigger instant pending orders scan\n\n` +
+        `💡 <i>Tip: You can use short IDs (first 6-8 characters) instead of typing full UUIDs!</i>`
       await sendMessage(chatId, helpMsg)
     } 
     else if (text === '/summary') {
       const startOfDay = new Date()
       startOfDay.setHours(0, 0, 0, 0)
-      
-      const [revenueRes, ordersRes, pendingRes] = await Promise.all([
-        supabase.rpc('get_daily_revenue', { start_date: startOfDay.toISOString() }),
-        supabase.from('orders').select('id', { count: 'exact' }).gte('created_at', startOfDay.toISOString()),
-        supabase.from('orders').select('id', { count: 'exact' }).in('status', ['pending', 'payment_submitted', 'payment_verified']),
+      const startIso = startOfDay.toISOString()
+
+      const [ordersTodayRes, waitingRes, completedOrdersRes] = await Promise.all([
+        supabase.from('orders').select('id', { count: 'exact' }).gte('created_at', startIso),
+        supabase.from('orders').select('id', { count: 'exact' }).in('status', ['pending', 'payment_submitted', 'payment_verified', 'sourcing']),
+        supabase.from('orders').select('total, cost').gte('created_at', startIso).in('status', ['fulfilled', 'completed']),
       ])
 
-      const revenue = escapeHtml(revenueRes.data || 0)
-      const orders = escapeHtml(ordersRes.count || 0)
-      const pending = escapeHtml(pendingRes.count || 0)
+      const ordersCount = ordersTodayRes.count || 0
+      const pendingCount = waitingRes.count || 0
+
+      let totalRevenue = 0
+      let totalCost = 0
+      if (completedOrdersRes.data && completedOrdersRes.data.length > 0) {
+        completedOrdersRes.data.forEach((o: any) => {
+          totalRevenue += Number(o.total || 0)
+          totalCost += Number(o.cost || 0)
+        })
+      }
+      const netProfit = totalRevenue - totalCost
 
       const msg = `📊 <b>Daily Store Summary</b>\n\n` +
-        `💰 <b>Revenue:</b> ৳${revenue}\n` +
-        `📦 <b>Orders Today:</b> ${orders}\n` +
-        `⏳ <b>Waiting Fulfillment:</b> ${pending}`
+        `💰 <b>Revenue Today:</b> ৳${escapeHtml(totalRevenue.toFixed(2))}\n` +
+        `📈 <b>Net Profit:</b> ৳${escapeHtml(netProfit.toFixed(2))}\n` +
+        `📦 <b>Orders Today:</b> ${escapeHtml(ordersCount)}\n` +
+        `⏳ <b>Waiting Fulfillment:</b> ${escapeHtml(pendingCount)}\n\n` +
+        `<i>Fulfilled: ${completedOrdersRes.data?.length || 0} orders</i>`
       await sendMessage(chatId, msg)
     }
     else if (text === '/orders' || text === '/remind') {
       const { data } = await supabase
         .from('orders')
         .select('id, total, status, created_at, customer_input, products(title)')
-        .in('status', ['pending', 'payment_submitted', 'payment_verified'])
+        .in('status', ['pending', 'payment_submitted', 'payment_verified', 'sourcing'])
         .order('created_at', { ascending: false })
         .limit(10)
 
       if (!data || data.length === 0) {
-        await sendMessage(chatId, '🎉 No pending orders right now!')
+        await sendMessage(chatId, '🎉 <b>All caught up!</b> No pending or unfulfilled orders right now.')
       } else {
         let msg = `📦 <b>Unfulfilled Orders (${data.length}):</b>\n\n`
         data.forEach((o: any, idx: number) => {
           const statusLabel = o.status === 'payment_submitted' ? '💳 Payment Submitted' :
-                              o.status === 'payment_verified' ? '✅ Payment Verified' : '⏳ Pending'
+                              o.status === 'payment_verified' ? '✅ Payment Verified' :
+                              o.status === 'sourcing' ? '🔄 Sourcing' : '⏳ Pending'
           const safeId = escapeHtml(o.id)
-          const safeTitle = escapeHtml(o.products?.title || 'Unknown')
+          const shortId = safeId.substring(0, 8)
+          const safeTitle = escapeHtml(o.products?.title || 'Unknown Product')
           const safeTotal = escapeHtml(o.total)
-          const trx = o.customer_input?.transaction_id ? `\n   Trx: <code>${escapeHtml(o.customer_input.transaction_id)}</code>` : ''
+          const trx = o.customer_input?.transaction_id ? ` (Trx: <code>${escapeHtml(o.customer_input.transaction_id)}</code>)` : ''
+          const gameId = o.customer_input?.game_id || o.customer_input?.player_id
+          const gameIdStr = gameId ? `\n   🎮 UID: <code>${escapeHtml(gameId)}</code>` : ''
           
           msg += `${idx + 1}. <b>${safeTitle}</b> - ৳${safeTotal}\n` +
-                 `   Status: ${statusLabel}${trx}\n` +
-                 `   👉 <code>/deliver ${safeId} CODE_HERE</code>\n\n`
+                 `   Status: ${statusLabel}${trx}${gameIdStr}\n` +
+                 `   👉 <code>/verify ${shortId}</code>\n` +
+                 `   👉 <code>/deliver ${shortId} CODE</code>\n` +
+                 `   👉 <code>/cancel ${shortId} Reason</code>\n\n`
         })
         await sendMessage(chatId, msg)
+      }
+    }
+    else if (text.startsWith('/order')) {
+      const orderIdentifier = text.substring(6).trim()
+      if (!orderIdentifier) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/order [order_id]</code>\n<i>Example:</i> <code>/order c7c482a2</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else {
+          const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+          const safePlatform = escapeHtml(order.products?.platform || 'General')
+          const safeCategory = escapeHtml(order.products?.category || 'Item')
+          const safeTotal = escapeHtml(order.total)
+          const shortId = order.id.substring(0, 8)
+          const statusEmoji = order.status === 'fulfilled' ? '🎉 Fulfilled' :
+                              order.status === 'payment_verified' ? '✅ Payment Verified' :
+                              order.status === 'payment_submitted' ? '💳 Payment Submitted' :
+                              order.status === 'sourcing' ? '🔄 Sourcing' :
+                              order.status === 'cancelled' ? '🚫 Cancelled' :
+                              order.status === 'refunded' ? '💸 Refunded' : '⏳ Pending'
+
+          let card = `🔍 <b>Order Details:</b> <code>${shortId}</code>\n\n` +
+            `📦 <b>Product:</b> ${safeTitle}\n` +
+            `🎮 <b>Platform / Category:</b> ${safePlatform} (${safeCategory})\n` +
+            `💰 <b>Price:</b> ৳${safeTotal}\n` +
+            `📊 <b>Status:</b> ${statusEmoji}\n` +
+            `🆔 <b>Full ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+            `📅 <b>Created:</b> ${new Date(order.created_at).toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })}\n`
+
+          if (order.customer_input?.game_id || order.customer_input?.player_id) {
+            const uid = order.customer_input.game_id || order.customer_input.player_id
+            card += `🎯 <b>Player ID / UID:</b> <code>${escapeHtml(uid)}</code>\n`
+          }
+          if (order.customer_input?.server_id || order.customer_input?.zone_id) {
+            const server = order.customer_input.server_id || order.customer_input.zone_id
+            card += `🌐 <b>Server / Zone:</b> <code>${escapeHtml(server)}</code>\n`
+          }
+          if (order.customer_input?.transaction_id) {
+            card += `🧾 <b>bKash TrxID:</b> <code>${escapeHtml(order.customer_input.transaction_id)}</code>\n`
+          }
+          if (order.customer_input?.contact_number) {
+            card += `📱 <b>Contact:</b> <code>${escapeHtml(order.customer_input.contact_number)}</code>\n`
+          }
+          if (order.customer_input?.cancel_reason) {
+            card += `📝 <b>Cancel Reason:</b> <i>${escapeHtml(order.customer_input.cancel_reason)}</i>\n`
+          }
+          if (order.final_output) {
+            card += `🔑 <b>Delivered Output:</b> <code>${escapeHtml(order.final_output)}</code>\n`
+          }
+
+          card += `\n⚡ <b>Quick Shortcuts:</b>\n` +
+            `• <code>/deliver ${shortId} CODE</code>\n` +
+            `• <code>/verify ${shortId}</code>\n` +
+            `• <code>/source ${shortId}</code>\n` +
+            `• <code>/cancel ${shortId} Reason</code>`
+
+          await sendMessage(chatId, card)
+        }
+      }
+    }
+    else if (text.startsWith('/verify')) {
+      const parts = text.substring(7).trim().split(' ')
+      const orderIdentifier = parts[0]?.trim()
+
+      if (!orderIdentifier) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/verify [order_id]</code>\n<i>Example:</i> <code>/verify c7c482a2</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else if (order.status === 'payment_verified') {
+          await sendMessage(chatId, `ℹ️ Order <code>${escapeHtml(order.id)}</code> is already marked as Payment Verified.`)
+        } else if (order.status === 'fulfilled') {
+          await sendMessage(chatId, `ℹ️ Order <code>${escapeHtml(order.id)}</code> is already fulfilled!`)
+        } else {
+          const { error } = await supabase
+            .from('orders')
+            .update({
+              status: 'payment_verified',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+
+          if (error) {
+            await sendMessage(chatId, `❌ Failed to verify payment: ${escapeHtml(error.message)}`)
+          } else {
+            try {
+              await supabase.from('admin_action_logs').insert({
+                order_id: order.id,
+                action: 'verify_payment',
+                before_status: order.status,
+                after_status: 'payment_verified',
+                notes: 'Verified via Telegram Bot',
+              })
+            } catch (_) {}
+
+            const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+            const shortId = order.id.substring(0, 8)
+            const msg = `✅ <b>Payment Verified!</b>\n\n` +
+              `📦 <b>Product:</b> ${safeTitle}\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n\n` +
+              `⚡ <b>Next Steps:</b>\n` +
+              `• Fulfill: <code>/deliver ${shortId} CODE_HERE</code>\n` +
+              `• Sourcing: <code>/source ${shortId}</code>`
+            await sendMessage(chatId, msg)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/source')) {
+      const parts = text.substring(7).trim().split(' ')
+      const orderIdentifier = parts[0]?.trim()
+
+      if (!orderIdentifier) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/source [order_id]</code>\n<i>Example:</i> <code>/source c7c482a2</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else {
+          const { error } = await supabase
+            .from('orders')
+            .update({
+              status: 'sourcing',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+
+          if (error) {
+            await sendMessage(chatId, `❌ Failed to mark sourcing: ${escapeHtml(error.message)}`)
+          } else {
+            try {
+              await supabase.from('admin_action_logs').insert({
+                order_id: order.id,
+                action: 'start_sourcing',
+                before_status: order.status,
+                after_status: 'sourcing',
+                notes: 'Marked sourcing via Telegram Bot',
+              })
+            } catch (_) {}
+
+            const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+            const shortId = order.id.substring(0, 8)
+            const msg = `🔄 <b>Order Marked as Sourcing</b>\n\n` +
+              `📦 <b>Product:</b> ${safeTitle}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n\n` +
+              `<i>Customer sees "Sourcing" on their orders page.</i>\n` +
+              `👉 Deliver when ready: <code>/deliver ${shortId} CODE</code>`
+            await sendMessage(chatId, msg)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/cancel')) {
+      const parts = text.substring(7).trim().split(' ')
+      const orderIdentifier = parts[0]?.trim()
+      const reason = parts.slice(1).join(' ').trim()
+
+      if (!orderIdentifier) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/cancel [order_id] [optional reason]</code>\n<i>Example:</i> <code>/cancel c7c482a2 Fake TrxID</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else if (order.status === 'cancelled') {
+          await sendMessage(chatId, `⚠️ Order <code>${escapeHtml(order.id)}</code> is already cancelled!`)
+        } else if (order.status === 'fulfilled') {
+          await sendMessage(chatId, `⚠️ Order <code>${escapeHtml(order.id)}</code> is already fulfilled. Use <code>/refund ${order.id.substring(0, 8)}</code> instead.`)
+        } else {
+          const cancelReason = reason || 'Cancelled by admin via Telegram Bot'
+          const updatedInput = {
+            ...(order.customer_input || {}),
+            cancel_reason: cancelReason,
+            cancelled_at: new Date().toISOString(),
+          }
+
+          const { error } = await supabase
+            .from('orders')
+            .update({
+              status: 'cancelled',
+              customer_input: updatedInput,
+              final_output: `Cancelled: ${cancelReason}`,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+
+          if (error) {
+            await sendMessage(chatId, `❌ Failed to cancel order: ${escapeHtml(error.message)}`)
+          } else {
+            // Release any reserved inventory keys back to available
+            try {
+              await supabase
+                .from('inventory_keys')
+                .update({ status: 'available', order_id: null, sold_at: null })
+                .eq('order_id', order.id)
+            } catch (_) {}
+
+            // Record action in admin_action_logs
+            try {
+              await supabase.from('admin_action_logs').insert({
+                order_id: order.id,
+                action: 'cancel_order',
+                before_status: order.status,
+                after_status: 'cancelled',
+                notes: cancelReason,
+              })
+            } catch (_) {}
+
+            const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+            const msg = `🚫 <b>Order Cancelled Successfully</b>\n\n` +
+              `📦 <b>Product:</b> ${safeTitle}\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `📝 <b>Reason:</b> ${escapeHtml(cancelReason)}\n\n` +
+              `<i>Any reserved stock or inventory keys have been released back to catalog.</i>`
+            await sendMessage(chatId, msg)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/hold')) {
+      const parts = text.substring(5).trim().split(' ')
+      const orderIdentifier = parts[0]?.trim()
+      const reason = parts.slice(1).join(' ').trim()
+
+      if (!orderIdentifier) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/hold [order_id] [reason]</code>\n<i>Example:</i> <code>/hold c7c482a2 Invalid Server ID</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else {
+          const holdReason = reason || 'Order placed on hold for verification'
+          const updatedInput = {
+            ...(order.customer_input || {}),
+            hold_reason: holdReason,
+            held_at: new Date().toISOString(),
+          }
+
+          const { error } = await supabase
+            .from('orders')
+            .update({
+              status: 'pending',
+              customer_input: updatedInput,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+
+          if (error) {
+            await sendMessage(chatId, `❌ Failed to place hold: ${escapeHtml(error.message)}`)
+          } else {
+            try {
+              await supabase.from('admin_action_logs').insert({
+                order_id: order.id,
+                action: 'hold_order',
+                before_status: order.status,
+                after_status: 'pending',
+                notes: holdReason,
+              })
+            } catch (_) {}
+
+            const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+            const msg = `⏸️ <b>Order Placed on Hold</b>\n\n` +
+              `📦 <b>Product:</b> ${safeTitle}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `⚠️ <b>Reason:</b> ${escapeHtml(holdReason)}`
+            await sendMessage(chatId, msg)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/refund')) {
+      const parts = text.substring(7).trim().split(' ')
+      const orderIdentifier = parts[0]?.trim()
+      const reason = parts.slice(1).join(' ').trim()
+
+      if (!orderIdentifier) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/refund [order_id] [reason]</code>\n<i>Example:</i> <code>/refund c7c482a2 Customer requested refund</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else {
+          const refundReason = reason || 'Refunded by admin via Telegram Bot'
+          const updatedInput = {
+            ...(order.customer_input || {}),
+            refund_reason: refundReason,
+            refunded_at: new Date().toISOString(),
+          }
+
+          const { error } = await supabase
+            .from('orders')
+            .update({
+              status: 'refunded',
+              customer_input: updatedInput,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+
+          if (error) {
+            await sendMessage(chatId, `❌ Failed to refund order: ${escapeHtml(error.message)}`)
+          } else {
+            try {
+              await supabase.from('admin_action_logs').insert({
+                order_id: order.id,
+                action: 'refund_order',
+                before_status: order.status,
+                after_status: 'refunded',
+                notes: refundReason,
+              })
+            } catch (_) {}
+
+            const safeTitle = escapeHtml(order.products?.title || 'Unknown Product')
+            const msg = `💸 <b>Order Refunded</b>\n\n` +
+              `📦 <b>Product:</b> ${safeTitle}\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `📝 <b>Reason:</b> ${escapeHtml(refundReason)}`
+            await sendMessage(chatId, msg)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/deliver')) {
+      const parts = text.substring(8).trim().split(' ')
+      const orderIdentifier = parts[0]?.trim()
+      const output = parts.slice(1).join(' ').trim()
+      
+      if (!orderIdentifier || !output) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/deliver [order_id] [code/credentials]</code>\n<i>Example:</i> <code>/deliver c7c482a2 RA-9842-8821</code>')
+      } else {
+        const { order, error: resolveError } = await resolveOrder(orderIdentifier)
+        if (resolveError) {
+          await sendMessage(chatId, resolveError)
+        } else {
+          const { error } = await supabase
+            .from('orders')
+            .update({ 
+              status: 'fulfilled', 
+              final_output: output,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id)
+            
+          if (error) {
+            await sendMessage(chatId, `❌ Failed to fulfill order: ${escapeHtml(error.message)}`)
+          } else {
+            try {
+              await supabase.from('admin_action_logs').insert({
+                order_id: order.id,
+                action: 'fulfill_order',
+                before_status: order.status,
+                after_status: 'fulfilled',
+                notes: `Fulfilled via Telegram Bot: ${output.substring(0, 30)}...`,
+              })
+            } catch (_) {}
+
+            const safeTitle = escapeHtml(order.products?.title || 'Product')
+            const shortId = order.id.substring(0, 8)
+            const msg = `🎉 <b>Order Fulfilled Successfully!</b>\n\n` +
+              `📦 <b>Product:</b> ${safeTitle}\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `🔑 <b>Delivered Code:</b> <code>${escapeHtml(output)}</code>\n\n` +
+              `<i>The customer can now see this code immediately on their dashboard.</i>`
+            await sendMessage(chatId, msg)
+          }
+        }
+      }
+    }
+    else if (text.startsWith('/stock')) {
+      const searchQuery = text.substring(6).trim()
+      if (searchQuery) {
+        const { data: searchResults } = await supabase
+          .from('products')
+          .select('id, title, platform, in_stock, sale_price, is_active')
+          .ilike('title', `%${searchQuery}%`)
+          .limit(8)
+
+        if (!searchResults || searchResults.length === 0) {
+          await sendMessage(chatId, `🔍 No products matching "<code>${escapeHtml(searchQuery)}</code>".`)
+        } else {
+          let stockMsg = `🔍 <b>Search Results for "${escapeHtml(searchQuery)}":</b>\n\n`
+          searchResults.forEach((p: any, idx: number) => {
+            const stockBadge = p.in_stock <= 0 ? '❌ Out of Stock' :
+                               p.in_stock <= 3 ? `⚠️ Low (${p.in_stock})` : `✅ Stock: ${p.in_stock}`
+            stockMsg += `${idx + 1}. <b>${escapeHtml(p.title)}</b> (${escapeHtml(p.platform || 'General')})\n` +
+                        `   ৳${escapeHtml(p.sale_price)} | ${stockBadge}\n\n`
+          })
+          await sendMessage(chatId, stockMsg)
+        }
+      } else {
+        const { data: lowStock } = await supabase
+          .from('products')
+          .select('id, title, platform, in_stock, sale_price')
+          .eq('is_active', true)
+          .lte('in_stock', 5)
+          .order('in_stock', { ascending: true })
+          .limit(10)
+
+        if (!lowStock || lowStock.length === 0) {
+          await sendMessage(chatId, '✅ <b>Inventory Healthy!</b> No active products are currently low in stock (≤ 5).')
+        } else {
+          let stockMsg = `⚠️ <b>Low Stock Inventory Alert (${lowStock.length} items):</b>\n\n`
+          lowStock.forEach((p: any, idx: number) => {
+            const badge = p.in_stock <= 0 ? '❌ Out of Stock' : `⚠️ Only ${p.in_stock} left`
+            stockMsg += `${idx + 1}. <b>${escapeHtml(p.title)}</b> (${escapeHtml(p.platform || 'General')})\n` +
+                        `   ${badge} | ৳${escapeHtml(p.sale_price)}\n\n`
+          })
+          stockMsg += `<i>Tip: Type <code>/stock &lt;name&gt;</code> to check any specific product.</i>`
+          await sendMessage(chatId, stockMsg)
+        }
       }
     }
     else if (text === '/custom') {
       const { data } = await supabase
         .from('custom_orders')
-        .select('id, name, product_name, platform, status')
+        .select('id, name, product_name, platform, status, details, created_at')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
         .limit(5)
 
       if (!data || data.length === 0) {
-        await sendMessage(chatId, '🎉 No pending custom requests!')
+        await sendMessage(chatId, '🎉 No pending custom requests right now!')
       } else {
-        let msg = `📝 <b>Latest 5 Custom Requests:</b>\n\n`
+        let msg = `📝 <b>Pending Custom Requests (${data.length}):</b>\n\n`
         data.forEach((req: any, idx: number) => {
           msg += `${idx + 1}. <b>${escapeHtml(req.product_name)}</b> (${escapeHtml(req.platform)})\n` +
-                 `   From: ${escapeHtml(req.name)}\n\n`
+                 `   From: ${escapeHtml(req.name)}\n`
+          if (req.details) {
+            msg += `   Details: <i>${escapeHtml(req.details)}</i>\n`
+          }
+          msg += '\n'
         })
         await sendMessage(chatId, msg)
       }
     }
-    else if (text.startsWith('/deliver ')) {
-      const parts = text.substring(9).trim().split(' ')
-      const orderId = parts[0]?.trim()
-      const output = parts.slice(1).join(' ').trim()
-      
-      if (!orderId || !output) {
-        await sendMessage(chatId, '⚠️ Usage: /deliver [order_id] [message/code]')
-      } else {
-        const { data, error } = await supabase
-          .from('orders')
-          .update({ 
-            status: 'fulfilled', 
-            final_output: output 
-          })
-          .eq('id', orderId)
-          .select('id')
-          
-        if (error) {
-          await sendMessage(chatId, `❌ Failed to fulfill order: ${escapeHtml(error.message)}`)
-        } else if (!data || data.length === 0) {
-          await sendMessage(chatId, `❌ Order not found: <code>${escapeHtml(orderId)}</code>`)
-        } else {
-          await sendMessage(chatId, `✅ Order <code>${escapeHtml(orderId)}</code> successfully fulfilled! The customer can now see the product code on their dashboard.`)
-        }
-      }
-    }
     else {
-      await sendMessage(chatId, '❓ Unknown command. Type /help to see available commands.')
+      await sendMessage(chatId, '❓ Unknown command. Type <code>/help</code> to see all available commands.')
     }
 
     return new Response('OK', { status: 200, headers: corsHeaders })

@@ -250,15 +250,16 @@ Merchants execute state transitions through secure PostgreSQL stored procedures:
 
 ---
 
-## 9. Merchant Operational Standard Operating Procedures (SOP)
-
 | Daily Task | Administrative Action | Response Time Target |
 | :--- | :--- | :--- |
-| **New Payment Received** | Check bKash merchant app $\rightarrow$ Go to `/admin` $\rightarrow$ Find Order $\rightarrow$ Click **Validate**. | Under 5 minutes |
-| **Fulfill Digital Key** | Click **Fulfill** $\rightarrow$ Paste Key/Credentials $\rightarrow$ Confirm. System assigns code and emails customer. | Instant (Automatic) / Under 15m (Manual) |
-| **Invalid Customer UID** | Click **Hold Order** $\rightarrow$ Enter reason ("Invalid Server ID") $\rightarrow$ Contact customer. | Under 10 minutes |
-| **Restock Digital Inventory**| Go to `/admin` $\rightarrow$ Inventory $\rightarrow$ Adjust stock or run seeding toolchain. | As stock depletes |
-| **Review Custom Inquiries** | Go to `/admin` $\rightarrow$ Custom Orders tab $\rightarrow$ Quote buyer via email $\rightarrow$ Update status to `quoted`. | Within 2 hours |
+| **New Payment Received** | Check bKash app $\rightarrow$ Send <code>/verify &lt;id&gt;</code> via Telegram or validate in `/admin`. | Under 5 minutes |
+| **Fulfill Digital Key** | Send <code>/deliver &lt;id&gt; &lt;code&gt;</code> in Telegram or click **Fulfill** in `/admin`. | Instant (Automatic) / Under 15m (Manual) |
+| **Cancel Fraud / Failed Trx**| Send <code>/cancel &lt;id&gt; [reason]</code> via Telegram (auto-releases keys and notifies audit log). | Under 5 minutes |
+| **Invalid Customer UID** | Send <code>/hold &lt;id&gt; [reason]</code> in Telegram or click **Hold Order** in `/admin`. | Under 10 minutes |
+| **Restock Digital Inventory**| Send <code>/stock</code> to inspect low stock $\rightarrow$ Adjust in `/admin` or run seeding scripts. | As stock depletes |
+| **Review Custom Inquiries** | Send <code>/custom</code> in Telegram $\rightarrow$ Quote buyer via email $\rightarrow$ Update to `quoted`. | Within 2 hours |
+
+> 📱 **Mobile First Command Center**: Every operation can be performed on-the-go via Telegram using **short IDs** (e.g. `c7c482a2` or first 6–8 characters), eliminating the need to log into the web dashboard on a smartphone.
 
 ---
 
