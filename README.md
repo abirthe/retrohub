@@ -84,9 +84,10 @@ Engineered with a **high-availability dual-channel dispatch architecture**: aler
 * 📝 **Custom Order Alert**: Customer name, email, platform, and request details.
 * ⚠️ **Low Stock Warning**: Instant notification when product inventory drops to $\le 3$.
 
-#### Interactive Telegram Commands
+#### Interactive Telegram Commands & Inline Keyboards
 | Command | Action |
 | :--- | :--- |
+| **[Inline Button]** | Instantly **Cancel** or **Verify** orders directly from push notifications without typing commands |
 | `/orders` | View up to 10 latest unfulfilled orders with quick action shortcuts |
 | `/order <id>` | **Inspect full order details** (Player UID, Server, TrxID, timestamps, status) |
 | `/verify <id>` | **Verify customer payment** directly from chat (`status = 'payment_verified'`) |
@@ -137,7 +138,7 @@ Engineered to pass all Google Core Web Vitals and achieve green performance benc
   * **Concurrent React 18 `startTransition`**: Wrapped category filters (`#cat-giftcard`, `#cat-games`), sort selectors, and admin tab triggers in `startTransition`, ensuring click animations and borders render in frame 1 (<16ms) while list mutations happen non-blockingly.
 * **Cumulative Layout Shift (CLS = 0.00)**:
   * **Geometric Skeleton Grid**: Replaced generic loading spinners in [Index.tsx](src/pages/Index.tsx) with an 8-card responsive skeleton matching the exact card dimensions (`h-[280px] sm:h-[340px]`).
-  * **Stable FeaturedBanner**: Removed collapsing placeholders that previously shrank from `192px` to `0px`, eliminating layout jumpiness entirely.
+  * **Vite Chunk Optimization**: Implemented aggressive `manualChunks` in `vite.config.ts` to split vendor libraries (React, Supabase, UI primitives) into independent chunks, drastically reducing initial JS parse time and improving main-thread responsiveness.
   * **Layout Height Pre-Allocation**: Added `min-h-[500px]` to catalog wrappers and fixed aspect-ratio containers (`h-32 sm:h-44`) for product imagery.
 
 ---
