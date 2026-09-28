@@ -1,45 +1,6 @@
-// @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const CUSTOMER_BOT_TOKEN = Deno.env.get("CUSTOMER_BOT_TOKEN") || "";
-const ADMIN_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
-const STAFF_CHAT_ID = String(
-  Deno.env.get("ADMIN_CHAT_ID") ||
-    Deno.env.get("TELEGRAM_CHAT_ID") ||
-    "",
-).trim();
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const XAI_API_KEY = (
-  Deno.env.get("XAI_API_KEY") ||
-  Deno.env.get("VITE_XAI_API_KEY") ||
-  ""
-).trim();
-const XAI_TEAM_ID = (
-  Deno.env.get("XAI_TEAM_ID") ||
-  ""
-).trim();
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function escapeHtml(str: unknown): string {
-  if (str === null || str === undefined) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { CUSTOMER_BOT_TOKEN, ADMIN_BOT_TOKEN, STAFF_CHAT_ID, supabase, corsHeaders, XAI_API_KEY, XAI_TEAM_ID } from "./config.ts";
+import { escapeHtml, sleep } from "./utils.ts";
 
 async function sendChatAction(
   chatId: string | number,
