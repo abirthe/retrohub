@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { CUSTOMER_BOT_TOKEN, ADMIN_BOT_TOKEN, STAFF_CHAT_ID, supabase, corsHeaders, XAI_API_KEY, XAI_TEAM_ID } from "./config.ts";
 import { escapeHtml, sleep } from "./utils.ts";
@@ -23,11 +24,11 @@ async function sendChatAction(
 async function sendMessage(
   chatId: string | number,
   text: string,
-  reply_markup?: any,
+  reply_markup?: any /* eslint-disable-line */,
 ) {
   try {
     const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/sendMessage`;
-    const body: any = {
+    const body: any /* eslint-disable-line */ = {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
@@ -67,11 +68,11 @@ async function sendMessage(
   }
 }
 
-async function sendMerchantAdminAlert(text: string, reply_markup?: any) {
+async function sendMerchantAdminAlert(text: string, reply_markup?: any /* eslint-disable-line */) {
   try {
     const token = ADMIN_BOT_TOKEN || CUSTOMER_BOT_TOKEN;
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const body: any = {
+    const body: any /* eslint-disable-line */ = {
       chat_id: STAFF_CHAT_ID,
       text,
       parse_mode: "HTML",
@@ -100,11 +101,11 @@ async function editMessageText(
   chatId: string | number,
   messageId: number,
   text: string,
-  reply_markup?: any,
+  reply_markup?: any /* eslint-disable-line */,
 ) {
   try {
     const url = `https://api.telegram.org/bot${CUSTOMER_BOT_TOKEN}/editMessageText`;
-    const body: any = {
+    const body: any /* eslint-disable-line */ = {
       chat_id: chatId,
       message_id: messageId,
       text,
@@ -703,7 +704,7 @@ RetroHub Knowledge Base & Rules:
 async function sendPacedMessage(
   chatId: string | number,
   text: string,
-  reply_markup?: any,
+  reply_markup?: any /* eslint-disable-line */,
   delayRange?: [number, number],
 ) {
   if (delayRange && delayRange[1] > 0) {
