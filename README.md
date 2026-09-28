@@ -191,7 +191,7 @@ RetroHub implements a decoupled, high-availability two-bot Telegram architecture
 - **Persona**: _"Retro Chan"_ — witty, charming, empathetic, and highly knowledgeable about all RetroHub products, platforms, and payment workflows (uses gamer terminology like _GG_ and _GLHF_).
 - **Dual-Engine Customer Care Architecture**:
   - **Engine A (xAI Grok)**: Powered by `grok-2-latest` for conversational NLP, live order context injection, regional platform guidance, and empathetic problem solving.
-  - **Engine B (Retro Chan Natural Intelligence Engine)**: Built-in local high-IQ knowledge engine providing sub-second fallback answers on bKash payments, instant delivery, order tracking, and guarantees.
+  - **Engine B (Retro Chan Natural Intelligence Engine)**: Built-in local high-IQ knowledge engine providing sub-second fallback answers on bKash payments, instant delivery, order tracking, guarantees, and catalog searches. Implements token-level relevance scoring, game franchise acronym expansion (`gtav`, `rdr2`, `cod`, `vp`, `uc`), platform intent boosting, and deal sorting.
 - **Hardened Enterprise Resilience**:
   - **Idempotency Locks**: Neutralizes Telegram webhook redeliveries via the `telegram_processed_updates` PostgreSQL table.
   - **Row-Level Session Locks**: `append_session_message()` PL/pgSQL function entirely eliminates race conditions during rapid message bursts.
