@@ -322,30 +322,108 @@ function extractSearchTerms(clean: string): string {
     "your", "shop", "store", "is", "the", "a", "an", "for", "please", "can", "i",
     "get", "buy", "price", "any", "got", "what", "are", "there", "available",
     "stock", "tell", "me", "about", "show", "give", "much", "cost", "how", "sell",
-    "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account"
+    "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account",
+    "deal", "deals", "cheap", "cheapest", "best", "rate", "rates", "latest", "top"
   ]);
-  const words = clean.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 1 && !stopWords.has(w));
+  const words = clean
+    .replace(/\bgtav\b/g, "gta 5")
+    .replace(/\bgta5\b/g, "gta 5")
+    .replace(/\brdr2\b/g, "red dead redemption 2")
+    .replace(/\brdr\b/g, "red dead redemption")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 1 && !stopWords.has(w));
   return words.join(" ").trim();
 }
 
 function findMatchingProducts(query: string, products: CatalogProduct[]): CatalogProduct[] {
-  const clean = query.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+  let queryLower = query.toLowerCase();
+
+  // Expand common game franchise acronyms & aliases
+  queryLower = queryLower
+    .replace(/\bgtav\b/g, "gta 5")
+    .replace(/\bgta5\b/g, "gta 5")
+    .replace(/\brdr2\b/g, "red dead redemption 2")
+    .replace(/\brdr\b/g, "red dead redemption")
+    .replace(/\bcod\b/g, "call of duty")
+    .replace(/\bmw\b/g, "modern warfare")
+    .replace(/\bbf\b/g, "battlefield")
+    .replace(/\bvp\b/g, "valorant points")
+    .replace(/\buc\b/g, "pubg uc");
+
   const stopWords = new Set([
     "do", "you", "have", "certain", "games", "game", "of", "my", "choice", "in",
     "your", "shop", "store", "is", "the", "a", "an", "for", "please", "can", "i",
     "get", "buy", "price", "any", "got", "what", "are", "there", "available",
     "stock", "tell", "me", "about", "show", "give", "much", "cost", "how", "sell",
-    "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account"
+    "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account",
+    "deal", "deals", "cheap", "cheapest", "best", "rate", "rates", "latest", "top"
   ]);
 
-  const words = clean.split(/\s+/).filter((w) => w.length > 2 && !stopWords.has(w));
-  if (words.length === 0) return [];
+  const clean = queryLower.replace(/[^a-z0-9\s]/g, " ");
+  const rawTokens = clean.split(/\s+/).filter((w) => w.length > 0);
+  const searchTokens = rawTokens.filter((w) => !stopWords.has(w) && w.length > 1);
 
-  return products.filter((p) => {
-    const titleLower = (p.title || "").toLowerCase();
-    const platLower = (p.platform || "Global").toLowerCase();
-    return words.some((w) => titleLower.includes(w) || platLower.includes(w));
+  if (searchTokens.length === 0) return [];
+
+  const wantsXbox = rawTokens.includes("xbox") || rawTokens.includes("series");
+  const wantsSteam = rawTokens.includes("steam") || rawTokens.includes("pc");
+  const wantsPlaystation = rawTokens.includes("psn") || rawTokens.includes("playstation") || rawTokens.includes("ps4") || rawTokens.includes("ps5");
+  const wantsCheapest = rawTokens.includes("cheapest") || rawTokens.includes("cheap");
+
+  const scored: Array<{ product: CatalogProduct; score: number }> = [];
+
+  for (const p of products) {
+    const title = (p.title || "").toLowerCase();
+    const platform = (p.platform || "Global").toLowerCase();
+
+    let score = 0;
+    let matchedTitleTokens = 0;
+
+    for (const token of searchTokens) {
+      if (token === "gta") {
+        if (title.includes("gta") || title.includes("grand theft auto")) {
+          score += 50;
+          matchedTitleTokens++;
+        }
+      } else if (title.includes(token)) {
+        score += 20;
+        matchedTitleTokens++;
+      }
+    }
+
+    if (matchedTitleTokens === 0) continue;
+
+    const matchRatio = matchedTitleTokens / searchTokens.length;
+    // For multi-word queries, reject products matching less than half the search terms
+    if (searchTokens.length >= 2 && matchRatio < 0.5) continue;
+
+    score += matchRatio * 50;
+
+    // Platform intent bonuses
+    if (wantsXbox && (platform.includes("xbox") || title.includes("xbox"))) score += 40;
+    if (wantsSteam && (platform.includes("steam") || title.includes("steam"))) score += 40;
+    if (wantsPlaystation && (platform.includes("playstation") || platform.includes("psn"))) score += 40;
+
+    // Favor in-stock items
+    if (p.in_stock > 0) score += 5;
+
+    scored.push({ product: p, score });
+  }
+
+  if (scored.length === 0) return [];
+
+  scored.sort((a, b) => {
+    if (wantsCheapest && Math.abs(b.score - a.score) < 30) {
+      return a.product.sale_price - b.product.sale_price;
+    }
+    return b.score - a.score || a.product.sale_price - b.product.sale_price;
   });
+
+  const topScore = scored[0].score;
+  const highQualityMatches = scored.filter((s) => s.score >= topScore * 0.75);
+
+  return highQualityMatches.map((s) => s.product);
 }
 
 /**
@@ -435,8 +513,12 @@ function getRetroChanIntelligenceResponse(
     clean.includes("valorant") ||
     clean.includes("resident") ||
     clean.includes("witcher") ||
-    clean.includes("warhammer") ||
     clean.includes("gta") ||
+    clean.includes("red dead") ||
+    clean.includes("rdr") ||
+    clean.includes("deal") ||
+    clean.includes("discount") ||
+    clean.includes("cheap") ||
     clean.includes("mine") ||
     clean.includes("got") ||
     clean.includes("have")
