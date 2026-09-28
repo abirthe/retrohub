@@ -1,20 +1,6 @@
 // deno-lint-ignore-file no-explicit-any no-unused-vars
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const TELEGRAM_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
-const ADMIN_CHAT_ID = String(
-  Deno.env.get("TELEGRAM_CHAT_ID") ||
-    Deno.env.get("ADMIN_CHAT_ID") ||
-    "",
-).trim();
-const CUSTOMER_BOT_TOKEN = Deno.env.get("CUSTOMER_BOT_TOKEN") || "";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const TELEGRAM_WEBHOOK_SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") || "";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+import { TELEGRAM_TOKEN, ADMIN_CHAT_ID, CUSTOMER_BOT_TOKEN, supabase, TELEGRAM_WEBHOOK_SECRET, corsHeaders, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from "./config.ts";
 
 async function sendToCustomer(chatId: string | number, message: string) {
   if (!CUSTOMER_BOT_TOKEN) {
@@ -99,11 +85,6 @@ async function appendAgentSessionMessage(chatId: number, text: string) {
   }
 }
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token, x-internal-secret",
-};
 
 function escapeHtml(str: unknown): string {
   if (str === null || str === undefined) return "";
