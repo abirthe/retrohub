@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any no-unused-vars
+// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { CUSTOMER_BOT_TOKEN, ADMIN_BOT_TOKEN, STAFF_CHAT_ID, supabase, corsHeaders, XAI_API_KEY, XAI_TEAM_ID } from "./config.ts";
 import { escapeHtml, sleep } from "./utils.ts";
