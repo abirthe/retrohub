@@ -112,7 +112,8 @@ Ensure these are populated in your Supabase Secrets manager (`npx supabase secre
 | Secret                    | Value Type | Description                                                      |
 | :------------------------ | :--------- | :--------------------------------------------------------------- |
 | `CUSTOMER_BOT_TOKEN`      | `string`   | The primary bot token provided by BotFather for `@retrochanbot`. |
-| `ADMIN_CHAT_ID`           | `bigint`   | The Telegram Admin Group ID to route staff alerts.               |
+| `TELEGRAM_BOT_TOKEN`      | `string`   | The merchant admin bot token for `@Notifyretro_bot` (used to send escalation alerts). |
+| `ADMIN_CHAT_ID` / `TELEGRAM_CHAT_ID` | `string`   | The Telegram Admin Chat / Group ID to route staff alerts. |
 | `XAI_API_KEY`             | `string`   | x.ai Grok secret API Bearer token (starts with `xai-`).           |
 | `XAI_TEAM_ID`             | `uuid`     | Optional x.ai Team/Organization ID for API scoping.               |
 | `TELEGRAM_WEBHOOK_SECRET` | `string`   | Cryptographic secret verified against incoming webhook headers.  |

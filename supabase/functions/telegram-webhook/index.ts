@@ -576,7 +576,22 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------
-    // 2. Telegram Webhook Updates (commands from Telegram chat)
+    // 2. Telegram Webhook Updates (commands and callbacks from Telegram)
+    if (body.callback_query || body.message) {
+      if (TELEGRAM_WEBHOOK_SECRET) {
+        const secretHeader = req.headers.get("x-telegram-bot-api-secret-token");
+        if (secretHeader !== TELEGRAM_WEBHOOK_SECRET) {
+          console.warn(
+            "Unauthorized webhook request rejected: missing or invalid secret token.",
+          );
+          return new Response("Unauthorized", {
+            status: 401,
+            headers: corsHeaders,
+          });
+        }
+      }
+    }
+
     if (body.callback_query) {
       const cq = body.callback_query;
       const chatId = cq.message?.chat?.id;
@@ -722,20 +737,6 @@ serve(async (req: Request) => {
 
     if (!body.message || !body.message.text) {
       return new Response("OK", { status: 200, headers: corsHeaders });
-    }
-
-    // SECURITY CHECK: Verify Telegram Webhook Secret Token header
-    if (TELEGRAM_WEBHOOK_SECRET) {
-      const secretHeader = req.headers.get("x-telegram-bot-api-secret-token");
-      if (secretHeader !== TELEGRAM_WEBHOOK_SECRET) {
-        console.warn(
-          "Unauthorized webhook request rejected: missing or invalid secret token.",
-        );
-        return new Response("Unauthorized", {
-          status: 401,
-          headers: corsHeaders,
-        });
-      }
     }
 
     const chatId = body.message.chat.id;
