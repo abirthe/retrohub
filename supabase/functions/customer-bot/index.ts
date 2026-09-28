@@ -16,6 +16,10 @@ const XAI_API_KEY = (
   Deno.env.get("VITE_XAI_API_KEY") ||
   ""
 ).trim();
+const XAI_TEAM_ID = (
+  Deno.env.get("XAI_TEAM_ID") ||
+  ""
+).trim();
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -599,6 +603,24 @@ function getRetroChanIntelligenceResponse(
   );
 }
 
+function extractResponseText(data: any): string {
+  if (Array.isArray(data?.output)) {
+    for (const item of data.output) {
+      if (item.type === "message" && Array.isArray(item.content)) {
+        const block = item.content.find(
+          (c: any) => c.type === "output_text" || typeof c.text === "string",
+        );
+        if (block?.text) return block.text.trim();
+      }
+      if (typeof item.text === "string") return item.text.trim();
+    }
+  }
+  if (data?.choices?.[0]?.message?.content) {
+    return data.choices[0].message.content.trim();
+  }
+  return "";
+}
+
 /**
  * Generates an intelligent, context-aware reply using xAI (Grok) with fallback to Retro Chan Intelligence.
  */
@@ -644,43 +666,66 @@ RetroHub Knowledge Base & Rules:
       { role: "user", content: latestMessage },
     ];
 
-    const model = "grok-beta";
+    const xaiHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${XAI_API_KEY}`,
+    };
+    if (XAI_TEAM_ID) {
+      xaiHeaders["X-Team-Id"] = XAI_TEAM_ID;
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const res = await fetch("https://api.x.ai/v1/chat/completions", {
+      // 1. Try modern xAI v1/responses with grok-4.7
+      const res = await fetch("https://api.x.ai/v1/responses", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${XAI_API_KEY}`,
-        },
+        headers: xaiHeaders,
         body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.5,
-          max_tokens: 300,
+          model: "grok-4.7",
+          input: messages,
         }),
         signal: controller.signal,
       });
-      clearTimeout(timeoutId);
 
       if (res.ok) {
+        clearTimeout(timeoutId);
         const data = await res.json();
-        const text = data.choices?.[0]?.message?.content?.trim();
+        const text = extractResponseText(data);
         if (text) return text;
       } else {
-        const errText = await res.text();
-        console.error(
-          `AI API error with model ${model}: ${res.status} ${res.statusText} - ${errText}`,
-        );
+        // 2. Fallback to v1/chat/completions with grok-beta
+        const fallbackRes = await fetch("https://api.x.ai/v1/chat/completions", {
+          method: "POST",
+          headers: xaiHeaders,
+          body: JSON.stringify({
+            model: "grok-beta",
+            messages,
+            temperature: 0.5,
+            max_tokens: 300,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (fallbackRes.ok) {
+          const data = await fallbackRes.json();
+          const text = data.choices?.[0]?.message?.content?.trim();
+          if (text) return text;
+        } else {
+          const errText = await fallbackRes.text();
+          console.error(
+            `AI API error with model grok-beta: ${fallbackRes.status} ${fallbackRes.statusText} - ${errText}`,
+          );
+        }
       }
     } catch (err: any) {
       clearTimeout(timeoutId);
       if (err.name === "AbortError") {
-        console.error(`AI API timeout with model ${model}`);
+        console.error("AI API timeout");
       } else {
-        console.error(`AI API fetch failed with model ${model}:`, err);
+        console.error("AI API fetch failed:", err);
       }
     }
 
