@@ -45,7 +45,7 @@ A public-facing Telegram support agent powered by a **Dual-Engine Architecture**
 
 - **Dual-Engine Architecture**:
   - **Primary (xAI Grok)**: Context-aware conversational AI with dynamic store prompt injection and active order state tracking.
-  - **Secondary (Retro Chan Natural Intelligence Engine)**: High-speed local store intelligence answering bKash payment walkthroughs, instant delivery guarantees, order status queries, and product catalog details with zero external API dependencies.
+  - **Secondary (Retro Chan Natural Intelligence Engine)**: High-speed local store intelligence answering bKash payment walkthroughs, instant delivery guarantees, order status queries, and product catalog searches. Features game alias expansion (`gtav`, `rdr2`, `cod`, `vp`, `uc`), platform intent boosting (`Xbox`, `Steam`, `PSN`), and price-optimized sorting (`cheapest deal`) with sub-50ms execution.
 - **Zero-Interruption Invariant**: The merchant admin bot is **only alerted when a customer explicitly requests human assistance** (via `[👤 Talk to Human Agent]`, `/human`, `/agent`, `/support`, `/staff`). General customer care inquiries never ping or bother the merchant desk.
 - **Instant Order Tracking**: Accepts short IDs (e.g. `8f4b12`), 36-char UUIDs, or user email addresses to display live order status, verification stage, item breakdowns, and delivered digital codes.
 - **bKash Payment Assistant**: Step-by-step payment walkthrough for bKash Send Money to `01580382868`, explaining the dynamic 1.0% charge calculation and reference ID.

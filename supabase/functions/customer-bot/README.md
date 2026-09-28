@@ -82,7 +82,7 @@ graph TB
 ### 1. Dual-Engine Conversational AI
 
 - **Engine A (xAI Grok)**: Powered by modern `v1/responses` with `grok-4.7` (with fallback to `chat/completions` on `grok-beta`). Injects live product catalog items and active order contexts natively into the system prompt for highly contextual interactions. Gamified and enthusiastic tone (GG, GLHF).
-- **Engine B (Retro Chan Natural Intelligence)**: Zero-downtime deterministic and live database catalog responder. Directly queries the `products` table (2,600+ active items) to answer exact game availability queries, in-stock prices, and custom on-demand game sourcing requests with zero latency and zero token costs.
+- **Engine B (Retro Chan Natural Intelligence)**: Zero-downtime deterministic and live database catalog responder. Employs a **high-precision relevance scoring engine** with game franchise alias expansion (`gtav`/`gta5` → Grand Theft Auto V, `rdr2`/`rdr` → Red Dead Redemption 2, `cod`/`mw` → Call of Duty / Modern Warfare, `vp` → Valorant Points, `uc` → PUBG UC), platform intent boosting (`Xbox`, `Steam`, `PSN`), and price-sort criteria (`cheapest deal`), returning verified live prices and stock in <50ms with zero token cost.
 
 ### 2. Autonomous Digital Delivery Engine
 
