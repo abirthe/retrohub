@@ -221,7 +221,8 @@ CUSTOMER_BOT_TOKEN="your_customer_bot_token"
 TELEGRAM_WEBHOOK_SECRET="your_webhook_secret_token"
 
 # AI Integration
-XAI_API_KEY="your_xai_api_key"
+XAI_API_KEY="xai-your_secret_api_key"
+XAI_TEAM_ID="your_xai_team_uuid"
 
 # Email Delivery
 RESEND_API_KEY="your_resend_api_key"
@@ -230,7 +231,7 @@ RESEND_API_KEY="your_resend_api_key"
 To configure via Supabase CLI:
 
 ```bash
-npx supabase secrets set TELEGRAM_BOT_TOKEN="xxx" ADMIN_CHAT_ID="xxx" CUSTOMER_BOT_TOKEN="xxx" XAI_API_KEY="xxx"
+npx supabase secrets set TELEGRAM_BOT_TOKEN="xxx" ADMIN_CHAT_ID="xxx" CUSTOMER_BOT_TOKEN="xxx" XAI_API_KEY="xai-xxx" XAI_TEAM_ID="xxx"
 ```
 
 ---

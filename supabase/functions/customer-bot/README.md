@@ -81,8 +81,8 @@ graph TB
 
 ### 1. Dual-Engine Conversational AI
 
-- **Engine A (xAI Grok)**: Powered by `grok-2-latest`. Injects active order contexts natively into the system prompt for highly contextual interactions. Gamified and enthusiastic tone (GG, GLHF).
-- **Engine B (Retro Chan Local)**: Sub-millisecond regex/keyword fallback system guaranteeing offline availability. Handles bKash guidelines, tracking, catalog overviews, and delivery speeds perfectly without token usage.
+- **Engine A (xAI Grok)**: Powered by modern `v1/responses` with `grok-4.7` (with fallback to `chat/completions` on `grok-beta`). Injects live product catalog items and active order contexts natively into the system prompt for highly contextual interactions. Gamified and enthusiastic tone (GG, GLHF).
+- **Engine B (Retro Chan Natural Intelligence)**: Zero-downtime deterministic and live database catalog responder. Directly queries the `products` table (2,600+ active items) to answer exact game availability queries, in-stock prices, and custom on-demand game sourcing requests with zero latency and zero token costs.
 
 ### 2. Autonomous Digital Delivery Engine
 
@@ -113,7 +113,8 @@ Ensure these are populated in your Supabase Secrets manager (`npx supabase secre
 | :------------------------ | :--------- | :--------------------------------------------------------------- |
 | `CUSTOMER_BOT_TOKEN`      | `string`   | The primary bot token provided by BotFather for `@retrochanbot`. |
 | `ADMIN_CHAT_ID`           | `bigint`   | The Telegram Admin Group ID to route staff alerts.               |
-| `XAI_API_KEY`             | `uuid`     | x.ai Grok API Bearer token.                                      |
+| `XAI_API_KEY`             | `string`   | x.ai Grok secret API Bearer token (starts with `xai-`).           |
+| `XAI_TEAM_ID`             | `uuid`     | Optional x.ai Team/Organization ID for API scoping.               |
 | `TELEGRAM_WEBHOOK_SECRET` | `string`   | Cryptographic secret verified against incoming webhook headers.  |
 
 _(Note: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically by the Supabase runtime environment.)_
