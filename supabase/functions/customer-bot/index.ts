@@ -636,7 +636,7 @@ async function getAiResponse(
     liveProducts,
   );
 
-  if (!XAI_API_KEY || XAI_API_KEY.length < 10) {
+  if (!XAI_API_KEY || !XAI_API_KEY.startsWith("xai-")) {
     return fallback;
   }
 
@@ -675,7 +675,7 @@ RetroHub Knowledge Base & Rules:
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
     try {
       // 1. Try modern xAI v1/responses with grok-4.7
@@ -737,18 +737,20 @@ RetroHub Knowledge Base & Rules:
 }
 
 /**
- * Paced sender that simulates authentic human typing and cadence.
+ * High-speed message sender with optional subtle typing cadence.
  */
 async function sendPacedMessage(
   chatId: string | number,
   text: string,
   reply_markup?: any,
-  delayRange: [number, number] = [1000, 1800],
+  delayRange?: [number, number],
 ) {
-  await sendChatAction(chatId, "typing");
-  const delay =
-    Math.floor(Math.random() * (delayRange[1] - delayRange[0])) + delayRange[0];
-  await sleep(delay);
+  if (delayRange && delayRange[1] > 0) {
+    await sendChatAction(chatId, "typing");
+    const delay =
+      Math.floor(Math.random() * (delayRange[1] - delayRange[0])) + delayRange[0];
+    if (delay > 0) await sleep(delay);
+  }
   return await sendMessage(chatId, text, reply_markup);
 }
 
@@ -1487,8 +1489,6 @@ Tap the button below to reach our merchant specialist directly.`;
     rawText === "/human" ||
     rawText === "/staff"
   ) {
-    await sendChatAction(chatId, "typing");
-    await sleep(600);
     await sendMessage(
       chatId,
       `👨‍💻 <b>Connecting to Live Human Support...</b>\n\nI have routed your inquiry directly to our merchant desk. An agent will review your chat transcript and reply directly to you right here.\n\nIn the meantime, feel free to ask any other questions!`,
@@ -1560,22 +1560,14 @@ Tap the button below to reach our merchant specialist directly.`;
       const orderId = payload.replace(/^(order_|issue_)/, "");
       await updateSessionState(chatId, { last_order_id: orderId });
 
-      await sendChatAction(chatId, "typing");
-      await sleep(1000);
-
       const { order } = await resolveOrder(orderId);
       if (order) {
         const greeting = payload.startsWith("issue_")
           ? `👋 Hi <b>${escapeHtml(fromUser.first_name || "there")}</b>, I see you're checking on Order <code>#${order.id.slice(0, 8)}</code>. Let's look into this right away!`
           : `👋 Hi <b>${escapeHtml(fromUser.first_name || "there")}</b>! Here is the latest update on your order:`;
 
-        await sendMessage(chatId, greeting);
-        await sleep(600);
-        await sendChatAction(chatId, "typing");
-        await sleep(1000);
-
         const statusText = formatOrderStatus(order);
-        await sendMessage(chatId, statusText, buildOrderKeyboard(order.id));
+        await sendMessage(chatId, `${greeting}\n\n${statusText}`, buildOrderKeyboard(order.id));
         return new Response(JSON.stringify({ ok: true }), {
           headers: corsHeaders,
         });
@@ -1586,7 +1578,6 @@ Tap the button below to reach our merchant specialist directly.`;
       chatId,
       `👋 <b>Welcome to Retro Hub Customer Care!</b>\n\nI'm Retro Chan, your 24/7 automated support concierge. I can instantly verify your order status, look up your game keys & credentials, or connect you with human support whenever needed.`,
       buildGeneralKeyboard(),
-      [1000, 1600],
     );
     return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
   }
@@ -1601,19 +1592,12 @@ Tap the button below to reach our merchant specialist directly.`;
   const orderIdOnlyRegex =
     /^[0-9a-f]{8}(-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$/i;
   if (orderIdOnlyRegex.test(rawText)) {
-    await sendChatAction(chatId, "typing");
-    await sleep(1000);
-
     const { order } = await resolveOrder(rawText);
     if (order) {
       await updateSessionState(chatId, { last_order_id: order.id });
-      await sendMessage(chatId, `🔍 Found your order!`);
-      await sleep(600);
-      await sendChatAction(chatId, "typing");
-      await sleep(1000);
       await sendMessage(
         chatId,
-        formatOrderStatus(order),
+        `🔍 Found your order!\n\n${formatOrderStatus(order)}`,
         buildOrderKeyboard(order.id),
       );
       return new Response(JSON.stringify({ ok: true }), {
@@ -1680,7 +1664,7 @@ Tap the button below to reach our merchant specialist directly.`;
     ? buildOrderKeyboard(activeOrderData.id)
     : buildGeneralKeyboard();
 
-  await sendPacedMessage(chatId, responseText, keyboard, [800, 1800]);
+  await sendPacedMessage(chatId, responseText, keyboard);
 
   return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
 }
