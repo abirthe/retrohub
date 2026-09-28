@@ -305,7 +305,7 @@ async function getLiveProducts(): Promise<CatalogProduct[]> {
       products
         .map(
           (p) =>
-            `- ${p.title} [${p.platform}]: ৳${p.sale_price} (Stock: ${p.in_stock})`,
+            `- ${p.title || "Unknown"} [${p.platform || "Global"}]: ৳${p.sale_price} (Stock: ${p.in_stock})`,
         )
         .join("\n");
     lastCatalogFetch = now;
@@ -342,8 +342,8 @@ function findMatchingProducts(query: string, products: CatalogProduct[]): Catalo
   if (words.length === 0) return [];
 
   return products.filter((p) => {
-    const titleLower = p.title.toLowerCase();
-    const platLower = p.platform.toLowerCase();
+    const titleLower = (p.title || "").toLowerCase();
+    const platLower = (p.platform || "Global").toLowerCase();
     return words.some((w) => titleLower.includes(w) || platLower.includes(w));
   });
 }
@@ -461,7 +461,7 @@ function getRetroChanIntelligenceResponse(
       const matches = findMatchingProducts(clean, products);
       if (matches.length > 0) {
         const itemsList = matches.slice(0, 4).map((p) =>
-          `• <b>${escapeHtml(p.title)}</b> [${escapeHtml(p.platform)}]\n  💰 Price: <b>৳${p.sale_price}</b> | Stock: ${p.in_stock > 0 ? `✅ In Stock (${p.in_stock})` : "⚠️ Out of Stock"}`
+          `• <b>${escapeHtml(p.title || "Unknown")}</b> [${escapeHtml(p.platform || "Global")}]\n  💰 Price: <b>৳${p.sale_price}</b> | Stock: ${p.in_stock > 0 ? `✅ In Stock (${p.in_stock})` : "⚠️ Out of Stock"}`
         ).join("\n\n");
         return (
           `🎮 <b>Found in our Live Catalog:</b>\n\n` +
@@ -484,7 +484,7 @@ function getRetroChanIntelligenceResponse(
 
     // C. General Product Overview with live sample items
     const sampleProducts = (products || []).slice(0, 5).map((p) =>
-      `• <b>${escapeHtml(p.title)}</b> (${escapeHtml(p.platform)}) — ৳${p.sale_price}`
+      `• <b>${escapeHtml(p.title || "Unknown")}</b> (${escapeHtml(p.platform || "Global")}) — ৳${p.sale_price}`
     ).join("\n");
 
     return (
