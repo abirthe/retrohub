@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -218,23 +217,23 @@ async function sendOrderInspection(
     return;
   }
 
-  const safeTitle = escapeHtml(order.products?.title || "Unknown Product");
-  const safePlatform = escapeHtml(order.products?.platform || "General");
-  const safeCategory = escapeHtml(order.products?.category || "Item");
-  const safeTotal = escapeHtml(order.total);
-  const shortId = order.id.substring(0, 8);
+  const safeTitle = escapeHtml(((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Unknown Product");
+  const safePlatform = escapeHtml(((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.platform || "General");
+  const safeCategory = escapeHtml(((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.category || "Item");
+  const safeTotal = escapeHtml(order!.total);
+  const shortId = order!.id.substring(0, 8);
   const statusEmoji =
-    order.status === "fulfilled"
+    order!.status === "fulfilled"
       ? "🎉 Fulfilled"
-      : order.status === "payment_verified"
+      : order!.status === "payment_verified"
         ? "✅ Payment Verified"
-        : order.status === "payment_submitted"
+        : order!.status === "payment_submitted"
           ? "💳 Payment Submitted"
-          : order.status === "sourcing"
+          : order!.status === "sourcing"
             ? "🔄 Sourcing"
-            : order.status === "cancelled"
+            : order!.status === "cancelled"
               ? "🚫 Cancelled"
-              : order.status === "refunded"
+              : order!.status === "refunded"
                 ? "💸 Refunded"
                 : "⏳ Pending";
 
@@ -244,29 +243,29 @@ async function sendOrderInspection(
     `🎮 <b>Platform / Category:</b> ${safePlatform} (${safeCategory})\n` +
     `💰 <b>Price:</b> ৳${safeTotal}\n` +
     `📊 <b>Status:</b> ${statusEmoji}\n` +
-    `🆔 <b>Full ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
-    `📅 <b>Created:</b> ${new Date(order.created_at).toLocaleString("en-US", { timeZone: "Asia/Dhaka" })}\n`;
+    `🆔 <b>Full ID:</b> <code>${escapeHtml(order!.id)}</code>\n` +
+    `📅 <b>Created:</b> ${new Date(order!.created_at).toLocaleString("en-US", { timeZone: "Asia/Dhaka" })}\n`;
 
-  if (order.customer_input?.game_id || order.customer_input?.player_id) {
-    const uid = order.customer_input.game_id || order.customer_input.player_id;
+  if (order!.customer_input?.game_id || order!.customer_input?.player_id) {
+    const uid = order!.customer_input.game_id || order!.customer_input.player_id;
     card += `🎯 <b>Player ID / UID:</b> <code>${escapeHtml(uid)}</code>\n`;
   }
-  if (order.customer_input?.server_id || order.customer_input?.zone_id) {
+  if (order!.customer_input?.server_id || order!.customer_input?.zone_id) {
     const server =
-      order.customer_input.server_id || order.customer_input.zone_id;
+      order!.customer_input.server_id || order!.customer_input.zone_id;
     card += `🌐 <b>Server / Zone:</b> <code>${escapeHtml(server)}</code>\n`;
   }
-  if (order.customer_input?.transaction_id) {
-    card += `🧾 <b>bKash TrxID:</b> <code>${escapeHtml(order.customer_input.transaction_id)}</code>\n`;
+  if (order!.customer_input?.transaction_id) {
+    card += `🧾 <b>bKash TrxID:</b> <code>${escapeHtml(order!.customer_input.transaction_id)}</code>\n`;
   }
-  if (order.customer_input?.contact_number) {
-    card += `📱 <b>Contact:</b> <code>${escapeHtml(order.customer_input.contact_number)}</code>\n`;
+  if (order!.customer_input?.contact_number) {
+    card += `📱 <b>Contact:</b> <code>${escapeHtml(order!.customer_input.contact_number)}</code>\n`;
   }
-  if (order.customer_input?.cancel_reason) {
-    card += `📝 <b>Cancel Reason:</b> <i>${escapeHtml(order.customer_input.cancel_reason)}</i>\n`;
+  if (order!.customer_input?.cancel_reason) {
+    card += `📝 <b>Cancel Reason:</b> <i>${escapeHtml(order!.customer_input.cancel_reason)}</i>\n`;
   }
-  if (order.final_output) {
-    card += `🔑 <b>Delivered Output:</b> <code>${escapeHtml(order.final_output)}</code>\n`;
+  if (order!.final_output) {
+    card += `🔑 <b>Delivered Output:</b> <code>${escapeHtml(order!.final_output)}</code>\n`;
   }
 
   card +=
@@ -296,13 +295,13 @@ async function syncOrderToRetroChan(order: any, newStatus: string, additionalTex
     const { data: session } = await supabase
       .from("customer_support_sessions")
       .select("chat_id")
-      .eq("last_order_id", order.id)
+      .eq("last_order_id", order!.id)
       .maybeSingle();
       
     if (!session || !session.chat_id) return;
 
-    const shortId = order.id.substring(0, 8);
-    const safeTitle = escapeHtml(order.products?.title || "Digital Item");
+    const shortId = order!.id.substring(0, 8);
+    const safeTitle = escapeHtml(((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Digital Item");
     
     let msg = `🔔 <b>Order Update: #${shortId}</b>\n━━━━━━━━━━━━━━━━━━\n🎮 ${safeTitle}\n\n`;
     
@@ -613,18 +612,18 @@ serve(async (req: Request) => {
         if (resolveError) {
           await answerCallbackQuery(cq.id, "Order not found", true);
         } else if (
-          order.status === "cancelled" ||
-          order.status === "fulfilled"
+          order!.status === "cancelled" ||
+          order!.status === "fulfilled"
         ) {
           await answerCallbackQuery(
             cq.id,
-            "Order already " + order.status,
+            "Order already " + order!.status,
             true,
           );
         } else {
           const cancelReason = "Cancelled via inline button";
           const updatedInput = {
-            ...(order.customer_input || {}),
+            ...(order!.customer_input || {}),
             cancel_reason: cancelReason,
             cancelled_at: new Date().toISOString(),
           };
@@ -637,27 +636,27 @@ serve(async (req: Request) => {
               final_output: `Cancelled: ${cancelReason}`,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
 
           if (!error) {
             try {
               await supabase
                 .from("inventory_keys")
                 .update({ status: "available", order_id: null, sold_at: null })
-                .eq("order_id", order.id);
+                .eq("order_id", order!.id);
               await supabase
                 .from("admin_action_logs")
                 .insert({
-                  order_id: order.id,
+                  order_id: order!.id,
                   action: "cancel_order",
-                  before_status: order.status,
+                  before_status: order!.status,
                   after_status: "cancelled",
                   notes: cancelReason,
                 });
             } catch (_) {}
             await sendMessage(
               chatId,
-              `🚫 <b>Order Cancelled!</b>\nOrder <code>${order.id.substring(0, 8)}</code> cancelled.`,
+              `🚫 <b>Order Cancelled!</b>\nOrder <code>${order!.id.substring(0, 8)}</code> cancelled.`,
             );
             await answerCallbackQuery(cq.id, "Order Cancelled");
             await syncOrderToRetroChan(order, "cancelled", cancelReason);
@@ -671,12 +670,12 @@ serve(async (req: Request) => {
         if (resolveError) {
           await answerCallbackQuery(cq.id, "Order not found", true);
         } else if (
-          order.status === "payment_verified" ||
-          order.status === "fulfilled"
+          order!.status === "payment_verified" ||
+          order!.status === "fulfilled"
         ) {
           await answerCallbackQuery(
             cq.id,
-            "Order already " + order.status,
+            "Order already " + order!.status,
             true,
           );
         } else {
@@ -686,11 +685,11 @@ serve(async (req: Request) => {
               status: "payment_verified",
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
           if (!error) {
             await sendMessage(
               chatId,
-              `✅ <b>Payment Verified!</b>\nOrder <code>${order.id.substring(0, 8)}</code> verified.`,
+              `✅ <b>Payment Verified!</b>\nOrder <code>${order!.id.substring(0, 8)}</code> verified.`,
             );
             await answerCallbackQuery(cq.id, "Payment Verified");
             await syncOrderToRetroChan(order, "payment_verified");
@@ -702,7 +701,7 @@ serve(async (req: Request) => {
         (action === "order" || action === "inspect") &&
         orderIdentifier
       ) {
-        await answerCallbackQuery(cq.id, "🔍 Inspecting order...");
+        await answerCallbackQuery(cq.id, "🔍 Inspecting order!...");
         await sendOrderInspection(chatId, orderIdentifier);
       } else if (action === "support_reply" && orderIdentifier) {
         await answerCallbackQuery(cq.id, "Tap command to copy");
@@ -916,15 +915,15 @@ serve(async (req: Request) => {
           await resolveOrder(orderIdentifier);
         if (resolveError) {
           await sendMessage(chatId, resolveError);
-        } else if (order.status === "payment_verified") {
+        } else if (!order) { await sendMessage(chatId, 'Order not found'); } else if (order!.status === "payment_verified") {
           await sendMessage(
             chatId,
-            `ℹ️ Order <code>${escapeHtml(order.id)}</code> is already marked as Payment Verified.`,
+            `ℹ️ Order <code>${escapeHtml(order!.id)}</code> is already marked as Payment Verified.`,
           );
-        } else if (order.status === "fulfilled") {
+        } else if (!order) { await sendMessage(chatId, 'Order not found'); } else if (order!.status === "fulfilled") {
           await sendMessage(
             chatId,
-            `ℹ️ Order <code>${escapeHtml(order.id)}</code> is already fulfilled!`,
+            `ℹ️ Order <code>${escapeHtml(order!.id)}</code> is already fulfilled!`,
           );
         } else {
           const { error } = await supabase
@@ -933,7 +932,7 @@ serve(async (req: Request) => {
               status: "payment_verified",
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
 
           if (error) {
             await sendMessage(
@@ -943,23 +942,23 @@ serve(async (req: Request) => {
           } else {
             try {
               await supabase.from("admin_action_logs").insert({
-                order_id: order.id,
+                order_id: order!.id,
                 action: "verify_payment",
-                before_status: order.status,
+                before_status: order!.status,
                 after_status: "payment_verified",
                 notes: "Verified via Telegram Bot",
               });
             } catch (_) {}
 
             const safeTitle = escapeHtml(
-              order.products?.title || "Unknown Product",
+              ((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Unknown Product",
             );
-            const shortId = order.id.substring(0, 8);
+            const shortId = order!.id.substring(0, 8);
             const msg =
               `✅ <b>Payment Verified!</b>\n\n` +
               `📦 <b>Product:</b> ${safeTitle}\n` +
-              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
-              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order!.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order!.id)}</code>\n\n` +
               `⚡ <b>Next Steps:</b>\n` +
               `• Fulfill: <code>/deliver ${shortId} CODE_HERE</code>\n` +
               `• Cancel:  <code>/cancel ${shortId} Reason</code>`;
@@ -983,20 +982,20 @@ serve(async (req: Request) => {
           await resolveOrder(orderIdentifier);
         if (resolveError) {
           await sendMessage(chatId, resolveError);
-        } else if (order.status === "cancelled") {
+        } else if (!order) { await sendMessage(chatId, 'Order not found'); } else if (order!.status === "cancelled") {
           await sendMessage(
             chatId,
-            `⚠️ Order <code>${escapeHtml(order.id)}</code> is already cancelled!`,
+            `⚠️ Order <code>${escapeHtml(order!.id)}</code> is already cancelled!`,
           );
-        } else if (order.status === "fulfilled") {
+        } else if (!order) { await sendMessage(chatId, 'Order not found'); } else if (order!.status === "fulfilled") {
           await sendMessage(
             chatId,
-            `⚠️ Order <code>${escapeHtml(order.id)}</code> is already fulfilled. Use <code>/refund ${order.id.substring(0, 8)}</code> instead.`,
+            `⚠️ Order <code>${escapeHtml(order!.id)}</code> is already fulfilled. Use <code>/refund ${order!.id.substring(0, 8)}</code> instead.`,
           );
         } else {
           const cancelReason = reason || "Cancelled by admin via Telegram Bot";
           const updatedInput = {
-            ...(order.customer_input || {}),
+            ...(order!.customer_input || {}),
             cancel_reason: cancelReason,
             cancelled_at: new Date().toISOString(),
           };
@@ -1009,7 +1008,7 @@ serve(async (req: Request) => {
               final_output: `Cancelled: ${cancelReason}`,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
 
           if (error) {
             await sendMessage(
@@ -1022,28 +1021,28 @@ serve(async (req: Request) => {
               await supabase
                 .from("inventory_keys")
                 .update({ status: "available", order_id: null, sold_at: null })
-                .eq("order_id", order.id);
+                .eq("order_id", order!.id);
             } catch (_) {}
 
             // Record action in admin_action_logs
             try {
               await supabase.from("admin_action_logs").insert({
-                order_id: order.id,
+                order_id: order!.id,
                 action: "cancel_order",
-                before_status: order.status,
+                before_status: order!.status,
                 after_status: "cancelled",
                 notes: cancelReason,
               });
             } catch (_) {}
 
             const safeTitle = escapeHtml(
-              order.products?.title || "Unknown Product",
+              ((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Unknown Product",
             );
             const msg =
               `🚫 <b>Order Cancelled Successfully</b>\n\n` +
               `📦 <b>Product:</b> ${safeTitle}\n` +
-              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
-              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order!.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order!.id)}</code>\n` +
               `📝 <b>Reason:</b> ${escapeHtml(cancelReason)}\n\n` +
               `<i>Any reserved stock or inventory keys have been released back to catalog.</i>`;
             await sendMessage(chatId, msg);
@@ -1069,7 +1068,7 @@ serve(async (req: Request) => {
         } else {
           const holdReason = reason || "Order placed on hold for verification";
           const updatedInput = {
-            ...(order.customer_input || {}),
+            ...(order!.customer_input || {}),
             hold_reason: holdReason,
             held_at: new Date().toISOString(),
           };
@@ -1081,7 +1080,7 @@ serve(async (req: Request) => {
               customer_input: updatedInput,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
 
           if (error) {
             await sendMessage(
@@ -1091,21 +1090,21 @@ serve(async (req: Request) => {
           } else {
             try {
               await supabase.from("admin_action_logs").insert({
-                order_id: order.id,
+                order_id: order!.id,
                 action: "hold_order",
-                before_status: order.status,
+                before_status: order!.status,
                 after_status: "pending",
                 notes: holdReason,
               });
             } catch (_) {}
 
             const safeTitle = escapeHtml(
-              order.products?.title || "Unknown Product",
+              ((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Unknown Product",
             );
             const msg =
               `⏸️ <b>Order Placed on Hold</b>\n\n` +
               `📦 <b>Product:</b> ${safeTitle}\n` +
-              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order!.id)}</code>\n` +
               `⚠️ <b>Reason:</b> ${escapeHtml(holdReason)}`;
             await sendMessage(chatId, msg);
             await syncOrderToRetroChan(order, "pending", holdReason);
@@ -1130,7 +1129,7 @@ serve(async (req: Request) => {
         } else {
           const refundReason = reason || "Refunded by admin via Telegram Bot";
           const updatedInput = {
-            ...(order.customer_input || {}),
+            ...(order!.customer_input || {}),
             refund_reason: refundReason,
             refunded_at: new Date().toISOString(),
           };
@@ -1142,7 +1141,7 @@ serve(async (req: Request) => {
               customer_input: updatedInput,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
 
           if (error) {
             await sendMessage(
@@ -1152,22 +1151,22 @@ serve(async (req: Request) => {
           } else {
             try {
               await supabase.from("admin_action_logs").insert({
-                order_id: order.id,
+                order_id: order!.id,
                 action: "refund_order",
-                before_status: order.status,
+                before_status: order!.status,
                 after_status: "refunded",
                 notes: refundReason,
               });
             } catch (_) {}
 
             const safeTitle = escapeHtml(
-              order.products?.title || "Unknown Product",
+              ((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Unknown Product",
             );
             const msg =
               `💸 <b>Order Refunded</b>\n\n` +
               `📦 <b>Product:</b> ${safeTitle}\n` +
-              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
-              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order!.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order!.id)}</code>\n` +
               `📝 <b>Reason:</b> ${escapeHtml(refundReason)}`;
             await sendMessage(chatId, msg);
             await syncOrderToRetroChan(order, "refunded", refundReason);
@@ -1197,7 +1196,7 @@ serve(async (req: Request) => {
               final_output: output,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order!.id);
 
           if (error) {
             await sendMessage(
@@ -1207,21 +1206,21 @@ serve(async (req: Request) => {
           } else {
             try {
               await supabase.from("admin_action_logs").insert({
-                order_id: order.id,
+                order_id: order!.id,
                 action: "fulfill_order",
-                before_status: order.status,
+                before_status: order!.status,
                 after_status: "fulfilled",
                 notes: `Fulfilled via Telegram Bot: ${output.substring(0, 30)}...`,
               });
             } catch (_) {}
 
-            const safeTitle = escapeHtml(order.products?.title || "Product");
-            const shortId = order.id.substring(0, 8);
+            const safeTitle = escapeHtml(((Array.isArray(order!.products) ? order!.products[0] : order!.products) as any)?.title || "Product");
+            const shortId = order!.id.substring(0, 8);
             const msg =
               `🎉 <b>Order Fulfilled Successfully!</b>\n\n` +
               `📦 <b>Product:</b> ${safeTitle}\n` +
-              `💰 <b>Amount:</b> ৳${escapeHtml(order.total)}\n` +
-              `🆔 <b>Order ID:</b> <code>${escapeHtml(order.id)}</code>\n` +
+              `💰 <b>Amount:</b> ৳${escapeHtml(order!.total)}\n` +
+              `🆔 <b>Order ID:</b> <code>${escapeHtml(order!.id)}</code>\n` +
               `🔑 <b>Delivered Code:</b> <code>${escapeHtml(output)}</code>\n\n` +
               `<i>The customer can now see this code immediately on their dashboard.</i>`;
             await sendMessage(chatId, msg);
