@@ -414,35 +414,54 @@ function extractSearchTerms(clean: string): string {
   return words.join(" ").trim();
 }
 
+const GAME_ALIAS_MAP: Record<string, string> = {
+  "gtav": "gta 5", "gta5": "gta 5", "gta v": "gta 5", "grand theft auto v": "gta 5",
+  "gta4": "gta 4", "gta iv": "gta 4", "gta": "grand theft auto",
+  "rdr2": "red dead redemption 2", "rdr 2": "red dead redemption 2", "rdr": "red dead redemption",
+  "cod": "call of duty", "mw": "modern warfare", "mw2": "modern warfare 2", "mw3": "modern warfare 3",
+  "warzone": "call of duty warzone", "bo": "black ops", "bo2": "black ops 2", "bo3": "black ops 3",
+  "bf": "battlefield", "bf1": "battlefield 1", "bf4": "battlefield 4", "bf5": "battlefield 5", "bf2042": "battlefield 2042",
+  "vp": "valorant points", "valorant point": "valorant points",
+  "uc": "pubg uc", "pubguc": "pubg uc", "bgmi": "pubg bgmi", "pubg mobile": "pubg mobile uc",
+  "ff": "free fire", "ffdia": "free fire diamonds", "ff diamond": "free fire diamonds",
+  "fc25": "ea fc 25", "fc24": "ea fc 24", "fifa25": "ea fc 25", "fifa24": "ea fc 24", "fifa": "ea sports fc",
+  "mc": "minecraft", "mine craft": "minecraft", "vbucks": "fortnite v bucks", "robux": "roblox robux",
+  "gplay": "google play", "googleplay": "google play", "appstore": "apple", "itunes": "apple",
+  "gp": "game pass", "xgp": "xbox game pass", "gpu": "game pass ultimate",
+  "psplus": "playstation plus", "ps plus": "playstation plus", "ps+": "playstation plus",
+  "er": "elden ring", "ds": "dark souls", "cp77": "cyberpunk 2077", "tw3": "witcher 3", "re4": "resident evil 4",
+  "dite": "give", "nite": "take", "ache": "is", "koto": "how much", "dam": "price",
+  "playstation 5": "ps5", "playstation 4": "ps4", "playstation network": "psn", "switch": "nintendo switch",
+};
+
+function applyAliases(text: string): string {
+  let out = text;
+  const entries = Object.entries(GAME_ALIAS_MAP).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, canonical] of entries) {
+    const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replace(new RegExp(`\\b${escaped}\\b`, "gi"), canonical);
+  }
+  return out;
+}
+
 function findMatchingProducts(query: string, products: CatalogProduct[]): CatalogProduct[] {
-  let queryLower = query.toLowerCase();
-
-  // Expand common game franchise acronyms & aliases
-  queryLower = queryLower
-    .replace(/\bgtav\b/g, "gta 5")
-    .replace(/\bgta5\b/g, "gta 5")
-    .replace(/\brdr2\b/g, "red dead redemption 2")
-    .replace(/\brdr\b/g, "red dead redemption")
-    .replace(/\bcod\b/g, "call of duty")
-    .replace(/\bmw\b/g, "modern warfare")
-    .replace(/\bbf\b/g, "battlefield")
-    .replace(/\bvp\b/g, "valorant points")
-    .replace(/\buc\b/g, "pubg uc");
-
+  const queryLower = applyAliases(query.toLowerCase());
   const stopWords = new Set([
     "do", "you", "have", "certain", "games", "game", "of", "my", "choice", "in",
     "your", "shop", "store", "is", "the", "a", "an", "for", "please", "can", "i",
     "get", "buy", "price", "any", "got", "what", "are", "there", "available",
     "stock", "tell", "me", "about", "show", "give", "much", "cost", "how", "sell",
     "looking", "want", "need", "retrohub", "key", "keys", "code", "codes", "account",
-    "deal", "deals", "cheap", "cheapest", "best", "rate", "rates", "latest", "top"
+    "deal", "deals", "cheap", "cheapest", "best", "rate", "rates", "latest", "top",
+    "ache", "naki", "koto", "dam", "daam", "dite", "parben", "hobe", "bhai", "bro",
+    "apnaer", "apnader", "khobor", "khoj", "lagbe", "chai", "dorkar"
   ]);
 
   const clean = queryLower.replace(/[^a-z0-9\s]/g, " ");
   const rawTokens = clean.split(/\s+/).filter((w) => w.length > 0);
   const searchTokens = rawTokens.filter((w) => !stopWords.has(w) && w.length > 1);
 
-  if (searchTokens.length === 0) return [];
+  if (searchTokens.length === 0) return products.slice(0, 5);
 
   const wantsXbox = rawTokens.includes("xbox") || rawTokens.includes("series");
   const wantsSteam = rawTokens.includes("steam") || rawTokens.includes("pc");
@@ -454,42 +473,43 @@ function findMatchingProducts(query: string, products: CatalogProduct[]): Catalo
   for (const p of products) {
     const title = (p.title || "").toLowerCase();
     const platform = (p.platform || "Global").toLowerCase();
+    const combined = `${title} ${platform}`;
 
     let score = 0;
     let matchedTitleTokens = 0;
 
+    if (title.includes(clean.trim())) score += 100;
+    else if (combined.includes(clean.trim())) score += 60;
+
     for (const token of searchTokens) {
-      if (token === "gta") {
-        if (title.includes("gta") || title.includes("grand theft auto")) {
-          score += 50;
-          matchedTitleTokens++;
-        }
-      } else if (title.includes(token)) {
-        score += 20;
+      if (title.includes(token)) {
+        score += 25;
         matchedTitleTokens++;
+      } else if (platform.includes(token)) {
+        score += 15;
       }
     }
 
-    if (matchedTitleTokens === 0) continue;
+    if (matchedTitleTokens === 0 && !combined.includes(clean.trim())) continue;
 
     const matchRatio = matchedTitleTokens / searchTokens.length;
-    // For multi-word queries, reject products matching less than half the search terms
-    if (searchTokens.length >= 2 && matchRatio < 0.5) continue;
+    if (searchTokens.length >= 2 && matchRatio < 0.3) continue;
 
     score += matchRatio * 50;
-
-    // Platform intent bonuses
     if (wantsXbox && (platform.includes("xbox") || title.includes("xbox"))) score += 40;
     if (wantsSteam && (platform.includes("steam") || title.includes("steam"))) score += 40;
     if (wantsPlaystation && (platform.includes("playstation") || platform.includes("psn"))) score += 40;
-
-    // Favor in-stock items
     if (p.in_stock > 0) score += 5;
 
     scored.push({ product: p, score });
   }
 
-  if (scored.length === 0) return [];
+  if (scored.length === 0) {
+    return products.filter((p) => {
+      const title = (p.title || "").toLowerCase();
+      return searchTokens.some((t) => t.length >= 3 && title.includes(t));
+    });
+  }
 
   scored.sort((a, b) => {
     if (wantsCheapest && Math.abs(b.score - a.score) < 30) {
@@ -499,8 +519,7 @@ function findMatchingProducts(query: string, products: CatalogProduct[]): Catalo
   });
 
   const topScore = scored[0].score;
-  const highQualityMatches = scored.filter((s) => s.score >= topScore * 0.75);
-
+  const highQualityMatches = scored.filter((s) => s.score >= topScore * 0.6);
   return highQualityMatches.map((s) => s.product);
 }
 
