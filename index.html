@@ -38,7 +38,26 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <section class="relative min-h-[380px] sm:min-h-[460px] lg:min-h-[520px] flex items-center justify-center overflow-hidden bg-background">
+        <div class="absolute inset-0 z-0 pointer-events-none" style="mask-image: linear-gradient(to bottom, black 40%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);">
+          <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40"></div>
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.05)_0%,transparent_70%)]"></div>
+        </div>
+        <div class="container relative z-10 text-center space-y-4 max-w-4xl px-4 py-12 sm:py-16">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-muted-foreground shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            <span class="font-display tracking-widest text-[11px] uppercase">Official Digital Storefront</span>
+          </div>
+          <h1 class="font-display text-3xl sm:text-5xl md:text-7xl font-black tracking-wider text-white uppercase leading-[1.08]">
+            Game <span class="text-primary">Keys</span> & Top-Ups
+          </h1>
+          <p class="text-muted-foreground text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            Instant automated delivery for authentic PC, console keys, digital gift cards, subscriptions, and gaming balances.
+          </p>
+        </div>
+      </section>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
