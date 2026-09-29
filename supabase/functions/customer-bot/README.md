@@ -116,13 +116,13 @@ Every customer message flows through three distinct, independently resilient sta
 | **2** | **BrainGine Data Engine** | Pure local — Supabase DB queries | N/A — always succeeds | None |
 | **3** | **Response Composer** | xAI `grok-4.7` (Retro Chan persona) | `formatBrainGineResponse()` structured HTML | 3.5s |
 
-**Key design principle:** BrainGine (Stage 2) is the single source of truth. Grok (Stage 3) is only a *stylist* — it cannot invent prices, stock levels, or order statuses. All verified facts are passed as a sealed payload from Stage 2.
+**Key design principle:** BrainGine (Stage 2) is the single source of truth. Grok (Stage 3) is only a *stylist* — it cannot invent prices, stock levels, or order statuses. All verified facts are passed as a sealed payload from Stage 2. The **Intent Classifier** (Stage 1 & local fallback) natively understands English, Banglish (e.g., "koto dam", "ache naki", "lagbe"), and regional gaming context.
 
 ### 2. BrainGine — Local Intelligence Engine
 
 The zero-dependency data retrieval engine handles all 9 intent categories:
 
-- **`product_search`** — Advanced product search with game franchise alias expansion (`gtav`/`gta5` → Grand Theft Auto V, `rdr2` → Red Dead Redemption 2, `vp` → Valorant Points, `uc` → PUBG UC), platform intent boosting (`Xbox`, `Steam`, `PSN`), price-sort criteria (`cheapest`), and a 75% relevance threshold.
+- **`product_search`** — Multi-vector fuzzy search engine scoring by exact phrase, token coverage, and platform intent. Features extensive alias expansion (`gtav` → GTA 5, `vp` → Valorant Points, `fc25` → EA FC 25) and gracefully falls back to **Custom On-Demand Game Sourcing** proposals for out-of-catalog inquiries.
 - **`order_status`** — Fetches live order status from Supabase with inline interactive keyboards (`[📦 Check Status]` / `[🔑 View Key / Code]`).
 - **`payment_help`** — Returns verified bKash number, fee structure, and verification URL.
 - **`delivery_info`** — Explains the 1–15 minute automated SLA post-payment-verification.
