@@ -282,6 +282,84 @@ interface CatalogProduct {
   in_stock: number;
 }
 
+// ============================================================================
+// Three-Stage Pipeline Types: Grok → BrainGine → Grok
+// ============================================================================
+
+type IntentType =
+  | "product_search"
+  | "order_status"
+  | "payment_help"
+  | "delivery_info"
+  | "complaint"
+  | "human_request"
+  | "greeting"
+  | "thanks"
+  | "general_question";
+
+type SentimentType = "positive" | "neutral" | "negative" | "frustrated";
+
+interface CustomerIntent {
+  intent: IntentType;
+  entities: {
+    game?: string;
+    platform?: string;
+    order_id?: string;
+    keywords?: string[];
+  };
+  sentiment: SentimentType;
+}
+
+interface BrainGineProduct {
+  title: string;
+  platform: string;
+  price: number;
+  stock: number;
+}
+
+interface BrainGineOrder {
+  id: string;
+  shortId: string;
+  status: string;
+  product: string;
+  platform: string;
+  total: string;
+  createdAt: string;
+  deliveries: Array<{ code: string; notes?: string }>;
+  finalOutput?: string;
+}
+
+interface BrainGineFacts {
+  customerName?: string;
+  products?: BrainGineProduct[];
+  order?: BrainGineOrder;
+  payment?: {
+    method: string;
+    number: string;
+    fee: string;
+    verificationUrl: string;
+  };
+  delivery?: {
+    sla: string;
+    channels: string[];
+  };
+  refundPolicy?: string;
+  storeOverview?: {
+    url: string;
+    categories: string[];
+  };
+  searchQuery?: string;
+  noResults?: boolean;
+  customSourceAvailable?: boolean;
+  escalate?: boolean;
+}
+
+interface BrainGinePayload {
+  intent: IntentType;
+  sentiment: SentimentType;
+  facts: BrainGineFacts;
+}
+
 let cachedProducts: CatalogProduct[] = [];
 let cachedCatalog = "";
 let lastCatalogFetch = 0;
@@ -665,10 +743,8 @@ function extractResponseText(data: any): string {
   return "";
 }
 
-/**
- * Generates an intelligent, context-aware reply using xAI (Grok) with fallback to Retro Chan Intelligence.
- */
-async function getAiResponse(
+/** @deprecated Superseded by the three-stage BrainGine pipeline below. Retained as emergency fallback reference. */
+async function _getAiResponseLegacy(
   history: Array<{ sender: string; text: string }>,
   latestMessage: string,
   sessionContext?: { order?: any; customerName?: string },
@@ -778,6 +854,584 @@ RetroHub Knowledge Base & Rules:
     console.error("AI invocation failed, using local intelligence:", err);
     return fallback;
   }
+}
+
+// ============================================================================
+// THREE-STAGE AI PIPELINE: Grok Classifier → BrainGine → Grok Composer
+// ============================================================================
+
+/**
+ * STAGE 1 FALLBACK: Local intent classifier using keyword matching (sub-ms execution).
+ * Used when Grok is unavailable or times out.
+ */
+function classifyIntentLocally(rawText: string): CustomerIntent {
+  const clean = rawText.toLowerCase().trim();
+  const entities: CustomerIntent["entities"] = {};
+
+  const orderIdMatch = clean.match(/\b([0-9a-f]{8})\b/i);
+  if (orderIdMatch) entities.order_id = orderIdMatch[1];
+
+  const searchTerms = extractSearchTerms(clean);
+  if (searchTerms.length > 0) {
+    entities.keywords = searchTerms.split(" ").filter(Boolean);
+  }
+
+  if (/\b(steam|pc)\b/.test(clean)) entities.platform = "Steam";
+  else if (/\b(xbox|series\s*[xs])\b/.test(clean)) entities.platform = "Xbox";
+  else if (/\b(psn|playstation|ps[45])\b/.test(clean)) entities.platform = "PlayStation";
+  else if (/\b(nintendo|switch)\b/.test(clean)) entities.platform = "Nintendo";
+
+  let sentiment: SentimentType = "neutral";
+  if (/\b(scam|fake|fraud|waste|worst|terrible|horrible|cheat)\b/.test(clean)) {
+    sentiment = "frustrated";
+  } else if (/\b(broken|invalid|not working|issue|problem|wrong|error|bug)\b/.test(clean)) {
+    sentiment = "negative";
+  } else if (/\b(thank|great|awesome|love|perfect|excellent|amazing|good)\b/.test(clean)) {
+    sentiment = "positive";
+  }
+
+  // Intent classification — most specific first (priority order)
+  if (/\b(human|agent|person|admin|talk to someone|real person|staff)\b/.test(clean)) {
+    return { intent: "human_request", entities, sentiment };
+  }
+  if (/\b(refund|scam|broken|invalid|not working|fake|issue|problem|complaint)\b/.test(clean)) {
+    return { intent: "complaint", entities, sentiment };
+  }
+  if (/\b(order|status|track|where is|update|tracking|receipt)\b/.test(clean)) {
+    return { intent: "order_status", entities, sentiment };
+  }
+  if (/\b(bkash|pay|payment|send money|transaction|trxid|trx)\b/.test(clean)) {
+    return { intent: "payment_help", entities, sentiment };
+  }
+  if (/\b(key|code|how long|delivery|instant|when|deliver|credential|time)\b/.test(clean)) {
+    return { intent: "delivery_info", entities, sentiment };
+  }
+  if (/\b(game|product|steam|gift\s*card|buy|catalog|price|stock|deal|discount|cheap|fifa|valorant|gta|rdr|pubg|cod|minecraft)\b/.test(clean)) {
+    return { intent: "product_search", entities, sentiment };
+  }
+  if (/\b(hi|hello|hey|salam|hola|good\s*(morning|evening|afternoon)|assalamu|sup|yo)\b/.test(clean)) {
+    return { intent: "greeting", entities, sentiment: "positive" };
+  }
+  if (/\b(thank|thanks|tysm|ok|okay|cool|nice|appreciate)\b/.test(clean)) {
+    return { intent: "thanks", entities, sentiment: "positive" };
+  }
+
+  return { intent: "general_question", entities, sentiment };
+}
+
+/**
+ * STAGE 1: Grok-powered intent classifier with structured JSON output.
+ * 3-second hard timeout → falls back to classifyIntentLocally().
+ */
+async function classifyCustomerIntent(
+  latestMessage: string,
+  history: Array<{ sender: string; text: string }>,
+): Promise<CustomerIntent> {
+  const localResult = classifyIntentLocally(latestMessage);
+
+  if (!XAI_API_KEY || !XAI_API_KEY.startsWith("xai-")) {
+    return localResult;
+  }
+
+  try {
+    const classifierPrompt = `You are an intent classifier for RetroHub, a digital game key & gift card store in Bangladesh.
+Return ONLY valid JSON matching this exact schema — no markdown, no explanation:
+{"intent":"product_search|order_status|payment_help|delivery_info|complaint|human_request|greeting|thanks|general_question","entities":{"game":"name or null","platform":"Steam|Xbox|PlayStation|Nintendo|null","order_id":"hex id or null","keywords":["search","terms"]},"sentiment":"positive|neutral|negative|frustrated"}
+
+Intent guide:
+- product_search: wants a game, price, stock, gift card, catalog
+- order_status: checking order, tracking, existing purchase
+- payment_help: bKash, payment, fees, transaction
+- delivery_info: delivery time, how codes arrive
+- complaint: refund, invalid key, broken, not working
+- human_request: wants to talk to a human
+- greeting: hello, hi, hey
+- thanks: thank you, ok, cool
+- general_question: anything else`;
+
+    const msgs = [
+      { role: "system" as const, content: classifierPrompt },
+      ...history.slice(-4).map((m) => ({
+        role: (m.sender === "customer" ? "user" : "assistant") as "user" | "assistant",
+        content: m.text,
+      })),
+      { role: "user" as const, content: latestMessage },
+    ];
+
+    const xaiHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${XAI_API_KEY}`,
+    };
+    if (XAI_TEAM_ID) xaiHeaders["X-Team-Id"] = XAI_TEAM_ID;
+
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: xaiHeaders,
+      body: JSON.stringify({
+        model: "grok-4.7",
+        messages: msgs,
+        temperature: 0.1,
+        max_tokens: 150,
+        response_format: { type: "json_object" },
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(tid);
+
+    if (res.ok) {
+      const data = await res.json();
+      const raw = data.choices?.[0]?.message?.content?.trim();
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const validIntents = new Set<string>([
+          "product_search", "order_status", "payment_help", "delivery_info",
+          "complaint", "human_request", "greeting", "thanks", "general_question",
+        ]);
+        const validSentiments = new Set<string>(["positive", "neutral", "negative", "frustrated"]);
+
+        return {
+          intent: (validIntents.has(parsed.intent) ? parsed.intent : localResult.intent) as IntentType,
+          entities: {
+            ...localResult.entities,
+            ...(parsed.entities?.game ? { game: String(parsed.entities.game) } : {}),
+            ...(parsed.entities?.platform ? { platform: String(parsed.entities.platform) } : {}),
+            ...(parsed.entities?.order_id ? { order_id: String(parsed.entities.order_id) } : {}),
+            ...(Array.isArray(parsed.entities?.keywords) ? { keywords: parsed.entities.keywords.map(String) } : {}),
+          },
+          sentiment: (validSentiments.has(parsed.sentiment) ? parsed.sentiment : localResult.sentiment) as SentimentType,
+        };
+      }
+    }
+  } catch (_err: any) {
+    // Silent fallback — local classification is perfectly adequate
+  }
+
+  return localResult;
+}
+
+/**
+ * STAGE 2: BrainGine — Local data retrieval engine.
+ * Queries products, orders, policies based on classified intent.
+ * Pure local execution — no external dependencies, never fails.
+ */
+async function queryBrainGine(
+  intent: CustomerIntent,
+  sessionContext?: { order?: any; customerName?: string },
+): Promise<BrainGinePayload> {
+  const payload: BrainGinePayload = {
+    intent: intent.intent,
+    sentiment: intent.sentiment,
+    facts: { customerName: sessionContext?.customerName || "there" },
+  };
+
+  const buildOrderFacts = (o: any): BrainGineOrder => ({
+    id: o.id,
+    shortId: o.id.slice(0, 8),
+    status: o.status,
+    product: o.products?.title || "Digital Item",
+    platform: o.products?.platform || "Global",
+    total: formatMoney(o.total),
+    createdAt: new Date(o.created_at).toLocaleString("en-US", {
+      timeZone: "Asia/Dhaka",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    deliveries: (o.deliveries || []).map((d: any) => ({
+      code: d.delivery_code,
+      notes: d.delivery_notes || undefined,
+    })),
+    finalOutput: o.final_output || undefined,
+  });
+
+  switch (intent.intent) {
+    case "product_search": {
+      const products = await getLiveProducts();
+      const query = intent.entities.game || intent.entities.keywords?.join(" ") || "";
+
+      // Check for explicit custom game sourcing request
+      const isCustomRequest = intent.entities.keywords?.some((k) =>
+        ["choice", "custom", "request", "demand", "specific"].includes(k),
+      );
+      if (isCustomRequest) {
+        payload.facts.customSourceAvailable = true;
+        payload.facts.storeOverview = {
+          url: "https://www.retrohub.tech",
+          categories: [
+            "Custom On-Demand Game Sourcing for PC (Steam, EA, Epic)",
+            "Console Keys (PlayStation, Xbox, Nintendo)",
+          ],
+        };
+        break;
+      }
+
+      if (query && products.length > 0) {
+        const matches = findMatchingProducts(query, products);
+        if (matches.length > 0) {
+          payload.facts.products = matches.slice(0, 5).map((p) => ({
+            title: p.title || "Unknown",
+            platform: p.platform || "Global",
+            price: p.sale_price,
+            stock: p.in_stock,
+          }));
+        } else {
+          payload.facts.searchQuery = query;
+          payload.facts.noResults = true;
+          payload.facts.customSourceAvailable = true;
+        }
+      } else {
+        const featured = products.slice(0, 5);
+        if (featured.length > 0) {
+          payload.facts.products = featured.map((p) => ({
+            title: p.title || "Unknown",
+            platform: p.platform || "Global",
+            price: p.sale_price,
+            stock: p.in_stock,
+          }));
+        }
+        payload.facts.storeOverview = {
+          url: "https://www.retrohub.tech",
+          categories: [
+            "Global Game Keys (Steam, PSN, Xbox, Nintendo)",
+            "Digital Gift Cards (Apple, Google Play, Razer Gold, Roblox)",
+            "In-Game Top-Ups (Free Fire Diamonds, PUBG UC, Valorant Points)",
+            "Custom On-Demand Game Sourcing",
+          ],
+        };
+      }
+      break;
+    }
+    case "order_status": {
+      if (sessionContext?.order) {
+        payload.facts.order = buildOrderFacts(sessionContext.order);
+      } else if (intent.entities.order_id) {
+        const { order } = await resolveOrder(intent.entities.order_id);
+        if (order) payload.facts.order = buildOrderFacts(order);
+      }
+      break;
+    }
+    case "payment_help": {
+      payload.facts.payment = {
+        method: "bKash Send Money",
+        number: "01580382868",
+        fee: "1% bKash fee (include in payment amount)",
+        verificationUrl: "https://www.retrohub.tech/payment",
+      };
+      break;
+    }
+    case "delivery_info": {
+      payload.facts.delivery = {
+        sla: "1\u201315 minutes after bKash payment verification",
+        channels: ["Telegram (this chat)", "Web Customer Console at retrohub.tech/orders"],
+      };
+      if (sessionContext?.order) payload.facts.order = buildOrderFacts(sessionContext.order);
+      break;
+    }
+    case "complaint": {
+      payload.facts.refundPolicy =
+        "100% Genuine Key & Verified Delivery Guarantee. If a key is invalid or region-locked, RetroHub immediately verifies and replaces it or issues a prompt refund.";
+      if (sessionContext?.order) payload.facts.order = buildOrderFacts(sessionContext.order);
+      break;
+    }
+    case "human_request": {
+      payload.facts.escalate = true;
+      break;
+    }
+    case "greeting": {
+      const products = await getLiveProducts();
+      payload.facts.storeOverview = {
+        url: "https://www.retrohub.tech",
+        categories: ["Order Tracking", "Game Key Lookup", "bKash Payment Help", "Live Agent Connection"],
+      };
+      if (products.length > 0) {
+        payload.facts.products = products.slice(0, 3).map((p) => ({
+          title: p.title || "Unknown",
+          platform: p.platform || "Global",
+          price: p.sale_price,
+          stock: p.in_stock,
+        }));
+      }
+      break;
+    }
+    case "thanks": {
+      break;
+    }
+    default: {
+      payload.facts.storeOverview = {
+        url: "https://www.retrohub.tech",
+        categories: ["Order Tracking", "Game Key Lookup", "bKash Payment Help", "Live Agent Connection"],
+      };
+      break;
+    }
+  }
+
+  return payload;
+}
+
+/**
+ * STAGE 3 FALLBACK: Format BrainGine payload into Telegram HTML locally.
+ * Used when Grok composer is unavailable or times out.
+ */
+function formatBrainGineResponse(data: BrainGinePayload): string {
+  const name = escapeHtml(data.facts.customerName || "there");
+
+  switch (data.intent) {
+    case "product_search": {
+      if (data.facts.customSourceAvailable && !data.facts.noResults && !data.facts.products?.length) {
+        return (
+          `\u{1F3AE} <b>Custom Games & Special Requests:</b>\n\n` +
+          `Yes, absolutely! At RetroHub, even if a specific game is not in our automated catalog, we offer <b>Custom On-Demand Game Sourcing</b> for virtually ANY title on PC (Steam, EA, Epic) or Consoles (PlayStation, Xbox, Nintendo)!\n\n` +
+          `\u{1F449} <b>How to get it:</b> Tap <b>\u{1F468}\u200D\u{1F4BB} Talk to Human Agent</b> below and tell our merchant desk which game and edition you want. We will provide an instant bKash checkout quote! \u26A1`
+        );
+      }
+      if (data.facts.noResults && data.facts.searchQuery) {
+        return (
+          `\u{1F50D} <b>Live Catalog Search:</b>\n\n` +
+          `I searched our inventory for \"<b>${escapeHtml(data.facts.searchQuery)}</b>\", but it's not currently in our automated instant catalog.\n\n` +
+          `\u2728 <b>Good news:</b> We offer <b>Custom On-Demand Game Sourcing</b>! We can source almost ANY game key or gift card upon request.\n\n` +
+          `Tap <b>\u{1F468}\u200D\u{1F4BB} Talk to Human Agent</b> below, and our merchant team will arrange it for you! \u{1F3AE}`
+        );
+      }
+      if (data.facts.products && data.facts.products.length > 0) {
+        const items = data.facts.products
+          .slice(0, 4)
+          .map(
+            (p) =>
+              `\u2022 <b>${escapeHtml(p.title)}</b> [${escapeHtml(p.platform)}]\n  \u{1F4B0} Price: <b>\u09F3${p.price}</b> | Stock: ${p.stock > 0 ? `\u2705 In Stock (${p.stock})` : "\u26A0\uFE0F Out of Stock"}`,
+          )
+          .join("\n\n");
+        return (
+          `\u{1F3AE} <b>Found in our Live Catalog:</b>\n\n${items}\n\n` +
+          `\u{1F6D2} Order instantly at <a href="https://www.retrohub.tech">retrohub.tech</a> with bKash Send Money to <code>01580382868</code>!`
+        );
+      }
+      const cats = (data.facts.storeOverview?.categories || []).map((c) => `\u2022 <b>${escapeHtml(c)}</b>`).join("\n");
+      return `\u{1F3AE} <b>RetroHub Live Catalog:</b>\n\n${cats}\n\nExplore live stock and instant delivery at: <a href="https://www.retrohub.tech">retrohub.tech</a> \u{1F6D2}`;
+    }
+    case "order_status": {
+      if (data.facts.order) {
+        const o = data.facts.order;
+        const statusMap: Record<string, string> = {
+          pending: "\u23F3 Pending Payment Verification",
+          payment_submitted: "\u{1F4B3} Payment Submitted (Under Review)",
+          payment_verified: "\u2705 Payment Verified & Queued",
+          sourcing: "\u26A1 Processing / Sourcing Key",
+          fulfilled: "\u{1F389} Fulfilled & Delivered",
+          cancelled: "\u274C Order Cancelled",
+          refunded: "\u{1F504} Refunded to Customer",
+        };
+        const label = statusMap[o.status] || `Status: ${o.status}`;
+        let text =
+          `\u{1F4E6} <b>Order #${escapeHtml(o.shortId)}</b>\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n` +
+          `\u{1F3AE} <b>Product:</b> ${escapeHtml(o.product)}\n` +
+          `\u{1F3F7}\uFE0F <b>Platform:</b> ${escapeHtml(o.platform)}\n` +
+          `\u{1F4B0} <b>Total:</b> \u09F3${o.total}\n` +
+          `\u{1F555} <b>Placed:</b> ${o.createdAt} (BST)\n` +
+          `\u{1F4CA} <b>Current Status:</b> <b>${label}</b>\n\n`;
+        if (o.status === "fulfilled") {
+          text += '\u2728 <i>Your product has been delivered! Tap "View Key / Code" below to reveal your credentials.</i>';
+        } else if (o.status === "sourcing" || o.status === "payment_verified") {
+          text += "\u{1F680} <i>Our automated delivery engine is actively preparing your digital license. Most codes are issued within 5\u201315 minutes.</i>";
+        } else {
+          text += "\u2139\uFE0F <i>We are verifying your transaction. If you need expedited handling, tap Talk to Human Agent below.</i>";
+        }
+        return text;
+      }
+      return `I can track any order for you instantly! \u{1F50D} Just send your <b>8-character Order ID</b> (from your checkout receipt), or tap <b>Track My Order</b> below.`;
+    }
+    case "payment_help": {
+      const p = data.facts.payment;
+      if (!p) return "Please contact support for payment assistance.";
+      return (
+        `\u{1F4B3} <b>RetroHub bKash Payment Guide:</b>\n\n` +
+        `\u2022 <b>Method:</b> ${escapeHtml(p.method)}\n` +
+        `\u2022 <b>Official Number:</b> <code>${escapeHtml(p.number)}</code> (Tap to copy)\n` +
+        `\u2022 <b>Charge:</b> Please include the <b>${escapeHtml(p.fee)}</b> in your payment amount.\n` +
+        `\u2022 <b>Reference:</b> Use your Order ID as the transaction reference.\n\n` +
+        `After sending money, enter your 10-character Transaction ID at <a href="${escapeHtml(p.verificationUrl)}">${escapeHtml(p.verificationUrl.replace("https://www.", ""))}</a> for instant verification! \u26A1`
+      );
+    }
+    case "delivery_info": {
+      const d = data.facts.delivery;
+      if (!d) return "Digital items are delivered within 1\u201315 minutes after payment verification.";
+      let text =
+        `\u26A1 <b>Digital Delivery Speed:</b>\n\n` +
+        `All automated items are delivered within <b>${escapeHtml(d.sla)}</b>!\n\n` +
+        `Once delivered, your credentials appear in:\n` +
+        d.channels.map((ch) => `\u2022 ${escapeHtml(ch)}`).join("\n") + " \u2728";
+      if (data.facts.order) {
+        text += `\n\n\u{1F4E6} Your order <b>#${escapeHtml(data.facts.order.shortId)}</b> is currently: <b>${escapeHtml(data.facts.order.status)}</b>`;
+      }
+      return text;
+    }
+    case "complaint": {
+      let text = `We sincerely apologize for the frustration, ${name}! \u{1F6E1}\uFE0F\n\n${escapeHtml(data.facts.refundPolicy || "")}\n\n`;
+      if (data.facts.order) {
+        text += `Your order <b>#${escapeHtml(data.facts.order.shortId)}</b> (${escapeHtml(data.facts.order.product)}) is currently <b>${escapeHtml(data.facts.order.status)}</b>.\n\n`;
+      }
+      text += `Tap <b>Talk to Human Agent</b> below for personal assistance, or send your Order ID so I can look up the details!`;
+      return text;
+    }
+    case "human_request": {
+      return `I'd be happy to connect you with our human merchant specialist! \u{1F468}\u200D\u{1F4BB}\n\nTap <b>Talk to Human Agent</b> below to alert the merchant desk. An agent will review your chat transcript and reply directly here.`;
+    }
+    case "greeting": {
+      let text = `Hello ${name}! \u{1F44B} Welcome to <b>RetroHub Customer Care</b>! I'm Retro Chan, your 24/7 support concierge.\n\nI can help you with:\n`;
+      if (data.facts.storeOverview) {
+        text += data.facts.storeOverview.categories.map((c) => `\u2022 ${escapeHtml(c)}`).join("\n");
+      }
+      if (data.facts.products && data.facts.products.length > 0) {
+        text += `\n\n\u{1F525} <b>Featured right now:</b>\n`;
+        text += data.facts.products.map((p) => `\u2022 ${escapeHtml(p.title)} \u2014 \u09F3${p.price}`).join("\n");
+      }
+      text += `\n\nWhat can I do for you today? \u2728`;
+      return text;
+    }
+    case "thanks": {
+      return `You're very welcome, ${name}! \u{1F60A} It's always my pleasure to help. If you ever have another question or need a new game, RetroHub is here for you 24/7! \u{1F3AE}`;
+    }
+    default: {
+      return (
+        `Thanks for reaching out, ${name}! \u{1F60A}\n\n` +
+        `I'm Retro Chan, your support concierge at RetroHub. I can check your order status, look up game credentials, check our live catalog, explain bKash payment, or route you to a live agent. What would you like assistance with?`
+      );
+    }
+  }
+}
+
+/**
+ * STAGE 3: Grok-powered response composer.
+ * Takes BrainGine-verified facts and composes a polished "Retro Chan" reply.
+ * 3.5-second hard timeout → falls back to formatBrainGineResponse().
+ */
+async function composeCustomerResponse(
+  latestMessage: string,
+  brainGineData: BrainGinePayload,
+  history: Array<{ sender: string; text: string }>,
+): Promise<string> {
+  const localFormatted = formatBrainGineResponse(brainGineData);
+
+  if (!XAI_API_KEY || !XAI_API_KEY.startsWith("xai-")) {
+    return localFormatted;
+  }
+
+  // Skip Grok for trivial intents — local formatting is optimal
+  if (brainGineData.intent === "thanks" || brainGineData.intent === "human_request") {
+    return localFormatted;
+  }
+
+  try {
+    const composerPrompt = `You are Retro Chan, the witty and charming customer support AI for RetroHub (retrohub.tech), a digital game key store in Bangladesh.
+
+CRITICAL RULES:
+1. Use ONLY the verified facts in the DATA section. NEVER invent prices, stock, order statuses, or policies.
+2. Format with Telegram HTML: <b>, <i>, <code>, <a href="">.
+3. Keep responses concise (under 200 words). Use emojis tastefully.
+4. Warm, playful gamer tone. Occasional "GG", "GLHF", "level up".
+5. If products are listed, show them with exact prices and stock from the data.
+6. For escalation, tell them to tap "Talk to Human Agent" button.
+7. Include retrohub.tech when relevant.
+
+CUSTOMER INTENT: ${brainGineData.intent}
+CUSTOMER SENTIMENT: ${brainGineData.sentiment}
+CUSTOMER NAME: ${brainGineData.facts.customerName || "Gamer"}
+
+DATA (verified facts from BrainGine \u2014 use ONLY these):
+${JSON.stringify(brainGineData.facts, null, 2)}`;
+
+    const msgs = [
+      { role: "system" as const, content: composerPrompt },
+      ...history.slice(-4).map((m) => ({
+        role: (m.sender === "customer" ? "user" : "assistant") as "user" | "assistant",
+        content: m.text,
+      })),
+      { role: "user" as const, content: latestMessage },
+    ];
+
+    const xaiHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${XAI_API_KEY}`,
+    };
+    if (XAI_TEAM_ID) xaiHeaders["X-Team-Id"] = XAI_TEAM_ID;
+
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 3500);
+
+    try {
+      const res = await fetch("https://api.x.ai/v1/responses", {
+        method: "POST",
+        headers: xaiHeaders,
+        body: JSON.stringify({ model: "grok-4.7", input: msgs }),
+        signal: controller.signal,
+      });
+
+      if (res.ok) {
+        clearTimeout(tid);
+        const data = await res.json();
+        const text = extractResponseText(data);
+        if (text && text.length > 10) return text;
+      } else {
+        const fallbackRes = await fetch("https://api.x.ai/v1/chat/completions", {
+          method: "POST",
+          headers: xaiHeaders,
+          body: JSON.stringify({
+            model: "grok-beta",
+            messages: msgs,
+            temperature: 0.5,
+            max_tokens: 300,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(tid);
+
+        if (fallbackRes.ok) {
+          const resData = await fallbackRes.json();
+          const text = resData.choices?.[0]?.message?.content?.trim();
+          if (text && text.length > 10) return text;
+        }
+      }
+    } catch (fetchErr: any) {
+      clearTimeout(tid);
+      if (fetchErr.name !== "AbortError") {
+        // Non-timeout fetch error — fall through to local formatting
+      }
+    }
+  } catch (_err: any) {
+    // Silent fallback to local formatting
+  }
+
+  return localFormatted;
+}
+
+/**
+ * Three-Stage AI Pipeline: Grok Classifier \u2192 BrainGine Data Engine \u2192 Grok Composer
+ *
+ * Stage 1: Grok classifies customer intent and extracts entities (3s timeout \u2192 local keyword fallback)
+ * Stage 2: BrainGine retrieves verified store data (products, orders, policies) \u2014 pure local, never fails
+ * Stage 3: Grok composes a polished \"Retro Chan\" reply using only BrainGine's verified facts (3.5s timeout \u2192 local format fallback)
+ */
+async function getAiResponse(
+  history: Array<{ sender: string; text: string }>,
+  latestMessage: string,
+  sessionContext?: { order?: any; customerName?: string },
+): Promise<string> {
+  // STAGE 1: Classify intent (Grok with local fallback)
+  const intent = await classifyCustomerIntent(latestMessage, history);
+
+  // STAGE 2: BrainGine data retrieval (always local, never fails)
+  const brainGineData = await queryBrainGine(intent, sessionContext);
+
+  // Short-circuit: if BrainGine flags escalation, use local format directly
+  if (brainGineData.facts.escalate) {
+    return formatBrainGineResponse(brainGineData);
+  }
+
+  // STAGE 3: Compose final response (Grok with local format fallback)
+  return await composeCustomerResponse(latestMessage, brainGineData, history);
 }
 
 /**

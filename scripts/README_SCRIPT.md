@@ -23,6 +23,17 @@ Comprehensive operational manual for all catalog management, database maintenanc
 
 ---
 
+## 🛡️ Recommended Execution SOP
+
+When performing catalog maintenance or batch operations:
+
+1. **Always run a dry run**: Confirm intended mutations with dry-run output.
+2. **Review affected row counts**: Verify that only the targeted categories or platforms will be affected.
+3. **Execute with `--execute`**: Commit the changes.
+4. **Audit results**: Run `check-stock.cjs` and verify through the Admin Suite at `/admin`.
+
+---
+
 ## 📁 Directory Overview
 
 ```
@@ -33,21 +44,6 @@ scripts/
 ├── pricing/           # Market price scrapers, competitor matching & margin updates
 └── seeding/           # Automated catalog seeders (games, gift cards, subs, top-ups)
 ```
-
----
-
-## 🔐 Environment Configuration
-
-All scripts connect directly to your Supabase project using the Node.js runtime and require environment variables defined in `.env` at the project root:
-
-```env
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
-
-> [!IMPORTANT]
-> The `SUPABASE_SERVICE_ROLE_KEY` bypasses PostgreSQL Row-Level Security (RLS) and is mandatory for bulk maintenance, deduplication, and seeding scripts. Never commit this key to version control.
 
 ---
 
@@ -166,17 +162,6 @@ To prevent stale artifacts, ensure atomic deployments, and guarantee clean asset
 
 ---
 
-## 🛡️ Recommended Execution SOP
-
-When performing catalog maintenance or batch operations:
-
-1. **Always run a dry run**: Confirm intended mutations with dry-run output.
-2. **Review affected row counts**: Verify that only the targeted categories or platforms will be affected.
-3. **Execute with `--execute`**: Commit the changes.
-4. **Audit results**: Run `check-stock.cjs` and verify through the Admin Suite at `/admin`.
-
----
-
 ## 📁 Catalog Data Files (Not in Git)
 
 The `Products/` folder contains Excel (`.xlsx`) and spreadsheet (`.ods`, `.csv`) files used for catalog reference and bulk import. These files are **excluded from version control** (`.gitignore`) to keep the repository lean and prevent binary file bloat.
@@ -185,6 +170,21 @@ Store them in:
 
 - Local `Products/` folder (already gitignored)
 - Google Drive, Notion, or private S3 bucket for team sharing
+
+---
+
+## 🔐 Environment Configuration
+
+All scripts connect directly to your Supabase project using the Node.js runtime and require environment variables defined in `.env` at the project root:
+
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+> [!IMPORTANT]
+> The `SUPABASE_SERVICE_ROLE_KEY` bypasses PostgreSQL Row-Level Security (RLS) and is mandatory for bulk maintenance, deduplication, and seeding scripts. Never commit this key to version control.
 
 ---
 
