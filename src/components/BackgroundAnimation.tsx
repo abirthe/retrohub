@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import type Hls from "hls.js";
 
 const BackgroundAnimation: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -118,65 +118,74 @@ const BackgroundAnimation: React.FC = () => {
     video.addEventListener("timeupdate", handlePlaying);
 
     // 2. Playback Engine Initialization:
-    // Engine A (Primary for Desktop Chrome/Edge/Firefox, Android): MSE HLS.js
-    if (Hls.isSupported()) {
-      hls = new Hls({
-        enableWorker: false, // Prevents blob worker restrictions across extensions/sandboxes
-        lowLatencyMode: false, // VOD asset must not use lowLatencyMode
-        backBufferLength: 0,
-        maxBufferLength: 30,
-        startLevel: -1, // Auto bitrate for device network
-        autoStartLoad: true,
-      });
+    const initHls = async () => {
+      try {
+        const { default: HlsModule } = await import("hls.js");
+        if (!isMounted) return;
+        
+        if (HlsModule.isSupported()) {
+          hls = new HlsModule({
+            enableWorker: false, // Prevents blob worker restrictions across extensions/sandboxes
+            lowLatencyMode: false, // VOD asset must not use lowLatencyMode
+            backBufferLength: 0,
+            maxBufferLength: 30,
+            startLevel: -1, // Auto bitrate for device network
+            autoStartLoad: true,
+          });
 
-      hls.loadSource(videoSrc);
-      hls.attachMedia(video);
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (isMounted) {
-          playVideo();
-        }
-      });
+          hls.on(HlsModule.Events.MANIFEST_PARSED, () => {
+            if (isMounted) {
+              playVideo();
+            }
+          });
 
-      hls.on(Hls.Events.FRAG_BUFFERED, () => {
-        if (isMounted && video.paused) {
-          playVideo();
-        }
-      });
+          hls.on(HlsModule.Events.FRAG_BUFFERED, () => {
+            if (isMounted && video.paused) {
+              playVideo();
+            }
+          });
 
-      // Self-healing recovery for network or media decoding hiccups
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              hls?.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls?.recoverMediaError();
-              break;
-            default:
-              try {
-                hls?.destroy();
-                if (video && isMounted) {
-                  hls = new Hls({ enableWorker: false, lowLatencyMode: false });
-                  hls.loadSource(videoSrc);
-                  hls.attachMedia(video);
-                }
-              } catch {
-                // Ignore instance reconstruction error
+          // Self-healing recovery for network or media decoding hiccups
+          hls.on(HlsModule.Events.ERROR, (_event, data) => {
+            if (data.fatal) {
+              switch (data.type) {
+                case HlsModule.ErrorTypes.NETWORK_ERROR:
+                  hls?.startLoad();
+                  break;
+                case HlsModule.ErrorTypes.MEDIA_ERROR:
+                  hls?.recoverMediaError();
+                  break;
+                default:
+                  try {
+                    hls?.destroy();
+                    if (video && isMounted) {
+                      hls = new HlsModule({ enableWorker: false, lowLatencyMode: false });
+                      hls.loadSource(videoSrc);
+                      hls.attachMedia(video);
+                    }
+                  } catch {
+                    // Ignore instance reconstruction error
+                  }
+                  break;
               }
-              break;
-          }
+            }
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          // Engine B (Fallback for iOS Safari & iPadOS where MSE is not supported): Native HLS
+          video.src = videoSrc;
+          video.load();
+          video.addEventListener("loadedmetadata", playVideo, { once: true });
+          video.addEventListener("canplay", playVideo, { once: true });
+          video.addEventListener("loadeddata", playVideo, { once: true });
         }
-      });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Engine B (Fallback for iOS Safari & iPadOS where MSE is not supported): Native HLS
-      video.src = videoSrc;
-      video.load();
-      video.addEventListener("loadedmetadata", playVideo, { once: true });
-      video.addEventListener("canplay", playVideo, { once: true });
-      video.addEventListener("loadeddata", playVideo, { once: true });
-    }
+      } catch (err) {
+        console.error("Failed to load hls.js", err);
+      }
+    };
+    initHls();
 
     // Safety watchdog: periodically ensures video is running and loops cleanly
     const watchdog = setInterval(() => {
