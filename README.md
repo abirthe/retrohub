@@ -35,6 +35,71 @@ Architected specifically for modern digital merchants, RetroHub couples an ultra
 
 ---
 
+## 🚀 Quick Start Guide
+
+### 1. Prerequisites
+
+- **Node.js**: `>=22.0.0`
+- **npm**: `>=9.0.0`
+- **Supabase Account** with PostgreSQL 15+
+
+### 2. Installation
+
+```bash
+git clone https://github.com/abirthe/retrohub.git
+cd retrohub
+npm install
+```
+
+### 3. Environment Setup
+
+```bash
+cp .env.example .env
+```
+
+Fill in your Supabase URL, Anon Key, Service Role Key, and Bot tokens.
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Mandatory Validation
+
+```bash
+npx tsc --noEmit      # TypeScript check (0 errors)
+npm run lint          # ESLint check (0 errors)
+npm test              # Run Vitest suite (27 unit tests)
+npm run build         # Production bundle compilation
+```
+
+---
+
+## ☁️ Deployment Playbook
+
+### Cloudflare Workers (Primary Production)
+
+```bash
+npx wrangler deploy
+```
+
+- Compiles static assets into `./dist`.
+- `worker.js` enforces sliding-window IP rate limiting (150 req/60s) and handles SPA route fallbacks.
+
+### Supabase Edge Functions
+
+```bash
+npx supabase functions deploy telegram-webhook --no-verify-jwt
+npx supabase functions deploy customer-bot --no-verify-jwt
+npx supabase functions deploy send-order-email --no-verify-jwt
+npx supabase functions deploy generate-ai-text --no-verify-jwt
+```
+
+---
+
 ## 🏛️ System Architecture Topology
 
 ```mermaid
@@ -342,71 +407,6 @@ retrohub/
 ├── package.json                      # Pinned dependencies & scripts
 ├── worker.js                         # Cloudflare Worker edge router & rate limiter
 └── wrangler.json                     # Cloudflare Workers configuration
-```
-
----
-
-## 🚀 Quick Start Guide
-
-### 1. Prerequisites
-
-- **Node.js**: `>=22.0.0`
-- **npm**: `>=9.0.0`
-- **Supabase Account** with PostgreSQL 15+
-
-### 2. Installation
-
-```bash
-git clone https://github.com/abirthe/retrohub.git
-cd retrohub
-npm install
-```
-
-### 3. Environment Setup
-
-```bash
-cp .env.example .env
-```
-
-Fill in your Supabase URL, Anon Key, Service Role Key, and Bot tokens.
-
-### 4. Run Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 5. Mandatory Validation
-
-```bash
-npx tsc --noEmit      # TypeScript check (0 errors)
-npm run lint          # ESLint check (0 errors)
-npm test              # Run Vitest suite (27 unit tests)
-npm run build         # Production bundle compilation
-```
-
----
-
-## ☁️ Deployment Playbook
-
-### Cloudflare Workers (Primary Production)
-
-```bash
-npx wrangler deploy
-```
-
-- Compiles static assets into `./dist`.
-- `worker.js` enforces sliding-window IP rate limiting (150 req/60s) and handles SPA route fallbacks.
-
-### Supabase Edge Functions
-
-```bash
-npx supabase functions deploy telegram-webhook --no-verify-jwt
-npx supabase functions deploy customer-bot --no-verify-jwt
-npx supabase functions deploy send-order-email --no-verify-jwt
-npx supabase functions deploy generate-ai-text --no-verify-jwt
 ```
 
 ---

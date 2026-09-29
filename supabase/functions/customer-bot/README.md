@@ -28,6 +28,29 @@ Furthermore, this edge function is meticulously **hardened** against Telegram ne
 
 ---
 
+## 🚀 Deployment Playbook
+
+### 1. Deploy the Edge Function
+
+Ship the finalized code to the Supabase Edge infrastructure:
+
+```bash
+npx supabase functions deploy customer-bot --no-verify-jwt
+```
+
+### 2. Register Webhook Dispatcher
+
+Bind the webhook endpoint to Telegram with the cryptographic secret:
+
+```powershell
+Invoke-RestMethod -Uri "https://api.telegram.org/bot<YOUR_CUSTOMER_BOT_TOKEN>/setWebhook" -Method Post -Body @{
+    url = "https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/customer-bot"
+    secret_token = "<YOUR_TELEGRAM_WEBHOOK_SECRET>"
+}
+```
+
+---
+
 ## 🏛️ System Architecture Topology
 
 ```mermaid
@@ -105,46 +128,6 @@ graph TB
 
 ---
 
-## ⚙️ Environment Secrets Vault
-
-Ensure these are populated in your Supabase Secrets manager (`npx supabase secrets set`):
-
-| Secret                    | Value Type | Description                                                      |
-| :------------------------ | :--------- | :--------------------------------------------------------------- |
-| `CUSTOMER_BOT_TOKEN`      | `string`   | The primary bot token provided by BotFather for `@retrochanbot`. |
-| `TELEGRAM_BOT_TOKEN`      | `string`   | The merchant admin bot token for `@Notifyretro_bot` (used to send escalation alerts). |
-| `ADMIN_CHAT_ID` / `TELEGRAM_CHAT_ID` | `string`   | The Telegram Admin Chat / Group ID to route staff alerts. |
-| `XAI_API_KEY`             | `string`   | x.ai Grok secret API Bearer token (starts with `xai-`).           |
-| `XAI_TEAM_ID`             | `uuid`     | Optional x.ai Team/Organization ID for API scoping.               |
-| `TELEGRAM_WEBHOOK_SECRET` | `string`   | Cryptographic secret verified against incoming webhook headers.  |
-
-_(Note: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically by the Supabase runtime environment.)_
-
----
-
-## 🚀 Deployment Playbook
-
-### 1. Deploy the Edge Function
-
-Ship the finalized code to the Supabase Edge infrastructure:
-
-```bash
-npx supabase functions deploy customer-bot --no-verify-jwt
-```
-
-### 2. Register Webhook Dispatcher
-
-Bind the webhook endpoint to Telegram with the cryptographic secret:
-
-```powershell
-Invoke-RestMethod -Uri "https://api.telegram.org/bot<YOUR_CUSTOMER_BOT_TOKEN>/setWebhook" -Method Post -Body @{
-    url = "https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/customer-bot"
-    secret_token = "<YOUR_TELEGRAM_WEBHOOK_SECRET>"
-}
-```
-
----
-
 ## 🗄️ Database Prerequisites
 
 The function strictly requires the following PL/pgSQL function to prevent race conditions during rapid message bursts:
@@ -185,3 +168,20 @@ $$;
 ---
 
 _Developed for RetroHub E-Commerce. Powered by Deno & Supabase._
+
+## ⚙️ Environment Secrets Vault
+
+Ensure these are populated in your Supabase Secrets manager (`npx supabase secrets set`):
+
+| Secret                    | Value Type | Description                                                      |
+| :------------------------ | :--------- | :--------------------------------------------------------------- |
+| `CUSTOMER_BOT_TOKEN`      | `string`   | The primary bot token provided by BotFather for `@retrochanbot`. |
+| `TELEGRAM_BOT_TOKEN`      | `string`   | The merchant admin bot token for `@Notifyretro_bot` (used to send escalation alerts). |
+| `ADMIN_CHAT_ID` / `TELEGRAM_CHAT_ID` | `string`   | The Telegram Admin Chat / Group ID to route staff alerts. |
+| `XAI_API_KEY`             | `string`   | x.ai Grok secret API Bearer token (starts with `xai-`).           |
+| `XAI_TEAM_ID`             | `uuid`     | Optional x.ai Team/Organization ID for API scoping.               |
+| `TELEGRAM_WEBHOOK_SECRET` | `string`   | Cryptographic secret verified against incoming webhook headers.  |
+
+_(Note: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically by the Supabase runtime environment.)_
+
+---
