@@ -382,7 +382,7 @@ async function getLiveProducts(): Promise<CatalogProduct[]> {
       "8. Live Product Catalog (Suggest from these):\n" +
       products
         .map(
-          (p) =>
+          (p: any) =>
             `- ${p.title || "Unknown"} [${p.platform || "Global"}]: ৳${p.sale_price} (Stock: ${p.in_stock})`,
         )
         .join("\n");
@@ -536,7 +536,7 @@ async function getRetroChanIntelligenceResponse(
     const matches = searchResults || [];
     
     if (matches.length > 0) {
-      const itemsList = matches.slice(0, 4).map((p) =>
+      const itemsList = matches.slice(0, 4).map((p: any) =>
         `• <b>${escapeHtml(p.title || "Unknown")}</b> [${escapeHtml(p.platform || "Global")}]\n  💰 Price: <b>৳${p.sale_price}</b> | Stock: ${p.in_stock > 0 ? `✅ In Stock (${p.in_stock})` : "⚠️ Out of Stock"}`
       ).join("\n\n");
       return (
@@ -558,7 +558,7 @@ async function getRetroChanIntelligenceResponse(
       }
     
     // C. General Product Overview with live sample items
-    const sampleProducts = (products || []).slice(0, 5).map((p) =>
+    const sampleProducts = (products || []).slice(0, 5).map((p: any) =>
       `• <b>${escapeHtml(p.title || "Unknown")}</b> (${escapeHtml(p.platform || "Global")}) — ৳${p.sale_price}`
     ).join("\n");
 
