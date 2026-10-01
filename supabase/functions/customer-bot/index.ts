@@ -556,8 +556,7 @@ async function getRetroChanIntelligenceResponse(
           `Tap <b>👨‍💻 Talk to Human Agent</b> below, let our merchant team know what you'd like, and we'll arrange it for you right away! 🎮`
         );
       }
-    }
-
+    
     // C. General Product Overview with live sample items
     const sampleProducts = (products || []).slice(0, 5).map((p) =>
       `• <b>${escapeHtml(p.title || "Unknown")}</b> (${escapeHtml(p.platform || "Global")}) — ৳${p.sale_price}`
