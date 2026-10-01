@@ -22,6 +22,8 @@
 
 **Retro Chan (@retrochanbot)** is the front-line Customer Support AI for the RetroHub commerce platform. Operating 24/7 inside Telegram, this bot handles level-1 triage, instant order tracking, digital key delivery, and comprehensive bKash payment walkthroughs — fully autonomously.
 
+> **Note:** For the internal staff operations bot that handles order dispatch and notifications, see the [Admin Bot (telegram-webhook) README](../telegram-webhook/README.md).
+
 It implements a **Three-Stage AI Pipeline** — **Grok Classifier → BrainGine Data Engine → Grok Composer** — combining the contextual intelligence of **xAI Grok 4.7** with a zero-dependency local fallback at every stage to guarantee zero downtime.
 
 Furthermore, this edge function is meticulously **hardened** against Telegram network races and double-execution edge cases using PostgREST row-level locks, per-chat rate limiting, and cryptographic webhook secret validation.
@@ -122,7 +124,7 @@ Every customer message flows through three distinct, independently resilient sta
 
 The zero-dependency data retrieval engine handles all 9 intent categories:
 
-- **`product_search`** — Multi-vector fuzzy search engine scoring by exact phrase, token coverage, and platform intent. Features extensive alias expansion (`gtav` → GTA 5, `vp` → Valorant Points, `fc25` → EA FC 25) and gracefully falls back to **Custom On-Demand Game Sourcing** proposals for out-of-catalog inquiries.
+- **`product_search`** — Powered by the new `product_search` PostgreSQL RPC. It acts as a multi-vector fuzzy search engine scoring by exact phrase, token coverage, and platform intent. Features extensive alias expansion (`gtav` → GTA 5, `vp` → Valorant Points, `fc25` → EA FC 25) and gracefully falls back to **Custom On-Demand Game Sourcing** proposals for out-of-catalog inquiries.
 - **`order_status`** — Fetches live order status from Supabase with inline interactive keyboards (`[📦 Check Status]` / `[🔑 View Key / Code]`).
 - **`payment_help`** — Returns verified bKash number, fee structure, and verification URL.
 - **`delivery_info`** — Explains the 1–15 minute automated SLA post-payment-verification.
