@@ -35,12 +35,12 @@ export async function fetchStoreProducts({
 
   if (search) {
     // Utilize the universal brain engine for fuzzy search and alias expansion
-    const { data: searchResults } = await supabase.rpc("product_search", {
+    const { data: searchResults } = await (supabase.rpc as any)("product_search", {
       search_query: search,
       max_results: 200,
     });
     
-    const ids = searchResults ? searchResults.map((s: any) => s.id) : [];
+    const ids = searchResults ? (searchResults as any[]).map((s: any) => s.id) : [];
     
     if (ids.length === 0) {
       // If no matches found by the engine, return empty
