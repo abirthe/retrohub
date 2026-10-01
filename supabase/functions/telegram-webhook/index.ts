@@ -828,10 +828,7 @@ serve(async (req: Request) => {
       const searchQuery = text.substring(6).trim()
       if (searchQuery) {
         const { data: searchResults } = await supabase
-          .from('products')
-          .select('id, title, platform, in_stock, sale_price, is_active')
-          .ilike('title', `%${searchQuery}%`)
-          .limit(8)
+          .rpc('product_search', { search_query: searchQuery, max_results: 8 })
 
         if (!searchResults || searchResults.length === 0) {
           await sendMessage(chatId, `🔍 No products matching "<code>${escapeHtml(searchQuery)}</code>".`)
