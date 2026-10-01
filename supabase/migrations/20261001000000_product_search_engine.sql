@@ -60,15 +60,21 @@ BEGIN
         p.is_active,
         GREATEST(
             similarity(lower(p.title), expanded_query),
-            similarity(lower(p.platform), expanded_query)
+            similarity(lower(p.platform), expanded_query),
+            similarity(lower(p.category::text), expanded_query),
+            similarity(lower(COALESCE(p.description, '')), expanded_query)
         ) AS relevance
     FROM public.products p
     WHERE p.is_active = true
       AND (
         p.title ILIKE '%' || expanded_query || '%' OR
         p.platform ILIKE '%' || expanded_query || '%' OR
+        p.category::text ILIKE '%' || expanded_query || '%' OR
+        p.description ILIKE '%' || expanded_query || '%' OR
+        p.sale_price::text = expanded_query OR
         similarity(lower(p.title), expanded_query) > 0.15 OR
-        similarity(lower(p.platform), expanded_query) > 0.15
+        similarity(lower(p.platform), expanded_query) > 0.15 OR
+        similarity(lower(p.category::text), expanded_query) > 0.15
       )
     ORDER BY relevance DESC, p.in_stock DESC, p.title ASC
     LIMIT max_results;
