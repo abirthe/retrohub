@@ -48,8 +48,8 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
         theme: "night",
         labels: "auto",
         variables: {
-          borderRadius: "6px",
-          colorBackground: "#0d1527",
+          borderRadius: "8px",
+          colorBackground: "transparent",
           colorDanger: "#ef4444",
           colorPrimary: "#00f0ff",
           colorSuccess: "#10b981",

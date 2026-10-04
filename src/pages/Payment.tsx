@@ -104,11 +104,10 @@ const Payment = () => {
   };
 
   return (
-    <div className="min-h-screen relative selection:bg-primary/20 bg-background text-foreground">
-      {/* Background Ambience & Cyber Grid */}
+    <div className="min-h-screen relative selection:bg-primary/20 text-foreground">
+      {/* Subtle Ambient Radial Highlight - background animation shines through */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,240,255,0.06)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,240,255,0.08)_0%,transparent_70%)]" />
       </div>
 
       <ShopHeader />
@@ -178,10 +177,10 @@ const Payment = () => {
                   type="button"
                   onClick={() => setSelectedMethod("card")}
                   className={cn(
-                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all duration-200 group cursor-pointer",
+                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all duration-200 group cursor-pointer backdrop-blur-md",
                     selectedMethod === "card"
                       ? "border-primary bg-primary/10 shadow-[0_0_20px_-5px_rgba(0,240,255,0.3)] ring-1 ring-primary/40"
-                      : "border-border/60 bg-card/40 hover:bg-card/70 hover:border-primary/40",
+                      : "border-white/10 bg-card/25 hover:bg-card/40 hover:border-primary/40",
                   )}
                 >
                   <div
@@ -189,7 +188,7 @@ const Payment = () => {
                       "w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                       selectedMethod === "card"
                         ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-secondary text-muted-foreground group-hover:text-primary group-hover:bg-primary/20",
+                        : "bg-secondary/60 text-muted-foreground group-hover:text-primary group-hover:bg-primary/20",
                     )}
                   >
                     <CreditCard className="w-5 h-5" />
@@ -219,10 +218,10 @@ const Payment = () => {
                   type="button"
                   onClick={() => setSelectedMethod("bkash")}
                   className={cn(
-                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all duration-200 group cursor-pointer",
+                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all duration-200 group cursor-pointer backdrop-blur-md",
                     selectedMethod === "bkash"
                       ? "border-pink-500 bg-pink-500/10 shadow-[0_0_20px_-5px_rgba(244,114,182,0.3)] ring-1 ring-pink-500/40"
-                      : "border-border/60 bg-card/40 hover:bg-card/70 hover:border-pink-500/40",
+                      : "border-white/10 bg-card/25 hover:bg-card/40 hover:border-pink-500/40",
                   )}
                 >
                   <div
@@ -230,7 +229,7 @@ const Payment = () => {
                       "w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                       selectedMethod === "bkash"
                         ? "bg-pink-500 text-white shadow-sm"
-                        : "bg-secondary text-muted-foreground group-hover:text-pink-400 group-hover:bg-pink-500/20",
+                        : "bg-secondary/60 text-muted-foreground group-hover:text-pink-400 group-hover:bg-pink-500/20",
                     )}
                   >
                     <Smartphone className="w-5 h-5" />
@@ -259,7 +258,7 @@ const Payment = () => {
 
             {/* Active Payment View: Stripe */}
             {selectedMethod === "card" && (
-              <Card className="border-primary/30 bg-card/60 backdrop-blur-md shadow-[0_0_35px_-10px_rgba(0,240,255,0.15)] overflow-hidden animate-in fade-in duration-300">
+              <Card className="border-primary/20 bg-card/30 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden animate-in fade-in duration-300">
                 <div className="h-1 bg-gradient-to-r from-primary via-cyan-400 to-primary/20" />
                 <CardHeader className="pb-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -291,7 +290,7 @@ const Payment = () => {
             {selectedMethod === "bkash" && (
               <div className="space-y-6 animate-in fade-in duration-300">
                 {/* bKash Details Card */}
-                <Card className="border-pink-500/30 bg-card/60 backdrop-blur-md shadow-[0_0_35px_-10px_rgba(244,114,182,0.15)] overflow-hidden">
+                <Card className="border-pink-500/20 bg-card/30 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden">
                   <div className="h-1 bg-gradient-to-r from-pink-500 via-pink-400 to-pink-500/20" />
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between gap-2">
@@ -313,7 +312,7 @@ const Payment = () => {
                 </Card>
 
                 {/* Transaction ID Submission Form */}
-                <Card className="border-border/60 bg-card/60 backdrop-blur-md shadow-lg overflow-hidden">
+                <Card className="border-white/10 bg-card/30 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden">
                   <CardHeader className="pb-3">
                     <CardTitle className="font-display text-base sm:text-lg flex items-center gap-2">
                       <Receipt className="w-4 h-4 text-primary" />
@@ -335,7 +334,7 @@ const Payment = () => {
                             placeholder="e.g. 9H7G6F5D4S"
                             value={transactionId}
                             onChange={(e) => setTransactionId(e.target.value)}
-                            className="font-mono uppercase placeholder:normal-case border-pink-500/30 focus-visible:ring-pink-500/50 text-lg py-5 bg-background/50"
+                            className="font-mono uppercase placeholder:normal-case border-pink-500/30 focus-visible:ring-pink-500/50 text-lg py-5 bg-white/[0.04]"
                           />
                           {transactionId.length >= 6 && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400 animate-in zoom-in">
@@ -374,7 +373,7 @@ const Payment = () => {
           {/* Right Column: Order Summary & Trust Guarantee (5 cols) */}
           <div className="lg:col-span-5 xl:col-span-4 space-y-6">
             {/* Sticky Order Summary Card */}
-            <Card className="border-border/60 bg-card/60 backdrop-blur-md shadow-xl overflow-hidden sticky top-24">
+            <Card className="border-white/10 bg-card/30 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden sticky top-24">
               <div className="h-1 bg-gradient-to-r from-primary via-accent to-primary" />
               <CardHeader className="pb-4">
                 <CardTitle className="font-display text-lg flex items-center justify-between">
@@ -391,7 +390,7 @@ const Payment = () => {
               <CardContent className="space-y-4">
                 {/* Order References */}
                 {orderIds.length > 0 && (
-                  <div className="p-3 rounded-lg bg-background/50 border border-border/50 space-y-1.5">
+                  <div className="p-3 rounded-lg bg-white/[0.04] border border-white/10 space-y-1.5">
                     <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold block">
                       Order Reference:
                     </span>
@@ -431,7 +430,7 @@ const Payment = () => {
                     </span>
                   </div>
 
-                  <div className="border-t border-border/60 my-2 pt-3 flex justify-between items-baseline">
+                  <div className="border-t border-white/10 my-2 pt-3 flex justify-between items-baseline">
                     <div className="flex flex-col">
                       <span className="font-display text-sm font-bold text-white uppercase tracking-wider">
                         Total Payable
@@ -451,7 +450,7 @@ const Payment = () => {
                 </div>
 
                 {/* Trust Badges */}
-                <div className="pt-4 border-t border-border/40 space-y-2.5 text-xs text-slate-300">
+                <div className="pt-4 border-t border-white/10 space-y-2.5 text-xs text-slate-300">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-primary shrink-0" />
                     <span>Instant automated digital code delivery</span>
@@ -470,7 +469,7 @@ const Payment = () => {
                 <div className="pt-2">
                   <Link
                     to="/custom-order"
-                    className="flex items-center justify-center gap-2 p-2.5 rounded-lg border border-border/40 bg-secondary/30 hover:bg-secondary/50 text-xs text-muted-foreground hover:text-white transition-colors"
+                    className="flex items-center justify-center gap-2 p-2.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] text-xs text-muted-foreground hover:text-white transition-colors"
                   >
                     <Headphones className="w-3.5 h-3.5 text-primary" />
                     Need help? Contact support or custom order
