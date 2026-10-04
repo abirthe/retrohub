@@ -76,7 +76,7 @@ serve(async (req) => {
     const mode = "payment";
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      ui_mode: "elements",
+      ui_mode: "form",
       mode,
       managed_payments: { enabled: false },
       billing_address_collection: "auto",
