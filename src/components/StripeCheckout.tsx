@@ -33,7 +33,9 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
         throw new Error("Stripe SDK failed to load from CDN. Please check your connection.");
       }
 
-      const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      const publishableKey =
+        import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
+        "pk_live_51UMuVWQ4V6haoLQNOWkACWHwmy1gQINs5sMGz3caYF3RdEBN8Co0qqQFwdFUuOhZubg6eD2Fn1zEr2bDQNvVdIeA00uYdmGnXc";
       if (!publishableKey) {
         throw new Error("Stripe publishable key is missing.");
       }
