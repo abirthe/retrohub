@@ -50,53 +50,12 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
         variables: {
           borderRadius: "8px",
           colorBackground: "transparent",
-          componentBackground: "rgba(255, 255, 255, 0.03)",
-          componentBorder: "rgba(255, 255, 255, 0.12)",
-          componentDivider: "rgba(255, 255, 255, 0.08)",
           colorDanger: "#ef4444",
           colorPrimary: "#00f0ff",
           colorSuccess: "#10b981",
           colorText: "#f1f5f9",
-          colorTextSecondary: "#94a3b8",
-          colorTextPlaceholder: "#64748b",
           fontFamily: "Inter, sans-serif",
           fontSizeBase: "15px",
-        },
-        rules: {
-          ".Input": {
-            backgroundColor: "rgba(255, 255, 255, 0.03)",
-            borderColor: "rgba(255, 255, 255, 0.12)",
-            boxShadow: "none",
-          },
-          ".Input:focus": {
-            borderColor: "#00f0ff",
-            boxShadow: "0 0 10px rgba(0, 240, 255, 0.25)",
-          },
-          ".Tab": {
-            backgroundColor: "rgba(255, 255, 255, 0.03)",
-            borderColor: "rgba(255, 255, 255, 0.12)",
-          },
-          ".Tab:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.06)",
-            borderColor: "rgba(0, 240, 255, 0.4)",
-          },
-          ".Tab--selected": {
-            backgroundColor: "rgba(0, 240, 255, 0.12)",
-            borderColor: "#00f0ff",
-            boxShadow: "0 0 15px rgba(0, 240, 255, 0.25)",
-          },
-          ".Block": {
-            backgroundColor: "rgba(255, 255, 255, 0.03)",
-            borderColor: "rgba(255, 255, 255, 0.12)",
-          },
-          ".PickerItem": {
-            backgroundColor: "rgba(255, 255, 255, 0.03)",
-            borderColor: "rgba(255, 255, 255, 0.12)",
-          },
-          ".PickerItem--selected": {
-            backgroundColor: "rgba(0, 240, 255, 0.12)",
-            borderColor: "#00f0ff",
-          },
         },
       };
 
