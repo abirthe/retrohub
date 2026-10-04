@@ -35,8 +35,7 @@ serve(async (req) => {
     // Wait, let's use the supabase client to fetch orders.
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: req.headers.get("Authorization")! } } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
     const { data: orders, error: ordersError } = await supabaseClient
@@ -77,16 +76,15 @@ serve(async (req) => {
     const mode = "payment";
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      ui_mode: "custom", // Configured custom for SDK below 21.0.0
+      ui_mode: "elements",
       mode,
+      managed_payments: { enabled: false },
       billing_address_collection: "auto",
       phone_number_collection: { enabled: false },
-      automatic_tax: { enabled: false },
+      automatic_tax: { enabled: true },
       submit_type: "auto",
-      tax_id_collection: { enabled: true, required: "if_supported" },
+      tax_id_collection: { enabled: true },
       name_collection: { individual: { enabled: true } },
-      saved_payment_method_options: { payment_method_save: "enabled" },
-      integration_identifier: "custom_embedded_web_0002",
       line_items,
       metadata: {
         orderIds: orderIds.join(",") // Store orderIds to update them later via webhook
