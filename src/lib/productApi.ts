@@ -34,13 +34,26 @@ export async function fetchStoreProducts({
     .select("*", { count: "exact" });
 
   if (search) {
+    interface SearchRpcResult {
+      id: string;
+      title: string;
+      platform: string;
+      in_stock: number;
+      sale_price: number;
+      is_active: boolean;
+      relevance: number;
+    }
+
     // Utilize the universal brain engine for fuzzy search and alias expansion
-    const { data: searchResults } = await (supabase.rpc as any)("product_search", {
+    const { data: searchResults } = await (supabase.rpc as unknown as (
+      fn: string,
+      params: { search_query: string; max_results?: number }
+    ) => Promise<{ data: SearchRpcResult[] | null }>)("product_search", {
       search_query: search,
       max_results: 200,
     });
     
-    const ids = searchResults ? (searchResults as any[]).map((s: any) => s.id) : [];
+    const ids = searchResults ? searchResults.map((s) => s.id) : [];
     
     if (ids.length === 0) {
       // If no matches found by the engine, return empty

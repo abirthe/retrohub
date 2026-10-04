@@ -1,12 +1,27 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface StripeCheckoutSdk {
+  initCheckoutFormSdk: (opts: { clientSecret: string; appearance?: Record<string, unknown> }) => {
+    createForm: (opts: { layout: string }) => {
+      mount: (el: HTMLElement) => void;
+      on: (event: string, handler: (e: unknown) => void) => void;
+    };
+    loadActions: () => Promise<{
+      type: string;
+      actions: {
+        confirm: (opts: { formConfirmEvent: unknown }) => Promise<{ type?: string; redirectUrl?: string }>;
+      };
+    }>;
+  };
+}
+
 // Global Stripe instance injected via index.html
 declare global {
   interface Window {
-    Stripe: any;
+    Stripe?: (key: string, options?: Record<string, unknown>) => StripeCheckoutSdk;
   }
 }
 
@@ -15,7 +30,9 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const initStripeCheckout = async () => {
+  const orderIdsKey = orderIds.join(",");
+
+  const initStripeCheckout = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -62,19 +79,30 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
       const { data, error: invokeError } = await supabase.functions.invoke(
         "create-checkout-session",
         {
-          body: { orderIds },
+          body: { orderIds: orderIdsKey.split(",").filter(Boolean) },
         }
       );
 
       if (invokeError) {
-        throw new Error(invokeError.message || "Failed to initialize payment session");
+        let detailedMsg = invokeError.message;
+        try {
+          if (invokeError.context && typeof invokeError.context.json === "function") {
+            const body = await invokeError.context.json();
+            if (body?.error) {
+              detailedMsg = body.error;
+            }
+          }
+        } catch (_parseErr) {
+          void _parseErr;
+        }
+        throw new Error(detailedMsg || "Failed to initialize payment session");
       }
 
       if (!data?.client_secret) {
         throw new Error("Invalid response from payment server: missing client_secret");
       }
 
-      const clientSecret = data.client_secret;
+      const clientSecret = data.client_secret as string;
       const checkout = stripe.initCheckoutFormSdk({ clientSecret, appearance });
       const form = checkout.createForm({ layout: "expanded" });
 
@@ -85,10 +113,10 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
 
       const loadActionsResult = await checkout.loadActions();
       if (loadActionsResult.type === "success") {
-        form.on("confirm", async (event: any) => {
+        form.on("confirm", async (event: unknown) => {
           try {
             const confirmResult = await loadActionsResult.actions.confirm({ formConfirmEvent: event });
-            if (confirmResult?.type === "redirect") {
+            if (confirmResult?.type === "redirect" && confirmResult.redirectUrl) {
               window.location.href = confirmResult.redirectUrl;
             } else {
               window.location.href = "/orders";
@@ -100,16 +128,17 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
       }
 
       setLoading(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error initializing Stripe checkout:", err);
-      setError(err?.message || "Failed to load payment form.");
+      const errorObj = err as Error;
+      setError(errorObj?.message || "Failed to load payment form.");
       setLoading(false);
     }
-  };
+  }, [orderIdsKey]);
 
   useEffect(() => {
     initStripeCheckout();
-  }, [JSON.stringify(orderIds)]);
+  }, [initStripeCheckout]);
 
   return (
     <div className="w-full">
@@ -146,3 +175,5 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
     </div>
   );
 }
+
+export default StripeCheckout;

@@ -25,14 +25,6 @@ serve(async (req) => {
       throw new Error("Missing orderIds array in request body");
     }
 
-    // Since we are not using the supabase client in the edge function currently, 
-    // we need to instantiate it to query the database, or we can just expect 
-    // the frontend to pass the productIds and quantities directly.
-    // However, for security, the frontend shouldn't pass prices.
-    // But wait! We don't have the Supabase URL/Key in this edge function right now!
-    // The previous code just took `productId` and asked Stripe directly.
-    // If the frontend passes an array of `{ productId, quantity }` it is much simpler.
-    // Wait, let's use the supabase client to fetch orders.
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? ""
@@ -40,37 +32,60 @@ serve(async (req) => {
 
     const { data: orders, error: ordersError } = await supabaseClient
       .from("orders")
-      .select("id, product_id")
+      .select("id, product_id, total, products(id, title, platform, sale_price, image_url)")
       .in("id", orderIds);
 
     if (ordersError || !orders || orders.length === 0) {
       throw new Error("Failed to fetch orders or orders not found.");
     }
 
-    // Group by product_id to calculate quantities
-    const productQuantities: Record<string, number> = {};
-    for (const order of orders) {
-      if (order.product_id) {
-        productQuantities[order.product_id] = (productQuantities[order.product_id] || 0) + 1;
-      }
-    }
-
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-    // Fetch stripe prices for each product
-    for (const [productId, quantity] of Object.entries(productQuantities)) {
-      const stripeProduct = await stripe.products.retrieve(productId);
-      if (!stripeProduct || !stripeProduct.default_price) {
-        throw new Error(`Product ${productId} not found or has no default price set in Stripe`);
-      }
-      const priceId = typeof stripeProduct.default_price === 'string' 
-        ? stripeProduct.default_price 
-        : stripeProduct.default_price.id;
+    for (const order of orders) {
+      const product = order.products;
+      const title = product?.title || `Order #${order.id.slice(0, 8)}`;
+      const amountNumber = Number(order.total || product?.sale_price || 1);
+      const unitAmount = Math.max(Math.round(amountNumber * 100), 50);
 
-      line_items.push({
-        price: priceId,
-        quantity: quantity
-      });
+      const item: Stripe.Checkout.SessionCreateParams.LineItem = {
+        price_data: {
+          currency: "bdt",
+          unit_amount: unitAmount,
+          product_data: {
+            name: title,
+            ...(product?.platform ? { description: `Platform: ${product.platform}` } : {}),
+            ...(product?.image_url && product.image_url.startsWith("http")
+              ? { images: [product.image_url] }
+              : {}),
+            metadata: {
+              order_id: order.id,
+              product_id: order.product_id || "",
+            },
+          },
+        },
+        quantity: 1,
+      };
+
+      line_items.push(item);
+    }
+
+    // Calculate total order amount across line items
+    let totalBdtAmount = 0;
+    for (const item of line_items) {
+      totalBdtAmount += ((item.price_data?.unit_amount || 0) * (item.quantity || 1)) / 100;
+    }
+
+    // Stripe enforces a global minimum transaction size equivalent to $0.50 USD (~৳65 BDT).
+    if (totalBdtAmount < 65) {
+      return new Response(
+        JSON.stringify({
+          error: `Stripe card processing requires a minimum order amount of ৳65 (~$0.50 USD). Your current total is ৳${totalBdtAmount.toFixed(2)}. Please pay via bKash or add more items to your cart.`,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
 
     const mode = "payment";
@@ -81,23 +96,47 @@ serve(async (req) => {
       managed_payments: { enabled: false },
       billing_address_collection: "auto",
       phone_number_collection: { enabled: false },
-      automatic_tax: { enabled: true },
+      automatic_tax: { enabled: false },
       submit_type: "auto",
-      tax_id_collection: { enabled: true },
+      tax_id_collection: { enabled: false },
       name_collection: { individual: { enabled: true } },
       line_items,
       metadata: {
-        orderIds: orderIds.join(",") // Store orderIds to update them later via webhook
-      }
+        orderIds: orderIds.join(","),
+      },
     };
 
-    const session = await stripe.checkout.sessions.create(sessionParams);
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create(sessionParams);
+    } catch (stripeErr: any) {
+      console.warn("Primary Stripe checkout session creation failed:", stripeErr.message);
+      // If BDT is not supported by merchant's Stripe account, convert line items to USD
+      if (
+        stripeErr?.message?.toLowerCase().includes("currency") ||
+        stripeErr?.code === "currency_unsupported"
+      ) {
+        console.warn("Retrying with USD currency fallback...");
+        for (const item of line_items) {
+          if (item.price_data) {
+            item.price_data.currency = "usd";
+            // Convert BDT to USD (~120 BDT per USD, with minimum $0.50 Stripe charge)
+            const usdAmount = Math.max(Math.round(item.price_data.unit_amount / 120), 50);
+            item.price_data.unit_amount = usdAmount;
+          }
+        }
+        session = await stripe.checkout.sessions.create(sessionParams);
+      } else {
+        throw stripeErr;
+      }
+    }
 
     return new Response(JSON.stringify({ client_secret: session.client_secret }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Create checkout session error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,

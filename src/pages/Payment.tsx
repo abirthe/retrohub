@@ -23,14 +23,14 @@ import {
   Receipt,
   Headphones,
   Check,
+  AlertCircle,
 } from "lucide-react";
 import { ShopHeader } from "@/components/layout";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { updateOrderTransactionId } from "@/lib/shopApi";
 
-import { BkashPayment } from "@/components/payment";
-import { StripeCheckout } from "@/components/StripeCheckout";
+import { BkashPayment, StripeCheckout } from "@/components/payment";
 
 type PaymentMethod = "card" | "bkash";
 
@@ -276,7 +276,44 @@ const Payment = () => {
                 </CardHeader>
                 <CardContent className="pt-2">
                   {orderIds.length > 0 ? (
-                    <StripeCheckout orderIds={orderIds} />
+                    totalPrice > 0 && totalPrice < 65 ? (
+                      <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm space-y-3">
+                        <div className="flex items-start gap-2.5">
+                          <AlertCircle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-semibold text-amber-200">
+                              Minimum Amount for International Card Processing
+                            </p>
+                            <p className="text-xs text-amber-300/90 mt-1 leading-relaxed">
+                              Stripe requires international card transactions to convert to at least $0.50 USD (approx. ৳65 BDT). Your current order total is <strong>৳{totalPrice.toFixed(2)}</strong>.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => setSelectedMethod("bkash")}
+                            className="bg-pink-600 hover:bg-pink-500 text-white font-medium text-xs shadow-md"
+                          >
+                            <Smartphone className="w-3.5 h-3.5 mr-1.5" />
+                            Pay with bKash (No Minimum)
+                          </Button>
+                          <Link to="/">
+                            <Button
+                              size="sm"
+                              type="button"
+                              variant="outline"
+                              className="text-xs border-amber-500/30 hover:bg-amber-500/10 text-amber-200"
+                            >
+                              Add More Items
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <StripeCheckout orderIds={orderIds} />
+                    )
                   ) : (
                     <div className="py-8 text-center text-muted-foreground text-sm">
                       No order items found. Please start from your cart.
