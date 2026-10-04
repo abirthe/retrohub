@@ -101,9 +101,13 @@ const Payment = () => {
               Complete Your Payment
             </h1>
             <p className="text-slate-200 max-w-lg mx-auto text-base md:text-lg font-medium leading-relaxed drop-shadow-sm">
-              RETROHUB accepts exclusively{" "}
+              RETROHUB accepts{" "}
+              <strong className="text-primary font-semibold drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
+                Card (Stripe)
+              </strong>{" "}
+              and{" "}
               <strong className="text-pink-400 font-semibold drop-shadow-[0_0_12px_rgba(244,114,182,0.4)]">
-                bKash Send Money
+                bKash
               </strong>{" "}
               for instant order verification and key delivery.
             </p>
