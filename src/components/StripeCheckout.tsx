@@ -87,7 +87,12 @@ export function StripeCheckout({ orderIds }: { orderIds: string[] }) {
       if (loadActionsResult.type === "success") {
         form.on("confirm", async (event: any) => {
           try {
-            await loadActionsResult.actions.confirm({ formConfirmEvent: event });
+            const confirmResult = await loadActionsResult.actions.confirm({ formConfirmEvent: event });
+            if (confirmResult?.type === "redirect") {
+              window.location.href = confirmResult.redirectUrl;
+            } else {
+              window.location.href = "/orders";
+            }
           } catch (confirmError) {
             console.error("Payment confirmation error:", confirmError);
           }
