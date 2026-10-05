@@ -57,6 +57,7 @@ serve(async (req) => {
           unit_amount: unitAmountInCents,
           product_data: {
             name: `${title} (৳${amountNumber.toFixed(0)} BDT)`,
+            tax_code: "txcd_10000000",
             ...(product?.platform ? { description: `Platform: ${product.platform}` } : {}),
             ...(product?.image_url && product.image_url.startsWith("http")
               ? { images: [product.image_url] }
@@ -90,6 +91,8 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded",
       mode: "payment",
+      managed_payments: { enabled: false } as any,
+      automatic_tax: { enabled: false },
       return_url: `${clientReturnUrl}?session_id={CHECKOUT_SESSION_ID}&order_ids=${orderIds.join(",")}`,
       line_items,
       metadata: {
