@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
-  apiVersion: "2026-03-25.dahlia; custom_checkout_payment_form_preview=v1" as any,
+  apiVersion: "2023-10-16" as any,
 });
 
 serve(async (req) => {
@@ -19,7 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    const { orderIds } = await req.json();
+    const { orderIds, returnUrl } = await req.json();
 
     if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
       throw new Error("Missing orderIds array in request body");
@@ -40,19 +40,23 @@ serve(async (req) => {
     }
 
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+    let totalBdtAmount = 0;
 
     for (const order of orders) {
       const product = order.products;
       const title = product?.title || `Order #${order.id.slice(0, 8)}`;
       const amountNumber = Number(order.total || product?.sale_price || 1);
-      const unitAmount = Math.max(Math.round(amountNumber * 100), 50);
+      totalBdtAmount += amountNumber;
+
+      // Convert BDT to USD cents (~122 BDT per USD, with minimum $0.50 Stripe charge)
+      const unitAmountInCents = Math.max(Math.round((amountNumber / 122) * 100), 50);
 
       const item: Stripe.Checkout.SessionCreateParams.LineItem = {
         price_data: {
-          currency: "bdt",
-          unit_amount: unitAmount,
+          currency: "usd",
+          unit_amount: unitAmountInCents,
           product_data: {
-            name: title,
+            name: `${title} (৳${amountNumber.toFixed(0)} BDT)`,
             ...(product?.platform ? { description: `Platform: ${product.platform}` } : {}),
             ...(product?.image_url && product.image_url.startsWith("http")
               ? { images: [product.image_url] }
@@ -69,12 +73,6 @@ serve(async (req) => {
       line_items.push(item);
     }
 
-    // Calculate total order amount across line items
-    let totalBdtAmount = 0;
-    for (const item of line_items) {
-      totalBdtAmount += ((item.price_data?.unit_amount || 0) * (item.quantity || 1)) / 100;
-    }
-
     // Stripe enforces a global minimum transaction size equivalent to $0.50 USD (~৳65 BDT).
     if (totalBdtAmount < 65) {
       return new Response(
@@ -88,53 +86,27 @@ serve(async (req) => {
       );
     }
 
-    const mode = "payment";
-
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      ui_mode: "form",
-      mode,
-      managed_payments: { enabled: false },
-      billing_address_collection: "auto",
-      phone_number_collection: { enabled: false },
-      automatic_tax: { enabled: false },
-      submit_type: "auto",
-      tax_id_collection: { enabled: false },
-      name_collection: { individual: { enabled: true } },
+    const clientReturnUrl = returnUrl || "https://retrohub.store/orders";
+    const session = await stripe.checkout.sessions.create({
+      ui_mode: "embedded",
+      mode: "payment",
+      return_url: `${clientReturnUrl}?session_id={CHECKOUT_SESSION_ID}&order_ids=${orderIds.join(",")}`,
       line_items,
       metadata: {
         orderIds: orderIds.join(","),
       },
-    };
-
-    let session;
-    try {
-      session = await stripe.checkout.sessions.create(sessionParams);
-    } catch (stripeErr: any) {
-      console.warn("Primary Stripe checkout session creation failed:", stripeErr.message);
-      // If BDT is not supported by merchant's Stripe account, convert line items to USD
-      if (
-        stripeErr?.message?.toLowerCase().includes("currency") ||
-        stripeErr?.code === "currency_unsupported"
-      ) {
-        console.warn("Retrying with USD currency fallback...");
-        for (const item of line_items) {
-          if (item.price_data) {
-            item.price_data.currency = "usd";
-            // Convert BDT to USD (~120 BDT per USD, with minimum $0.50 Stripe charge)
-            const usdAmount = Math.max(Math.round(item.price_data.unit_amount / 120), 50);
-            item.price_data.unit_amount = usdAmount;
-          }
-        }
-        session = await stripe.checkout.sessions.create(sessionParams);
-      } else {
-        throw stripeErr;
-      }
-    }
-
-    return new Response(JSON.stringify({ client_secret: session.client_secret }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
     });
+
+    return new Response(
+      JSON.stringify({
+        client_secret: session.client_secret,
+        session_id: session.id,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
   } catch (error: any) {
     console.error("Create checkout session error:", error);
     return new Response(JSON.stringify({ error: error.message }), {

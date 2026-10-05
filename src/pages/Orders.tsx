@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,9 +20,9 @@ import {
   Headphones,
 } from "lucide-react";
 import { ShopHeader } from "@/components/layout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MobileOrderCard, DesktopOrderTable } from "@/components/orders";
-import type { Order, Delivery } from "@/lib/shopApi";
+import { updateOrderTransactionId, type Order, type Delivery } from "@/lib/shopApi";
 
 const statusStyles: Record<
   string,
@@ -104,9 +105,42 @@ type OrderWithDetails = Order & {
 const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [filterTab, setFilterTab] = useState<"all" | "fulfilled" | "active">(
     "all",
   );
+
+  const sessionId = searchParams.get("session_id");
+  const orderIdsParam = searchParams.get("order_ids");
+
+  useEffect(() => {
+    if (sessionId) {
+      toast({
+        title: "Payment Confirmed! 🎉",
+        description: "Your card payment was processed securely by Stripe. We are preparing your order.",
+        className: "bg-success text-success-foreground",
+      });
+
+      if (orderIdsParam) {
+        const ids = orderIdsParam.split(",").filter(Boolean);
+        updateOrderTransactionId(ids, `STRIPE_${sessionId.slice(-12)}`)
+          .then(() => {
+            queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+          })
+          .catch((err) => {
+            console.warn("Could not auto-link transaction id to orders:", err);
+          });
+      }
+
+      // Clean query parameters from URL without a page reload
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("session_id");
+      newParams.delete("order_ids");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [sessionId, orderIdsParam, toast, queryClient, searchParams, setSearchParams]);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["user-orders", user?.id],
