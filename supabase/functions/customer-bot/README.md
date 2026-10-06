@@ -151,10 +151,12 @@ The zero-dependency data retrieval engine handles all 9 intent categories:
 
 ### 5. Seamless Human Handoff Bridge
 
-- **Zero-Interruption**: The AI manages 100% of the conversation autonomously until explicitly triggered.
-- **Escalation Triggers**: `/human`, `/help`, `/agent`, `/staff`, `/support` commands, or the `[👤 Talk to Human Agent]` inline button.
-- **State Machine**: Session transitions `bot_active` → `escalated` → `agent_active` → `bot_active` (via `/resolve`).
-- **Admin Relay**: The merchant desk receives a formatted alert including the customer name, Chat ID, linked order, and a `/reply <chat_id>` command template. When the agent replies, the session upgrades to `agent_active`, creating a bidirectional bridge.
+- **Zero-Interruption**: The AI manages 100% of the conversation autonomously until human help is explicitly requested.
+- **Escalation Triggers**: `/human`, `/agent`, `/staff`, `/support` commands, or the `[👤 Talk to Human Agent]` inline button.
+- **Direct Storefront Deep-Links**: Supports `/start <order_id>` deep-links directly from checkout or order confirmation pages (e.g. `https://t.me/retrochanbot?start=c7c482a2`), immediately parsing the hex ID and displaying status.
+- **State Machine**: Session transitions: `bot_active` → `escalated` → `agent_active` → `bot_active` (via `/resolve`).
+- **Live Two-Way Relay**: While a session is in `escalated` or `agent_active` status, all customer messages are forwarded directly to the merchant desk at `@Notifyretro_bot` with `#<chat_id>` headers, preventing AI interception.
+- **Staff Control**: Staff can reply directly via `/reply <chat_id> <message>` or close the issue with `/resolve <chat_id>` (or tap `[✅ Mark Resolved]`), instantly returning the customer to Retro Chan AI.
 
 ---
 

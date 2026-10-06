@@ -96,6 +96,7 @@ npx supabase functions deploy telegram-webhook --no-verify-jwt
 npx supabase functions deploy customer-bot --no-verify-jwt
 npx supabase functions deploy send-order-email --no-verify-jwt
 npx supabase functions deploy generate-ai-text --no-verify-jwt
+npx supabase functions deploy create-checkout-session --no-verify-jwt
 ```
 
 ---
@@ -126,7 +127,7 @@ graph TB
 
     subgraph Supabase["🗄️ Backend Services (PostgreSQL 15+)"]
         Auth["Supabase Auth (Google OAuth 2.0)"]
-        DB[(29 PostgreSQL Migrations)]
+        DB[(35 PostgreSQL Migrations)]
         RLS["Row-Level Security Policies"]
         RPCs["SECURITY DEFINER RPCs"]
     end
@@ -136,10 +137,13 @@ graph TB
         AdminFn["telegram-webhook (@Notifyretro_bot)"]
         EmailFn["send-order-email (Resend API)"]
         AiProxyFn["generate-ai-text (xAI Proxy)"]
+        CheckoutFn["create-checkout-session (Stripe Checkout)"]
     end
 
-    subgraph AI["🧠 Artificial Intelligence"]
-        xAI["xAI Grok (grok-beta)"]
+    subgraph External["🌐 External APIs & Gateways"]
+        StripeGateway["💳 Stripe Payment Gateway"]
+        xAI["🧠 xAI Grok (grok-2-latest / grok-beta)"]
+        ResendMail["✉️ Resend Email Service"]
     end
 
     Desktop --> CFWorker
@@ -152,6 +156,8 @@ graph TB
     Router --> Auth
     Auth --> DB
     Router --> AiProxyFn
+    Router --> CheckoutFn
+    CheckoutFn <--> StripeGateway
     AiProxyFn <--> xAI
 
     TgCustomer <--> CustomerFn
@@ -163,6 +169,7 @@ graph TB
     AdminFn <--> RPCs
     AdminFn <--> DB
     AdminFn --> EmailFn
+    EmailFn --> ResendMail
 ```
 
 ---
@@ -193,11 +200,18 @@ graph TB
 
 ---
 
-### 3. Payment Processing & bKash Anti-Fraud Engine
+### 3. Payment Processing & Dual-Gateway Architecture
 
-- **Dedicated bKash Payment Portal (`/payment`)**: Seamless walkthrough with 1-click copy for merchant and personal numbers, plus automated 1.0% charge calculation.
-- **Atomic `SECURITY DEFINER` Payment RPC**: Routes transaction submissions through `submit_order_payment`, enforcing caller ownership (`user_id = auth.uid()`), alphanumeric regex format validation (`/^[A-Z0-9]{6,30}$/i`), and transitioning status to `payment_submitted` without exposing table `UPDATE` rights.
-- **Duplicate TrxID Fraud Detection**: The system validates Transaction IDs against historical submissions, flagging attempted reuse and warning merchants instantly.
+RetroHub supports two parallel, ultra-secure checkout pathways:
+
+- **bKash P2P Engine (`/payment`)**:
+  - Seamless walkthrough with 1-click copy for merchant and personal numbers, plus automated 1.0% charge calculation.
+  - **Atomic `SECURITY DEFINER` Payment RPC**: Routes transaction submissions through `submit_order_payment`, enforcing caller ownership (`user_id = auth.uid()`), alphanumeric regex format validation (`/^[A-Z0-9]{6,30}$/i`), and transitioning status to `payment_submitted` without exposing table `UPDATE` rights.
+  - **Duplicate TrxID Fraud Detection**: The system validates Transaction IDs against historical submissions, flagging attempted reuse and warning merchants instantly.
+- **Stripe Global Checkout Engine (`create-checkout-session`)**:
+  - Secure hosted card checkout for international Visa, MasterCard, and digital wallets.
+  - Real-time currency conversion from store BDT to USD cents (`(amountNumber / 122) * 100`) with a ৳65 ($0.50) minimum charge defense guard.
+  - Automatic success and cancel redirection with order metadata preservation.
 
 ---
 
@@ -399,8 +413,10 @@ retrohub/
 │   ├── functions/
 │   │   ├── customer-bot/             # AI Customer Support Bot (@retrochanbot)
 │   │   ├── telegram-webhook/         # Merchant Admin Bot (@Notifyretro_bot)
-│   │   └── send-order-email/         # Resend transactional email function
-│   ├── migrations/                   # 29 versioned PostgreSQL migrations
+│   │   ├── send-order-email/         # Resend transactional email function
+│   │   ├── generate-ai-text/         # xAI Grok secure proxy function
+│   │   └── create-checkout-session/  # Stripe Card Checkout Session handler
+│   ├── migrations/                   # 35 versioned PostgreSQL migrations
 │   └── README.md                     # Backend database & Edge Function manual
 ├── CHANGELOG.md                      # Version changelog (Keep a Changelog standard)
 ├── CONTRIBUTING.md                   # Contribution and workflow guide

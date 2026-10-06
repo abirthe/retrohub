@@ -38,11 +38,13 @@ When performing catalog maintenance or batch operations:
 
 ```
 scripts/
-├── database/          # Database migration runner, compiled SQL seeds & schema
-├── images/            # Image mapping, watermark removal & box art sourcing
-├── maintenance/       # Catalog deduplication, orphan cleaners & stock auditors
-├── pricing/           # Market price scrapers, competitor matching & margin updates
-└── seeding/           # Automated catalog seeders (games, gift cards, subs, top-ups)
+├── database/                   # Database migration runner, compiled SQL seeds & schema
+├── images/                     # Image mapping, watermark removal & box art sourcing
+├── maintenance/                # Catalog deduplication, orphan cleaners & stock auditors
+├── pricing/                    # Market price scrapers, competitor matching & price increases
+├── seeding/                    # Automated catalog seeders (games, gift cards, subs, top-ups)
+├── sync_stripe.mjs             # Synchronizes Supabase catalog products & USD prices to Stripe
+└── cleanup_stripe_prices.mjs   # Deactivates obsolete and duplicate Stripe price objects
 ```
 
 ---
@@ -120,15 +122,33 @@ Tools for calculating margins, syncing with regional market data, and keeping sa
 | :---------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `market_scraped.json`         | Snapshot dataset containing current market rates, competitor pricing, and regional exchange values.                                                                         |
 | `match_and_update_prices.mjs` | Compares catalog items against `market_scraped.json`, computes gross margin (Sale − Cost), and adjusts `sale_price` and `cost_price` to maintain targeted merchant margins. |
+| `increase_prices.mjs`         | Batch-applies a uniform price increment (e.g. +৳50 / +0.50 USD) across all active products. Runs in dry-run mode by default; pass `--execute` to apply changes.           |
 
 ```bash
-# Analyze price differences and update catalog prices
+# Analyze price differences and update catalog prices based on competitor scrapes
 node scripts/pricing/match_and_update_prices.mjs
+
+# Dry-run +50 BDT price increase across all catalog products
+node scripts/pricing/increase_prices.mjs
+
+# Commit price increase to Supabase database
+node scripts/pricing/increase_prices.mjs --execute
 ```
 
 ---
 
-## 5. Database Schema & Migration Utilities (`scripts/database/`)
+## 5. Stripe Product & Price Synchronization (`scripts/`)
+
+Utilities for syncing catalog listings and prices with the Stripe dashboard for card payments:
+
+| Script                     | Purpose                                                                                                                                    | Usage                                    |
+| :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| `sync_stripe.mjs`          | Queries active products from Supabase, registers missing items in Stripe Products, and sets default prices in USD (converted at 120 BDT/USD). | `node scripts/sync_stripe.mjs`          |
+| `cleanup_stripe_prices.mjs`| Audits Stripe account prices and archives redundant or outdated price tiers.                                                              | `node scripts/cleanup_stripe_prices.mjs` |
+
+---
+
+## 6. Database Schema & Migration Utilities (`scripts/database/`)
 
 | File                  | Purpose                                                                                               |
 | :-------------------- | :---------------------------------------------------------------------------------------------------- |
@@ -146,7 +166,7 @@ node scripts/database/apply-migration.cjs supabase/migrations/20260927000001_sec
 
 ---
 
-## 6. Build & Deployment Automation Hooks (`package.json`)
+## 7. Build & Deployment Automation Hooks (`package.json`)
 
 To prevent stale artifacts, ensure atomic deployments, and guarantee clean asset uploads across Cloudflare Workers Builds and GitHub Pages:
 

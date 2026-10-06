@@ -28,11 +28,13 @@ Comprehensive technical documentation for RetroHub's database schema, versioned 
 ```
 supabase/
 ├── functions/
-│   ├── customer-bot/        # 24/7 AI Customer Support Bot (Retro Chan @retrochanbot)
-│   ├── telegram-webhook/    # 24/7 Merchant Admin Bot (@Notifyretro_bot)
-│   └── send-order-email/    # Resend order fulfillment email edge function
-├── migrations/              # 29 versioned PostgreSQL migrations
-└── README.md                # This manual
+│   ├── customer-bot/            # 24/7 AI Customer Support Bot (Retro Chan @retrochanbot)
+│   ├── telegram-webhook/        # 24/7 Merchant Admin Bot (@Notifyretro_bot)
+│   ├── send-order-email/        # Resend order fulfillment email edge function
+│   ├── generate-ai-text/        # xAI Grok secure text generation proxy
+│   └── create-checkout-session/ # Stripe hosted card checkout session handler
+├── migrations/                  # 35 versioned PostgreSQL migrations
+└── README.md                    # This manual
 ```
 
 ---
@@ -117,6 +119,21 @@ npx supabase functions deploy generate-ai-text --no-verify-jwt
 
 ---
 
+### 5. `create-checkout-session` — Stripe Card Checkout Session Handler
+
+Creates hosted, PCI-compliant Stripe Checkout sessions for card and digital wallet payments.
+
+- **Dynamic Currency Conversion**: Converts catalog BDT to USD cents (`(amount / 122) * 100`) with a ৳65 ($0.50) minimum charge defense guard.
+- **Order & User Metadata Preservation**: Attaches `order_id` and `user_id` to Stripe session metadata for frictionless webhook verification and reconciliation.
+- **Automatic Redirection**: Directs customers back to `/payment/success?order_id={id}&session_id={CHECKOUT_SESSION_ID}` or `/payment/cancel`.
+
+```bash
+# Deploy Stripe checkout function
+npx supabase functions deploy create-checkout-session --no-verify-jwt
+```
+
+---
+
 ## 🤝 Bidirectional Live Support Relay Sequence
 
 When a customer explicitly requests human assistance in `@retrochanbot`, the two bots orchestrate a live relay:
@@ -154,7 +171,7 @@ sequenceDiagram
 
 ## 🗄️ Database Architecture & Migrations
 
-The database runs on **PostgreSQL 15+** managed via 29 versioned SQL migrations in `supabase/migrations/`:
+The database runs on **PostgreSQL 15+** managed via 35 versioned SQL migrations in `supabase/migrations/`:
 
 | Migration Series | Scope & Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -163,8 +180,11 @@ The database runs on **PostgreSQL 15+** managed via 29 versioned SQL migrations 
 | `20260919*`      | Performance indexes V3, missing regional taxonomies, and `SECURITY DEFINER` function security fixes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `20260920*`      | Custom order requests board (`custom_orders` table) and database linter resolutions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `20260924*`      | Added `service` and `accounts` categories; default `instant_code` delivery pipeline flag.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `20260927*`      | **Current V3 Architecture**: <br>• `20260927000001_secure_order_payment_and_pricing.sql` — Secure payment RPC + price tamper validation<br>• `20260927000002_customer_support_sessions.sql` — Multi-turn AI support session tracking table with RLS<br>• `20260927000003_fix_security_linter_warnings.sql` — Resolved RLS and function search path linter findings<br>• `20260927000004_fix_database_linter_performance_warnings.sql` — Added missing foreign key indexes<br>• `20260927000005_drop_safe_unused_indexes.sql` — Dropped redundant unused indexes<br>• `20260927000006_drop_obsolete_stock_validation.sql` — Cleaned up deprecated stock triggers |
+| `20260927*`      | **V3 Architecture**: <br>• `20260927000001_secure_order_payment_and_pricing.sql` — Secure payment RPC + price tamper validation<br>• `20260927000002_customer_support_sessions.sql` — Multi-turn AI support session tracking table with RLS<br>• `20260927000003_fix_security_linter_warnings.sql` — Resolved RLS and function search path linter findings<br>• `20260927000004_fix_database_linter_performance_warnings.sql` — Added missing foreign key indexes<br>• `20260927000005_drop_safe_unused_indexes.sql` — Dropped redundant unused indexes<br>• `20260927000006_drop_obsolete_stock_validation.sql` — Cleaned up deprecated stock triggers |
+| `20260928*`      | **Session & Security Hardening**: <br>• `20260928053638_fix_function_search_path.sql` — Fixed schema search path warnings<br>• `20260928062500_session_queue_and_kill_system.sql` — Session queues and heartbeat tables<br>• `20260928144000_fix_security_definer_linter_warnings.sql` — Explicit search path lockdown for stored routines |
 | `20261001*`      | **Product Search Engine**: <br>• `20261001000000_product_search_engine.sql` — Universal brain engine for fuzzy search and alias expansion (powers `product_search` RPC).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `20261005*`      | **Search Linter Optimization**: <br>• `20261005000000_fix_product_search_and_pg_trgm_linter.sql` — Trigram and search index optimizations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `20261006*`      | **Support & Pricing Upgrades**: <br>• `20261006000000_telegram_support_and_hardening.sql` — Telegram support escalation tracking, idempotency improvements, and staff alert indexing<br>• `20261006000001_increase_product_prices.sql` — Catalog-wide +৳50 (+0.5 USD) price increase across all active products.                                                                                                                                                                                                                                                                                                                                        |
 
 ---
 
@@ -228,12 +248,16 @@ XAI_TEAM_ID="your_xai_team_uuid"
 
 # Email Delivery
 RESEND_API_KEY="your_resend_api_key"
+
+# Stripe Payment Gateway
+STRIPE_SECRET_KEY="sk_live_your_stripe_secret_key"
+STRIPE_WEBHOOK_SECRET="whsec_your_stripe_webhook_secret"
 ```
 
 To configure via Supabase CLI:
 
 ```bash
-npx supabase secrets set TELEGRAM_BOT_TOKEN="xxx" ADMIN_CHAT_ID="xxx" CUSTOMER_BOT_TOKEN="xxx" XAI_API_KEY="xai-xxx" XAI_TEAM_ID="xxx"
+npx supabase secrets set TELEGRAM_BOT_TOKEN="xxx" ADMIN_CHAT_ID="xxx" CUSTOMER_BOT_TOKEN="xxx" XAI_API_KEY="xai-xxx" XAI_TEAM_ID="xxx" RESEND_API_KEY="re_xxx" STRIPE_SECRET_KEY="sk_xxx"
 ```
 
 ---
