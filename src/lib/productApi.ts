@@ -96,7 +96,7 @@ export async function fetchStoreProducts({
         .not("title", "ilike", "%ps4%")
         .not("title", "ilike", "%ps5%");
     }
-  } else if (activeCategory === "giftcard") {
+  } else if (activeCategory === "giftcard" || activeCategory === "giftcards") {
     query = query.eq("category", "giftcard").not("title", "ilike", "%account%");
     if (activeSubcategory === "giftcard_xbox") {
       query = query.or("title.ilike.%xbox%,platform.ilike.%xbox%");
@@ -123,7 +123,7 @@ export async function fetchStoreProducts({
         "title.ilike.%blizzard%,title.ilike.%battle.net%,title.ilike.%battlenet%,platform.ilike.%blizzard%",
       );
     }
-  } else if (activeCategory === "subscription") {
+  } else if (activeCategory === "subscription" || activeCategory === "subscriptions") {
     query = query
       .eq("category", "subscription")
       .not("title", "ilike", "%account%");

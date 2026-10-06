@@ -1,4 +1,4 @@
-import { supabase, TELEGRAM_TOKEN, ADMIN_CHAT_ID } from "./config.ts";
+import { supabase, TELEGRAM_TOKEN, CUSTOMER_BOT_TOKEN, ADMIN_CHAT_ID } from "./config.ts";
 
 export function escapeHtml(str: unknown): string {
   if (str === null || str === undefined) return '';
@@ -24,6 +24,25 @@ export async function sendMessage(chatId: string | number, text: string, reply_m
   if (!res.ok) {
     const errText = await res.text();
     console.error('Telegram API error:', errText);
+  }
+  return res;
+}
+
+export async function sendCustomerBotMessage(chatId: string | number, text: string, reply_markup?: any) {
+  const token = CUSTOMER_BOT_TOKEN || TELEGRAM_TOKEN;
+  const url = `https://api.telegram.org/bot${token}/sendMessage`;
+  const body: any = { chat_id: chatId, text, parse_mode: 'HTML' };
+  if (reply_markup) {
+    body.reply_markup = reply_markup;
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('Telegram customer bot send error:', errText);
   }
   return res;
 }

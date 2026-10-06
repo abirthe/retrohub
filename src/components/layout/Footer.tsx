@@ -154,7 +154,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  to="/?category=subscriptions"
+                  to="/?category=subscription"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Subscriptions
@@ -162,7 +162,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  to="/?category=giftcards"
+                  to="/?category=giftcard"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Gift Cards
@@ -244,7 +244,11 @@ export const Footer: React.FC = () => {
                 <span className="text-muted-foreground/80 block">
                   Accepted Payment:{" "}
                   <strong className="text-pink-400 font-semibold">
-                    bKash Only
+                    bKash
+                  </strong>{" "}
+                  &{" "}
+                  <strong className="text-primary font-semibold">
+                    Card (Stripe)
                   </strong>
                 </span>
               </li>

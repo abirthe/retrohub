@@ -33,8 +33,21 @@ export function CategoryFilter({
 }: CategoryFilterProps) {
   const navigate = useNavigate();
   const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
   const activeSort =
     SORT_OPTIONS.find((s) => s.value === sort) ?? SORT_OPTIONS[0];
+
+  // Close sort menu when clicking outside
+  useEffect(() => {
+    if (!sortOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [sortOpen, setSortOpen]);
 
   // Auto-scroll active category into visible area without blocking interaction paint
   useEffect(() => {
@@ -89,7 +102,7 @@ export function CategoryFilter({
           </div>
 
           {/* Sort dropdown */}
-          <div className="relative shrink-0">
+          <div ref={sortRef} className="relative shrink-0">
             <Button
               id="sort-button"
               variant="ghost"

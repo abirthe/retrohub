@@ -11,6 +11,7 @@ import {
 import { 
   escapeHtml, 
   sendMessage, 
+  sendCustomerBotMessage,
   answerCallbackQuery, 
   resolveOrder, 
   sendOrderInspection 
@@ -289,6 +290,39 @@ serve(async (req: Request) => {
       } else if ((action === 'order' || action === 'inspect') && orderIdentifier) {
         await answerCallbackQuery(cq.id, '🔍 Inspecting order...')
         await sendOrderInspection(chatId, orderIdentifier)
+      } else if (action === 'support_resolve' && orderIdentifier) {
+        const targetChatId = Number(orderIdentifier)
+        if (targetChatId) {
+          await supabase
+            .from('customer_support_sessions')
+            .update({
+              state: 'bot_active',
+              resolved_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('chat_id', targetChatId)
+
+          await sendCustomerBotMessage(
+            targetChatId,
+            `✅ <b>Support Inquiry Resolved</b>\n\nYour support ticket has been closed by our merchant desk. Retro Chan is back to assist you anytime!`,
+            {
+              inline_keyboard: [
+                [
+                  { text: '📦 Track My Order', callback_data: 'prompt_order' },
+                  { text: '🛒 Visit Store', url: 'https://www.retrohub.tech' },
+                ],
+              ],
+            }
+          )
+          await sendMessage(chatId, `✅ Session for Chat <code>${targetChatId}</code> marked resolved and returned to Retro Chan AI.`)
+          await answerCallbackQuery(cq.id, 'Session Resolved')
+        } else {
+          await answerCallbackQuery(cq.id, 'Invalid Chat ID', true)
+        }
+      } else if (action === 'support_reply' && orderIdentifier) {
+        const targetChatId = orderIdentifier
+        await sendMessage(chatId, `💬 <b>To reply to Chat <code>${targetChatId}</code>:</b>\nType: <code>/reply ${targetChatId} &lt;your message&gt;</code>`)
+        await answerCallbackQuery(cq.id, 'Use /reply ' + targetChatId)
       } else {
         await answerCallbackQuery(cq.id)
       }
@@ -335,6 +369,9 @@ serve(async (req: Request) => {
         `• <code>/stock [search]</code> - Check stock or view low inventory\n` +
         `• <code>/custom</code> - View pending custom quote requests\n` +
         `• <code>/remind</code> - Trigger instant pending orders scan\n\n` +
+        `💬 <b>Customer Support Triage:</b>\n` +
+        `• <code>/reply [chat_id] [message]</code> - Reply directly to escalated customer\n` +
+        `• <code>/resolve [chat_id]</code> - Close ticket & return customer to AI concierge\n\n` +
         `💡 <i>Tip: You can use short IDs (first 6-8 characters) instead of typing full UUIDs!</i>`
       await sendMessage(chatId, helpMsg)
     } 
@@ -740,6 +777,81 @@ serve(async (req: Request) => {
           msg += '\n'
         })
         await sendMessage(chatId, msg)
+      }
+    }
+    else if (text.startsWith('/reply')) {
+      const parts = text.substring(6).trim().split(' ')
+      const targetChatId = parts[0]?.trim()
+      const replyMsg = parts.slice(1).join(' ').trim()
+
+      if (!targetChatId || !replyMsg) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/reply [chat_id] [message]</code>\n<i>Example:</i> <code>/reply 123456789 Hello, your order is being processed!</code>')
+      } else {
+        const numericChatId = Number(targetChatId)
+        const customerText = `👨‍💻 <b>RetroHub Support Desk:</b>\n\n${escapeHtml(replyMsg)}`
+        const customerKeyboard = {
+          inline_keyboard: [
+            [{ text: '🤖 Resume with Retro Chan AI', callback_data: 'resume_bot' }],
+          ],
+        }
+
+        const sendRes = await sendCustomerBotMessage(targetChatId, customerText, customerKeyboard)
+        if (sendRes && sendRes.ok) {
+          try {
+            await supabase
+              .from('customer_support_sessions')
+              .update({
+                state: 'agent_active',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('chat_id', numericChatId)
+
+            const sessionMsg = {
+              sender: 'agent',
+              text: replyMsg.substring(0, 800),
+              time: new Date().toISOString(),
+            }
+            await supabase.rpc('append_session_message', {
+              p_chat_id: numericChatId,
+              p_message: sessionMsg,
+              p_max_messages: 8,
+            }).catch(() => {})
+          } catch (_) {}
+
+          await sendMessage(chatId, `📨 <b>Reply Sent!</b>\nDelivered to Customer Chat <code>${escapeHtml(targetChatId)}</code>.`)
+        } else {
+          await sendMessage(chatId, `❌ Failed to deliver message to Chat <code>${escapeHtml(targetChatId)}</code>. Please verify that the customer has interacted with @retrochanbot.`)
+        }
+      }
+    }
+    else if (text.startsWith('/resolve')) {
+      const targetChatId = text.substring(8).trim()
+      if (!targetChatId) {
+        await sendMessage(chatId, '⚠️ <b>Usage:</b> <code>/resolve [chat_id]</code>\n<i>Example:</i> <code>/resolve 123456789</code>')
+      } else {
+        const numericChatId = Number(targetChatId)
+        await supabase
+          .from('customer_support_sessions')
+          .update({
+            state: 'bot_active',
+            resolved_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('chat_id', numericChatId)
+
+        await sendCustomerBotMessage(
+          targetChatId,
+          `✅ <b>Support Ticket Resolved</b>\n\nYour support session has been closed by our merchant desk. Retro Chan is back to assist you!`,
+          {
+            inline_keyboard: [
+              [
+                { text: '📦 Track My Order', callback_data: 'prompt_order' },
+                { text: '🛒 Visit Store', url: 'https://www.retrohub.tech' },
+              ],
+            ],
+          }
+        )
+        await sendMessage(chatId, `✅ Session for Chat <code>${escapeHtml(targetChatId)}</code> marked resolved and returned to Retro Chan AI.`)
       }
     }
     else {

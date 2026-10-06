@@ -1,16 +1,12 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Edit2, Save, X } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Product } from "@/lib/shopApi";
 import { EditProductDialog } from "./EditProductDialog";
 
 export const InventoryRow = ({ product: p }: { product: Product }) => {
-  const { toast } = useToast();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const sale = Number(p.sale_price) || 0;
   const cost = Number(p.cost_price) || 0;

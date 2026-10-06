@@ -2175,11 +2175,11 @@ Tap the button below to reach our merchant specialist directly.`;
     const parts = rawText.split(" ");
     const payload = parts[1] || "";
 
-    if (payload.startsWith("order_") || payload.startsWith("issue_")) {
-      const orderId = payload.replace(/^(order_|issue_)/, "");
-      await updateSessionState(chatId, { last_order_id: orderId });
+    const rawId = payload.replace(/^(order_|issue_)/, "");
+    if (rawId && (payload.startsWith("order_") || payload.startsWith("issue_") || /^[0-9a-f]{8}/i.test(rawId))) {
+      await updateSessionState(chatId, { last_order_id: rawId });
 
-      const { order } = await resolveOrder(orderId);
+      const { order } = await resolveOrder(rawId);
       if (order) {
         const greeting = payload.startsWith("issue_")
           ? `👋 Hi <b>${escapeHtml(fromUser.first_name || "there")}</b>, I see you're checking on Order <code>#${order.id.slice(0, 8)}</code>. Let's look into this right away!`
@@ -2241,9 +2241,9 @@ Tap the button below to reach our merchant specialist directly.`;
 
   // ─────────────────────────────────────────────────────────────
   // F. LIVE AGENT SESSION RELAY
-  // ONLY forward customer message to staff if the agent has ACTIVELY replied (agent_active)
+  // Forward customer messages to staff if escalated or agent is active
   // ─────────────────────────────────────────────────────────────
-  if (session.state === "agent_active") {
+  if (session.state === "agent_active" || session.state === "escalated") {
     const fwdText = `📩 <b>Customer Reply (Chat #<code>${chatId}</code>)</b> ${fromUser.username ? `(@${escapeHtml(fromUser.username)})` : ""}:
 "${escapeHtml(rawText)}"
 
@@ -2259,6 +2259,17 @@ Tap the button below to reach our merchant specialist directly.`;
     };
     await sendMerchantAdminAlert(fwdText, fwdKeyboard);
     await sendChatAction(chatId, "typing");
+    if (session.state === "escalated") {
+      await sendMessage(
+        chatId,
+        `📨 <i>Your message has been forwarded to our merchant desk. An agent will reply directly to you shortly.</i>`,
+        {
+          inline_keyboard: [
+            [{ text: "🤖 Resume with Retro Chan AI", callback_data: "resume_bot" }],
+          ],
+        },
+      );
+    }
     return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
   }
 

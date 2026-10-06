@@ -1,8 +1,15 @@
+// @ts-nocheck
+// deno-lint-ignore-file no-explicit-any
 // Supabase Edge Function to send order completion emails
 // This function is called when an order is completed
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "noreply@retrohub.com";
@@ -15,7 +22,11 @@ interface EmailPayload {
   order_total: number;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   try {
     // Get the order data from the request
     const payload: EmailPayload = await req.json();
@@ -23,7 +34,7 @@ serve(async (req) => {
     if (!payload.recipient || !payload.code) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -63,12 +74,12 @@ serve(async (req) => {
                 <div class="code">${payload.code}</div>
               </div>
               
-              <p><strong>Important:</strong> Please save this code securely. You can also view it anytime in your <a href="${Deno.env.get("SITE_URL") || "https://your-site.com"}/orders">order history</a>.</p>
+              <p><strong>Important:</strong> Please save this code securely. You can also view it anytime in your <a href="${Deno.env.get("SITE_URL") || "https://www.retrohub.tech"}/orders">order history</a>.</p>
               
-              <a href="${Deno.env.get("SITE_URL") || "https://your-site.com"}/orders" class="button">View All Orders</a>
+              <a href="${Deno.env.get("SITE_URL") || "https://www.retrohub.tech"}/orders" class="button">View All Orders</a>
             </div>
             <div class="footer">
-              <p>© 2024 RETROHUB. Dev by ABIR HOSSAIN</p>
+              <p>© 2026 RETROHUB. Dev by ABIR HOSSAIN</p>
               <p>If you have any questions, please contact our support team.</p>
             </div>
           </div>
@@ -106,17 +117,17 @@ serve(async (req) => {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({
-        error: error.message || "Failed to send email",
+        error: error?.message || "Failed to send email",
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
   }
