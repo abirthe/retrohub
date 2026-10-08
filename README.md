@@ -266,7 +266,7 @@ RetroHub implements a decoupled, high-availability two-bot Telegram architecture
 
 ### 1. 💬 AI Customer Support Bot (`@retrochanbot`)
 
-- **[Read Full Documentation](supabase/functions/customer-bot/README.md)**
+- **[Read Full Documentation](docs/supabase/functions/customer-bot.md)**
 - **Persona**: _"Retro Chan"_ — witty, charming, empathetic, and highly knowledgeable about all RetroHub products, platforms, and payment workflows (uses gamer terminology like _GG_ and _GLHF_).
 - **Dual-Engine Customer Care Architecture**:
   - **Engine A (xAI Grok)**: Powered by `grok-2-latest` for conversational NLP, live order context injection, regional platform guidance, and empathetic problem solving.
@@ -381,8 +381,13 @@ retrohub/
 ├── .github/workflows/
 │   ├── deploy-pages.yml              # CI/CD GitHub Pages deployment workflow
 │   └── pending-orders-reminder.yml   # 24/7 automated 2-hour pending orders scanner
-├── docs/
-│   └── MERCHANT_SYSTEM_OVERVIEW.md   # Authoritative merchant specification manual
+├── docs/                             # Complete project documentation hub
+│   ├── README.md                     # Master documentation index
+│   ├── MERCHANT_SYSTEM_OVERVIEW.md   # Authoritative merchant specification manual
+│   ├── supabase/                     # Backend architecture & Edge Functions manuals
+│   │   ├── README.md                 # PostgreSQL & Supabase architecture guide
+│   │   └── functions/                # Edge Functions (Telegram bots, Stripe)
+│   └── scripts/                      # 25+ catalog scripts operational manual
 ├── public/
 │   ├── favicon.png                   # Optimized 16.8 KB storefront favicon
 │   └── robots.txt                    # Search engine crawler directives
@@ -391,8 +396,7 @@ retrohub/
 │   ├── images/                       # Cover art sourcing & watermark cleaners
 │   ├── maintenance/                  # Deduplication, stock auditors & orphan cleaners
 │   ├── pricing/                      # Market scrapers & margin synchronizers
-│   ├── seeding/                      # Catalog seeders (games, gift cards, subs, top-ups)
-│   └── README_SCRIPT.md              # 25+ script operations manual
+│   └── seeding/                      # Catalog seeders (games, gift cards, subs, top-ups)
 ├── src/
 │   ├── components/
 │   │   ├── admin/                    # Operations board, fulfill dialogs, KPI cards
@@ -404,11 +408,11 @@ retrohub/
 │   │   ├── product/                  # ProductCard, ProductDetail, variant selectors
 │   │   └── ui/                       # Radix UI & shadcn accessible primitives
 │   ├── contexts/                     # CartContext (isolated per user UUID)
-│   ├── hooks/                        # useAdmin, useAuth, useMobile, useToast
+│   ├── hooks/                        # useAdmin, useAuth, useMobile, useToast, useUnpaidOrders
 │   ├── integrations/supabase/        # Supabase client with production types
 │   ├── lib/                          # Modular API clients, logger, formatters
 │   ├── pages/                        # 11 lazy-loaded route views
-│   └── test/                         # 27 unit tests across 3 suites
+│   └── test/                         # 40 unit tests across 4 suites
 ├── supabase/
 │   ├── functions/
 │   │   ├── customer-bot/             # AI Customer Support Bot (@retrochanbot)
@@ -416,8 +420,7 @@ retrohub/
 │   │   ├── send-order-email/         # Resend transactional email function
 │   │   ├── generate-ai-text/         # xAI Grok secure proxy function
 │   │   └── create-checkout-session/  # Stripe Card Checkout Session handler
-│   ├── migrations/                   # 35 versioned PostgreSQL migrations
-│   └── README.md                     # Backend database & Edge Function manual
+│   └── migrations/                   # 36 versioned PostgreSQL migrations
 ├── CHANGELOG.md                      # Version changelog (Keep a Changelog standard)
 ├── CONTRIBUTING.md                   # Contribution and workflow guide
 ├── package.json                      # Pinned dependencies & scripts

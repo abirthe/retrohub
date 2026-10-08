@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { PendingPaymentBanner } from "@/components/orders/PendingPaymentBanner";
 
 const ShopHeader = () => {
   const location = useLocation();
@@ -44,6 +45,7 @@ const ShopHeader = () => {
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/50">
+      <PendingPaymentBanner />
       <div className="container flex h-16 items-center justify-between gap-2">
         {/* Brand Name & Logo */}
         <Link

@@ -1,19 +1,29 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useUnpaidOrders } from "@/hooks/useUnpaidOrders";
 import { createOrder } from "@/lib/shopApi";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ArrowLeft, ShieldCheck } from "lucide-react";
+import {
+  ShoppingCart,
+  ArrowLeft,
+  ShieldCheck,
+  CreditCard,
+  AlertTriangle,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { ShopHeader } from "@/components/layout";
 import { useToast } from "@/hooks/use-toast";
 import { CheckoutCartItems, CheckoutSummary } from "@/components/checkout";
+import { PaymentCountdownTimer } from "@/components/orders";
 
 const Checkout = () => {
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice } =
     useCart();
   const { user } = useAuth();
+  const { unpaidOrders, hasUnpaidOrders, latestUnpaidOrder } = useUnpaidOrders();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -36,23 +46,59 @@ const Checkout = () => {
     return (
       <div className="min-h-screen">
         <ShopHeader />
-        <div className="container py-32 text-center flex flex-col items-center gap-4">
+        <div className="container py-20 text-center flex flex-col items-center gap-4 max-w-lg mx-auto px-4">
           <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center text-muted-foreground mb-2">
             <ShoppingCart className="w-8 h-8" />
           </div>
           <h1 className="font-display text-2xl font-bold">
             Your cart is empty
           </h1>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground mb-2 text-sm">
             Looks like you haven't added anything yet.
           </p>
+
+          {/* Pending Order Notice if cart is empty but user has an unpaid order */}
+          {hasUnpaidOrders && latestUnpaidOrder && (
+            <Card className="w-full text-left p-4 my-2 border-amber-500/30 bg-amber-500/10 backdrop-blur-md space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-display text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                  Order Waiting for Payment
+                </span>
+                <PaymentCountdownTimer
+                  createdAt={latestUnpaidOrder.created_at}
+                  compact
+                />
+              </div>
+              <p className="text-xs text-slate-300">
+                You have order #{latestUnpaidOrder.id.slice(0, 8)} (৳
+                {Number(latestUnpaidOrder.total).toFixed(2)}) waiting for payment.
+              </p>
+              <Button
+                size="sm"
+                onClick={() =>
+                  navigate(`/payment?order_ids=${latestUnpaidOrder.id}`, {
+                    state: {
+                      orderIds: [latestUnpaidOrder.id],
+                      totalPrice: Number(latestUnpaidOrder.total),
+                    },
+                  })
+                }
+                className="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium text-xs h-9 shadow-md"
+              >
+                <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                Complete Payment Now
+              </Button>
+            </Card>
+          )}
+
           <Button
             onClick={() => {
               if (window.history.length > 1) navigate(-1);
               else navigate("/");
             }}
             variant="outline"
-            className="border-primary/30 text-primary hover:bg-primary/10"
+            className="border-primary/30 text-primary hover:bg-primary/10 mt-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
@@ -109,13 +155,14 @@ const Checkout = () => {
       if (createdOrderIds.length > 0) {
         clearCart();
         queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+        queryClient.invalidateQueries({ queryKey: ["unpaid-orders"] });
         queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
         queryClient.invalidateQueries({ queryKey: ["products"] });
         toast({
           title: "Order initiated",
-          description: "Please complete your payment.",
+          description: "Please complete your payment within 30 minutes.",
         });
-        navigate("/payment", {
+        navigate(`/payment?order_ids=${createdOrderIds.join(",")}`, {
           state: { orderIds: createdOrderIds, totalPrice },
         });
       }
@@ -184,6 +231,43 @@ const Checkout = () => {
             >
               Sign In / Register
             </Button>
+          </div>
+        )}
+
+        {/* Existing Unpaid Order Banner */}
+        {hasUnpaidOrders && latestUnpaidOrder && (
+          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-300">
+                  You have an order awaiting payment (#{latestUnpaidOrder.id.slice(0, 8)})
+                </p>
+                <p className="text-xs text-slate-300">
+                  Total: ৳{Number(latestUnpaidOrder.total).toFixed(2)}. Complete payment before time runs out or continue with new order.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <PaymentCountdownTimer createdAt={latestUnpaidOrder.created_at} compact />
+              <Button
+                onClick={() =>
+                  navigate(`/payment?order_ids=${latestUnpaidOrder.id}`, {
+                    state: {
+                      orderIds: [latestUnpaidOrder.id],
+                      totalPrice: Number(latestUnpaidOrder.total),
+                    },
+                  })
+                }
+                size="sm"
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium text-xs h-8 px-3 shrink-0"
+              >
+                <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                Pay Existing Order
+              </Button>
+            </div>
           </div>
         )}
 

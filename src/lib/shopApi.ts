@@ -49,6 +49,8 @@ export {
   fulfillOrder,
   holdOrder,
   cancelOrder,
+  cancelUnpaidOrder,
+  expireStaleOrders,
   refundOrder,
 } from "./orderApi";
 

@@ -1,7 +1,7 @@
 # 🤖 RetroHub Customer Support Bot (Retro Chan)
 
 <p align="center">
-  <img src="../../public/favicon.png" alt="RetroHub Logo" width="80" height="80" />
+  <img src="../../../public/favicon.png" alt="RetroHub Logo" width="80" height="80" />
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 **Retro Chan (@retrochanbot)** is the front-line Customer Support AI for the RetroHub commerce platform. Operating 24/7 inside Telegram, this bot handles level-1 triage, instant order tracking, digital key delivery, and comprehensive bKash payment walkthroughs — fully autonomously.
 
-> **Note:** For the internal staff operations bot that handles order dispatch and notifications, see the [Admin Bot (telegram-webhook) README](../telegram-webhook/README.md).
+> **Note:** For the internal staff operations bot that handles order dispatch and notifications, see the [Admin Bot (telegram-webhook) Documentation](./telegram-webhook.md).
 
 It implements a **Three-Stage AI Pipeline** — **Grok Classifier → BrainGine Data Engine → Grok Composer** — combining the contextual intelligence of **xAI Grok 4.7** with a zero-dependency local fallback at every stage to guarantee zero downtime.
 

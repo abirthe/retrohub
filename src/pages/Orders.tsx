@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -18,11 +19,20 @@ import {
   Sparkles,
   ShieldCheck,
   Headphones,
+  AlertTriangle,
 } from "lucide-react";
 import { ShopHeader } from "@/components/layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { MobileOrderCard, DesktopOrderTable } from "@/components/orders";
-import { updateOrderTransactionId, type Order, type Delivery } from "@/lib/shopApi";
+import { MobileOrderCard, DesktopOrderTable, PaymentCountdownTimer } from "@/components/orders";
+import {
+  updateOrderTransactionId,
+  cancelUnpaidOrder,
+  expireStaleOrders,
+  type Order,
+  type Delivery,
+  type Product,
+} from "@/lib/shopApi";
+import { isOrderUnpaid, isOrderExpired } from "@/lib/orderPaymentWindow";
 
 const statusStyles: Record<
   string,
@@ -32,7 +42,7 @@ const statusStyles: Record<
     className:
       "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20",
     icon: <AlertCircle className="h-3.5 w-3.5" />,
-    label: "Pending Verification",
+    label: "Awaiting Payment",
   },
   payment_submitted: {
     className:
@@ -95,6 +105,8 @@ interface OrderProduct {
   title: string;
   platform: string | null;
   category: string;
+  sale_price?: number;
+  [key: string]: unknown;
 }
 
 type OrderWithDetails = Order & {
@@ -104,13 +116,14 @@ type OrderWithDetails = Order & {
 
 const Orders = () => {
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [filterTab, setFilterTab] = useState<"all" | "fulfilled" | "active">(
-    "all",
-  );
+  const [filterTab, setFilterTab] = useState<
+    "all" | "unpaid" | "fulfilled" | "active"
+  >("all");
 
   const sessionId = searchParams.get("session_id");
   const orderIdsParam = searchParams.get("order_ids");
@@ -119,7 +132,8 @@ const Orders = () => {
     if (sessionId) {
       toast({
         title: "Payment Confirmed! 🎉",
-        description: "Your card payment was processed securely by Stripe. We are preparing your order.",
+        description:
+          "Your card payment was processed securely by Stripe. We are preparing your order.",
         className: "bg-success text-success-foreground",
       });
 
@@ -148,7 +162,7 @@ const Orders = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("orders")
-        .select("*, products(id, title, platform, category), deliveries(*)")
+        .select("*, products(id, title, platform, category, sale_price, image_url), deliveries(*)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -164,11 +178,76 @@ const Orders = () => {
           o.status !== "refunded" &&
           o.status !== "failed",
       );
-      return hasActive ? 8000 : false;
+      return hasActive ? 5000 : false;
     },
   });
 
+  // Background auto-expire of stale orders
+  useEffect(() => {
+    if (orders && orders.length > 0) {
+      const hasStale = orders.some(
+        (o) => isOrderUnpaid(o) && isOrderExpired(o.created_at),
+      );
+      if (hasStale) {
+        expireStaleOrders().then(() => {
+          queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+          queryClient.invalidateQueries({ queryKey: ["unpaid-orders"] });
+        });
+      }
+    }
+  }, [orders, queryClient]);
+
+  const unpaidActiveOrders = (orders || []).filter(
+    (order) => isOrderUnpaid(order) && !isOrderExpired(order.created_at),
+  );
+
+  const handleCompletePayment = (orderId: string, total: number) => {
+    navigate(`/payment?order_ids=${orderId}`, {
+      state: { orderIds: [orderId], totalPrice: total },
+    });
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (
+      !confirm(
+        "Are you sure you want to cancel this pending order? You can add items back to your cart anytime.",
+      )
+    ) {
+      return;
+    }
+    try {
+      await cancelUnpaidOrder(orderId, "Cancelled by user");
+      queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["unpaid-orders"] });
+      toast({
+        title: "Order Cancelled",
+        description: "Your unpaid order has been cancelled.",
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to cancel order";
+      toast({
+        title: "Cancellation Failed",
+        description: msg,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReorder = (order: OrderWithDetails) => {
+    if (order.products) {
+      addToCart(order.products as unknown as Product, 1);
+      toast({
+        title: "Added to Cart",
+        description: `"${order.products.title}" has been restored to your cart.`,
+      });
+      navigate("/checkout");
+    }
+  };
+
   const filteredOrders = (orders || []).filter((order) => {
+    if (filterTab === "unpaid") {
+      return isOrderUnpaid(order) && !isOrderExpired(order.created_at);
+    }
     if (filterTab === "fulfilled") return order.status === "fulfilled";
     if (filterTab === "active")
       return order.status !== "fulfilled" && order.status !== "cancelled";
@@ -267,8 +346,43 @@ const Orders = () => {
         {/* Logged-In User Order History */}
         {user ? (
           <div className="space-y-4">
+            {/* Urgent Awaiting Payment Alert Box */}
+            {unpaidActiveOrders.length > 0 && (
+              <Card className="bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 border-amber-500/30 backdrop-blur-xl p-4 sm:p-5 shadow-[0_0_25px_rgba(245,158,11,0.1)]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0" />
+                      <h3 className="font-display font-bold text-sm sm:text-base text-amber-300 tracking-wide flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400" />
+                        You have {unpaidActiveOrders.length} order{unpaidActiveOrders.length > 1 ? "s" : ""} awaiting payment!
+                      </h3>
+                    </div>
+                    <p className="text-xs text-slate-300">
+                      Please complete payment within the 30-minute reservation window to avoid automatic cancellation.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        handleCompletePayment(
+                          unpaidActiveOrders.map((o) => o.id).join(","),
+                          unpaidActiveOrders.reduce((sum, o) => sum + Number(o.total || 0), 0),
+                        )
+                      }
+                      className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium text-xs h-9 px-4 shadow-md transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Complete Payment Now
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Filter Tabs */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+            <div className="flex items-center justify-between border-b border-white/5 pb-2 overflow-x-auto">
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
@@ -282,19 +396,20 @@ const Orders = () => {
                 >
                   All ({orders?.length || 0})
                 </Button>
-                <Button
-                  size="sm"
-                  variant={filterTab === "fulfilled" ? "default" : "ghost"}
-                  onClick={() => setFilterTab("fulfilled")}
-                  className={
-                    filterTab === "fulfilled"
-                      ? "gradient-primary text-xs"
-                      : "text-xs text-muted-foreground hover:text-white"
-                  }
-                >
-                  Delivered (
-                  {orders?.filter((o) => o.status === "fulfilled").length || 0})
-                </Button>
+                {unpaidActiveOrders.length > 0 && (
+                  <Button
+                    size="sm"
+                    variant={filterTab === "unpaid" ? "default" : "ghost"}
+                    onClick={() => setFilterTab("unpaid")}
+                    className={
+                      filterTab === "unpaid"
+                        ? "bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs"
+                        : "text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                    }
+                  >
+                    Awaiting Payment ({unpaidActiveOrders.length})
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant={filterTab === "active" ? "default" : "ghost"}
@@ -310,6 +425,19 @@ const Orders = () => {
                     (o) => o.status !== "fulfilled" && o.status !== "cancelled",
                   ).length || 0}
                   )
+                </Button>
+                <Button
+                  size="sm"
+                  variant={filterTab === "fulfilled" ? "default" : "ghost"}
+                  onClick={() => setFilterTab("fulfilled")}
+                  className={
+                    filterTab === "fulfilled"
+                      ? "gradient-primary text-xs"
+                      : "text-xs text-muted-foreground hover:text-white"
+                  }
+                >
+                  Delivered (
+                  {orders?.filter((o) => o.status === "fulfilled").length || 0})
                 </Button>
               </div>
             </div>
@@ -367,6 +495,9 @@ const Orders = () => {
                         order={order}
                         statusStyle={status}
                         orderDate={orderDate}
+                        onCompletePayment={handleCompletePayment}
+                        onCancelOrder={handleCancelOrder}
+                        onReorder={handleReorder}
                       />
                     );
                   })}
@@ -376,6 +507,9 @@ const Orders = () => {
                 <DesktopOrderTable
                   orders={filteredOrders}
                   statusStyles={statusStyles}
+                  onCompletePayment={handleCompletePayment}
+                  onCancelOrder={handleCancelOrder}
+                  onReorder={handleReorder}
                 />
               </Card>
             )}

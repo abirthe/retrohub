@@ -191,6 +191,63 @@ export async function cancelOrder(
   return data as unknown as RpcResult;
 }
 
+/**
+ * Allows a customer to cancel their own pending order before payment is submitted.
+ * Uses cancel_unpaid_order RPC, with graceful fallback.
+ */
+export async function cancelUnpaidOrder(
+  orderId: string,
+  reason: string = "Cancelled by customer",
+): Promise<RpcResult> {
+  const { data: rpcData, error: rpcError } = await supabase.rpc(
+    "cancel_unpaid_order" as never,
+    { p_order_id: orderId, p_reason: reason } as never,
+  );
+
+  if (!rpcError && (rpcData as { success?: boolean })?.success) {
+    return {
+      success: true,
+      message: (rpcData as { message?: string })?.message || "Order cancelled",
+    };
+  }
+
+  // Fallback: direct table update for authenticated user if RPC not available
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({
+      status: "cancelled",
+      final_output: reason,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .eq("status", "pending");
+
+  if (updateError) {
+    if (rpcError) throw rpcError;
+    throw updateError;
+  }
+
+  return { success: true, message: "Order cancelled successfully" };
+}
+
+/**
+ * Calls expire_stale_orders RPC to cancel pending orders older than 30 minutes without payment.
+ */
+export async function expireStaleOrders(): Promise<number> {
+  try {
+    const { data, error } = await supabase.rpc(
+      "expire_stale_orders" as never,
+      {} as never,
+    );
+    if (!error && (data as { success?: boolean })?.success) {
+      return (data as { expired_count?: number })?.expired_count || 0;
+    }
+  } catch (err) {
+    logger.warn("expireStaleOrders RPC execution:", { error: String(err) });
+  }
+  return 0;
+}
+
 export async function refundOrder(
   orderId: string,
   reason?: string,
@@ -202,3 +259,4 @@ export async function refundOrder(
   if (error) throw error;
   return data as unknown as RpcResult;
 }
+

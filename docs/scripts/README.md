@@ -1,7 +1,7 @@
 # RetroHub Catalog & Tooling Scripts Manual 🛠️
 
 <p align="center">
-  <img src="../public/favicon.png" alt="RetroHub Logo" width="80" height="80" />
+  <img src="../../public/favicon.png" alt="RetroHub Logo" width="80" height="80" />
 </p>
 
 <p align="center">

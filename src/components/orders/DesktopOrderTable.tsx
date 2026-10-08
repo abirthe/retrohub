@@ -8,25 +8,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Calendar, CheckCircle2, Copy, Check } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle2,
+  Copy,
+  Check,
+  CreditCard,
+  Trash2,
+  RotateCcw,
+  AlertTriangle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Delivery, Order } from "@/lib/shopApi";
 import { Button } from "@/components/ui/button";
+import { isOrderUnpaid, isOrderExpired } from "@/lib/orderPaymentWindow";
+import { PaymentCountdownTimer } from "./PaymentCountdownTimer";
 
 export interface DesktopOrderTableProps {
   orders: (Order & {
-    products?: { platform?: string; title?: string };
+    products?: { id?: string; platform?: string; title?: string; [key: string]: unknown } | null;
     deliveries?: Delivery[];
   })[];
   statusStyles: Record<
     string,
     { className: string; icon: React.ReactNode; label: string }
   >;
+  onCompletePayment?: (orderId: string, total: number) => void;
+  onCancelOrder?: (orderId: string) => void;
+  onReorder?: (order: Order & { products?: unknown }) => void;
 }
 
 export const DesktopOrderTable = ({
   orders,
   statusStyles,
+  onCompletePayment,
+  onCancelOrder,
+  onReorder,
 }: DesktopOrderTableProps) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -57,12 +74,15 @@ export const DesktopOrderTable = ({
               Date
             </TableHead>
             <TableHead className="text-muted-foreground font-display text-xs tracking-wider py-4 pr-6">
-              Delivery & Keys
+              Delivery & Actions
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orders.map((order) => {
+            const isUnpaid = isOrderUnpaid(order);
+            const expired = isOrderExpired(order.created_at);
+
             const status =
               statusStyles[order.status || "pending"] || statusStyles.pending;
             const orderDate = new Date(
@@ -79,7 +99,10 @@ export const DesktopOrderTable = ({
             return (
               <TableRow
                 key={order.id}
-                className="border-white/5 hover:bg-white/[0.02] transition-colors group"
+                className={cn(
+                  "border-white/5 hover:bg-white/[0.02] transition-colors group",
+                  isUnpaid && !expired && "bg-amber-500/[0.03]",
+                )}
               >
                 <TableCell className="font-mono text-xs text-muted-foreground pl-6">
                   <div className="flex flex-col">
@@ -109,16 +132,40 @@ export const DesktopOrderTable = ({
                 </TableCell>
 
                 <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit transition-colors",
-                      status.className,
-                    )}
-                  >
-                    {status.icon}
-                    {status.label}
-                  </Badge>
+                  {isUnpaid && !expired ? (
+                    <div className="space-y-1">
+                      <Badge
+                        variant="outline"
+                        className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit"
+                      >
+                        <AlertTriangle className="h-3 w-3 text-amber-400" />
+                        Awaiting Payment
+                      </Badge>
+                      <PaymentCountdownTimer
+                        createdAt={order.created_at}
+                        compact
+                        className="text-[10px]"
+                      />
+                    </div>
+                  ) : isUnpaid && expired ? (
+                    <Badge
+                      variant="outline"
+                      className="bg-rose-500/10 text-rose-400 border-rose-500/30 text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit"
+                    >
+                      Payment Expired
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[10px] font-normal px-2.5 py-0.5 flex items-center gap-1.5 w-fit transition-colors",
+                        status.className,
+                      )}
+                    >
+                      {status.icon}
+                      {status.label}
+                    </Badge>
+                  )}
                 </TableCell>
 
                 <TableCell className="font-display text-sm font-bold text-white group-hover:text-primary transition-colors">
@@ -132,8 +179,51 @@ export const DesktopOrderTable = ({
                   </div>
                 </TableCell>
 
-                <TableCell className="max-w-[260px] pr-6">
-                  {orderDeliveries.length > 0 ? (
+                <TableCell className="max-w-[320px] pr-6">
+                  {/* Case 1: Unpaid and still within 30-min window */}
+                  {isUnpaid && !expired ? (
+                    <div className="flex items-center gap-2 py-1">
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          onCompletePayment?.(order.id, Number(order.total))
+                        }
+                        className="h-8 text-xs px-3 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                        Complete Payment
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onCancelOrder?.(order.id)}
+                        title="Cancel this unpaid order"
+                        className="h-8 px-2.5 text-xs text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : isUnpaid && expired ? (
+                    /* Case 2: Unpaid and expired (> 30 mins) */
+                    <div className="flex items-center gap-2 py-1">
+                      <span className="text-xs text-rose-400/80 italic">
+                        Window expired
+                      </span>
+                      {onReorder && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onReorder(order)}
+                          className="h-7 text-xs border-white/10 hover:border-primary/40 text-foreground hover:text-primary"
+                        >
+                          <RotateCcw className="w-3 h-3 mr-1" />
+                          Re-order
+                        </Button>
+                      )}
+                    </div>
+                  ) : orderDeliveries.length > 0 ? (
+                    /* Case 3: Fulfilled deliveries */
                     <div className="text-xs space-y-1.5 py-1">
                       {orderDeliveries.map((delivery) => (
                         <div
@@ -165,7 +255,26 @@ export const DesktopOrderTable = ({
                         <span>Ready to redeem</span>
                       </div>
                     </div>
+                  ) : order.status === "cancelled" ? (
+                    /* Case 4: Cancelled order */
+                    <div className="flex items-center gap-2 py-1">
+                      <span className="text-xs text-muted-foreground italic opacity-70">
+                        {order.final_output || "Cancelled"}
+                      </span>
+                      {onReorder && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onReorder(order)}
+                          className="h-7 text-xs text-muted-foreground hover:text-primary hover:bg-primary/10"
+                        >
+                          <RotateCcw className="w-3 h-3 mr-1" />
+                          Re-order
+                        </Button>
+                      )}
+                    </div>
                   ) : (
+                    /* Case 5: In progress */
                     <div className="text-xs text-muted-foreground italic opacity-60">
                       {order.status === "sourcing"
                         ? "⚡ Sourcing key..."
