@@ -22,12 +22,9 @@ import { ShopHeader } from "@/components/layout";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
-import {
-  updateOrderTransactionId,
-  cancelUnpaidOrder,
-  expireStaleOrders,
-  type Product,
-} from "@/lib/shopApi";
+import { updateOrderTransactionId } from "@/lib/paymentApi";
+import { cancelUnpaidOrder, expireStaleOrders } from "@/lib/orderApi";
+import type { Product } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { isOrderExpired, isOrderUnpaid } from "@/lib/orderPaymentWindow";
 import { PaymentCountdownTimer } from "@/components/orders";

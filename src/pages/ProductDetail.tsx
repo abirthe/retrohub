@@ -13,7 +13,7 @@ import {
   ProductFeatures,
   ProductPurchaseCard,
 } from "@/components/product";
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();

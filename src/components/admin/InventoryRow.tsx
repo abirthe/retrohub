@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { type Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 import { EditProductDialog } from "./EditProductDialog";
 
 export const InventoryRow = ({ product: p }: { product: Product }) => {

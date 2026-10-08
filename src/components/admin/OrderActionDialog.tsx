@@ -21,7 +21,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { fetchOrders } from "@/lib/shopApi";
+import type { fetchOrders } from "@/lib/orderApi";
 
 type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
 

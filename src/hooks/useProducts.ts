@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { fetchStoreProducts } from "@/lib/shopApi";
+import { fetchStoreProducts } from "@/lib/productApi";
 
 interface FilterOptions {
   search?: string;

@@ -19,7 +19,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Edit2, Save, X, Package, User, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { updateProductPrice, type Product } from "@/lib/shopApi";
+import { updateProductPrice } from "@/lib/productApi";
+import type { Product } from "@/lib/types";
 import { InventoryRow } from "./InventoryRow";
 import { getProductEffectiveCategory } from "@/lib/productFilters";
 import { AddProductDialog } from "./AddProductDialog";

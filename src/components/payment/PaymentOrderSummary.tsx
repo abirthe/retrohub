@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Receipt, Zap, ShieldCheck, Lock } from "lucide-react";
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 
 export interface OrderSummaryItem {
   id: string;

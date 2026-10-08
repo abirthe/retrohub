@@ -15,7 +15,7 @@ import {
   Sparkles,
   PlusCircle,
 } from "lucide-react";
-import { submitCustomOrder } from "@/lib/shopApi";
+import { submitCustomOrder } from "@/lib/customOrderApi";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 

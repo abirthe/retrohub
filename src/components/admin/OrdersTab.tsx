@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { generateOrderEmailTemplate } from "@/lib/emailTemplates";
-import type { fetchOrders } from "@/lib/shopApi";
+import type { fetchOrders } from "@/lib/orderApi";
 
 type AdminOrder = NonNullable<Awaited<ReturnType<typeof fetchOrders>>>[number];
 

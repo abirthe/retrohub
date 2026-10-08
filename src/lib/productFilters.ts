@@ -1,4 +1,4 @@
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 import type { SortValue } from "@/lib/constants";
 
 export interface FilterOptions {

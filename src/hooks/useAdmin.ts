@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { checkIsAdmin } from "@/lib/shopApi";
+import { checkIsAdmin } from "@/lib/authApi";
 
 export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { getCartStorageKey, loadCartFromStorage } from "@/lib/cartStorage";
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 
 const mockProduct: Product = {
   id: "prod-123",

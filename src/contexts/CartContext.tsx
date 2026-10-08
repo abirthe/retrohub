@@ -6,7 +6,7 @@ import {
   useRef,
   ReactNode,
 } from "react";
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {

@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchCustomOrders,
   updateCustomOrderStatus,
-  CustomOrderRow,
-} from "@/lib/shopApi";
+} from "@/lib/customOrderApi";
+import type { CustomOrderRow } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {

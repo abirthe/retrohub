@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, Package, TrendingUp, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAdminStats } from "@/lib/shopApi";
+import { fetchAdminStats } from "@/lib/orderApi";
 
 export const AdminStatsGrid = (): React.ReactElement => {
   const { data: adminStats, isLoading } = useQuery({

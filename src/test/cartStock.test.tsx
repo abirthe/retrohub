@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { CartProvider, useCart } from "@/contexts/CartContext";
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 
 const unlimitedDigitalProduct: Product = {
   id: "prod-digital-null-stock",

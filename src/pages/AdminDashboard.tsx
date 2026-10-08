@@ -2,10 +2,9 @@ import { useState, useEffect, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchProducts } from "@/lib/productApi";
 import {
-  fetchProducts,
   fetchOrders,
-  Product,
   fulfillOrder,
   holdOrder,
   cancelOrder,
@@ -13,7 +12,8 @@ import {
   validateOrder,
   startSourcing,
   fetchAdminStats,
-} from "@/lib/shopApi";
+} from "@/lib/orderApi";
+import type { Product } from "@/lib/types";
 import { sendOrderCompletionEmail } from "@/lib/emailService";
 import { sendTelegramNotification } from "@/lib/telegramService";
 import { logger } from "@/lib/logger";

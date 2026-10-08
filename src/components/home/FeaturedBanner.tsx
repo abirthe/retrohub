@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchFeaturedProductIds, fetchProductsByIds } from "@/lib/shopApi";
+import { fetchFeaturedProductIds, fetchProductsByIds } from "@/lib/productApi";
 import ProductCard from "@/components/product/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Percent } from "lucide-react";

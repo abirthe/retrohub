@@ -13,11 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import {
-  updateProductDetails,
-  type Product,
-  type ProductCategory,
-} from "@/lib/shopApi";
+import { updateProductDetails } from "@/lib/productApi";
+import type { Product, ProductCategory } from "@/lib/types";
 import {
   Select,
   SelectContent,

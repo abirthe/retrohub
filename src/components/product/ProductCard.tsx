@@ -1,5 +1,5 @@
 import { startTransition } from "react";
-import type { Product } from "@/lib/shopApi";
+import type { Product } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

@@ -9,7 +9,8 @@ import {
   isOrderExpired,
   getOrderRemainingSeconds,
 } from "@/lib/orderPaymentWindow";
-import { cancelUnpaidOrder, expireStaleOrders, type Order, type Product } from "@/lib/shopApi";
+import { cancelUnpaidOrder, expireStaleOrders } from "@/lib/orderApi";
+import type { Order, Product } from "@/lib/types";
 
 export interface OrderWithProductInfo extends Order {
   products?: (Product & { id: string; title: string; sale_price: number | string }) | null;

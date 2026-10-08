@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnpaidOrders } from "@/hooks/useUnpaidOrders";
-import { createOrder } from "@/lib/shopApi";
+import { createOrder } from "@/lib/orderApi";
 import { Button } from "@/components/ui/button";
 import {
   ShoppingCart,

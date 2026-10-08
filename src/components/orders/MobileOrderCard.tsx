@@ -11,7 +11,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Delivery, Order } from "@/lib/shopApi";
+import type { Delivery, Order } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { isOrderUnpaid, isOrderExpired } from "@/lib/orderPaymentWindow";
 import { PaymentCountdownTimer } from "./PaymentCountdownTimer";

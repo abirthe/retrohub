@@ -4,8 +4,8 @@ import {
   fetchProducts,
   fetchFeaturedProductIds,
   updateFeaturedProductIds,
-  Product,
-} from "@/lib/shopApi";
+} from "@/lib/productApi";
+import type { Product } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
