@@ -35,3 +35,14 @@ This log records major non-obvious engineering decisions and rationale to preser
 * **Context:** RetroHub is deployed on Cloudflare Workers using static asset bindings. Direct browser navigation to client routes (e.g., `/orders`, `/checkout`, `/admin`) required seamless SPA fallbacks.
 * **Decision:** Configured `worker.js` with sliding-window client IP rate limiting (150 req/60s), asset serving via `env.ASSETS`, non-extension pathname rewriting to `/index.html`, and granular HTTP caching headers (`immutable` for hashed assets, `must-revalidate` for HTML).
 * **Impact:** Fast global edge routing, resilience against client reload traps, and sub-20ms edge response times.
+
+---
+
+## ADR-005: Multi-Tier Weighted Relevance Algorithm for Product Search
+* **Date:** 2026-10-09
+* **Context:** The legacy `product_search` RPC relied solely on raw unweighted `pg_trgm` and `ILIKE`. Multi-word queries often failed, in-stock products did not take precedence over sold-out items, and exact title matches were diluted.
+* **Decision:**
+  - Implemented a composite weighted scoring formula (0–100+ pts) across exact match (+50), prefix (+35), substring (+25), platform intent (+20), category match (+15), trigram fuzzy similarity (up to 15), and stock boost (+10 if `in_stock > 0`).
+  - Added [supabase/migrations/20261009000000_upgrade_product_search_scoring.sql](file:///d:/retrohub/supabase/migrations/20261009000000_upgrade_product_search_scoring.sql).
+  - Updated `@/lib/productApi.ts` to preserve RPC relevance ranks across storefront pagination and filters.
+* **Impact:** High-precision search across the storefront and both Telegram bots (`@retrochanbot`, `@Notifyretro_bot`); in-stock items always rank above out-of-stock items on equal relevance.

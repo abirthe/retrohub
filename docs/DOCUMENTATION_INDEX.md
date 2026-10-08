@@ -22,7 +22,7 @@
 ---
 
 ### 2. Backend, Database & Edge Functions
-- **[Backend Database & Supabase Architecture](./supabase/README.md)**
+- **[Backend Database & Supabase Architecture](./supabase/BACKEND_ARCHITECTURE.md)**
   - PostgreSQL 15 schema, tables, foreign keys, and indexes.
   - 36+ versioned database migrations and upgrade sequences.
   - Authoritative financial pricing triggers, stock validation, and role-based access control.
@@ -47,7 +47,7 @@
 ---
 
 ### 3. Tooling & Maintenance Scripts
-- **[Catalog & Tooling Scripts Operations Manual](./scripts/README.md)**
+- **[Catalog & Tooling Scripts Operations Manual](./scripts/CATALOG_TOOLING_MANUAL.md)**
   - Operational guide for the 25+ automated Node.js catalog and database scripts.
   - Batch price scrapers, margin calculators, and regional exchange rate synchronizers.
   - Automated database seeding (Steam, PlayStation, Xbox, Roblox, Valorant, etc.).
@@ -60,9 +60,9 @@
 | Document | Category | Scope |
 | :--- | :--- | :--- |
 | [Merchant System Overview](./MERCHANT_SYSTEM_OVERVIEW.md) | Platform | Core e-commerce capabilities, catalog hierarchy, business model |
-| [Supabase Architecture](./supabase/README.md) | Backend | PostgreSQL schema, RLS policies, migrations, RPCs |
+| [Supabase Architecture](./supabase/BACKEND_ARCHITECTURE.md) | Backend | PostgreSQL schema, RLS policies, migrations, RPCs |
 | [Customer AI Bot](./supabase/functions/customer-bot.md) | Telegram / AI | Customer support bot (@retrochanbot), Grok pipeline |
 | [Admin Webhook Bot](./supabase/functions/telegram-webhook.md) | Telegram | Staff dispatch terminal (@Notifyretro_bot), order triage |
 | [Stripe Checkout](./supabase/functions/create-checkout-session.md) | Payments | Stripe embedded checkout session handler |
-| [Tooling Scripts](./scripts/README.md) | Tooling | Seeding, catalog scripters, stock reconciliation |
+| [Tooling Scripts](./scripts/CATALOG_TOOLING_MANUAL.md) | Tooling | Seeding, catalog scripters, stock reconciliation |
 | [Main Storefront Readme](../README.md) | Repository | Project overview, quickstart, environment setup, deployment |

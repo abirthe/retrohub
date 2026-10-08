@@ -34,7 +34,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
 - **`/inspect` Admin Bot Command**: Registered as an alias for `/order`; `🔍 Inspect` inline button callback now works seamlessly.
 - **Google OAuth-Only Auth**: `Auth.tsx` simplified to one-click Google sign-in, removing legacy email/password UI.
 - **Deployment Chunk Self-Healing**: `vite:preloadError` listener + `lazyWithRetry` + `ErrorBoundary.tsx` prevents infinite reload loops on hashed-chunk deployment.
-- **`supabase/README.md`**: Comprehensive backend reference documenting Edge Functions, security RPCs, migration series, and required secrets.
+- **`docs/supabase/BACKEND_ARCHITECTURE.md`**: Comprehensive backend reference documenting Edge Functions, security RPCs, migration series, and required secrets.
 - **`docs/MERCHANT_SYSTEM_OVERVIEW.md`**: Updated to document Dual Telegram Bot Architecture (Section 8) and expanded Solo Merchant Operational Playbook (Section 10).
 - `supabase/migrations/20260927000002_customer_support_sessions.sql` — Multi-turn support session tracking table with RLS.
 - `supabase/migrations/20260927000003_fix_security_linter_warnings.sql` — Resolved `SECURITY DEFINER` and RLS linter findings.

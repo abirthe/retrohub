@@ -92,6 +92,9 @@ const ShopHeader = () => {
           <img
             src="/images/logo-monogram.jpg"
             alt="RetroHub"
+            width="32"
+            height="32"
+            decoding="async"
             draggable={false}
             className="h-8 w-8 rounded-lg object-cover ring-1 ring-primary/40 shadow-[0_0_12px_rgba(0,240,255,0.25)] transition-all duration-300 pointer-events-none select-none group-hover:scale-105 group-hover:ring-primary group-hover:shadow-[0_0_16px_rgba(0,240,255,0.4)]"
           />

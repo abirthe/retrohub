@@ -61,7 +61,15 @@ export default {
       } else if (headers.get("content-type")?.includes("text/html")) {
         // HTML is served fresh to ensure instant deployment rollouts
         headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+        // Instruct browser to preconnect to Google fonts and static origins
+        headers.set(
+          "Link",
+          "<https://fonts.googleapis.com>; rel=preconnect, <https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        );
       }
+
+      // Security & performance headers
+      headers.set("X-Content-Type-Options", "nosniff");
 
       return new Response(response.body, {
         status: response.status,

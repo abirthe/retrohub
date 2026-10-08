@@ -33,6 +33,7 @@ export async function fetchStoreProducts({
     .from("v_grouped_products")
     .select("*", { count: "exact" });
 
+  let searchIds: string[] = [];
   if (search) {
     interface SearchRpcResult {
       id: string;
@@ -53,13 +54,13 @@ export async function fetchStoreProducts({
       max_results: 200,
     });
     
-    const ids = searchResults ? searchResults.map((s) => s.id) : [];
+    searchIds = searchResults ? searchResults.map((s) => s.id) : [];
     
-    if (ids.length === 0) {
+    if (searchIds.length === 0) {
       // If no matches found by the engine, return empty
       return { products: [], nextPage: undefined, totalCount: 0 };
     }
-    query = query.in("id", ids);
+    query = query.in("id", searchIds);
   }
 
   if (activeCategory === "games") {
@@ -164,15 +165,33 @@ export async function fetchStoreProducts({
   } else if (sort === "name_asc") {
     query = query.order("title", { ascending: true });
   } else {
-    query = query.order("created_at", { ascending: false });
+    // When searching without an explicit sort, prioritize in-stock status then freshness
+    if (search) {
+      query = query.order("in_stock", { ascending: false }).order("created_at", { ascending: false });
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
   }
 
   query = query.range(from, to);
   const { data, error, count } = await query;
   if (error) throw error;
 
+  let products = (data as unknown as Product[]) ?? [];
+
+  // When searching, sort the page results by the RPC search relevance score if default sort
+  if (search && (!sort || sort === "newest") && searchIds.length > 0) {
+    const idRankMap = new Map<string, number>();
+    searchIds.forEach((id, index) => idRankMap.set(id, index));
+    products = [...products].sort((a, b) => {
+      const rankA = idRankMap.get(a.id) ?? 9999;
+      const rankB = idRankMap.get(b.id) ?? 9999;
+      return rankA - rankB;
+    });
+  }
+
   return {
-    products: (data as unknown as Product[]) ?? [],
+    products,
     nextPage: data?.length === PAGE_SIZE ? pageParam + 1 : undefined,
     totalCount: count ?? 0,
   };

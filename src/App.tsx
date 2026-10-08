@@ -8,8 +8,12 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
-import BackgroundAnimation from "@/components/BackgroundAnimation";
 import { Footer } from "@/components/layout";
+
+// Lazy load BackgroundAnimation so the heavy video/hls chunk is non-critical
+const BackgroundAnimation = lazy(
+  () => import("@/components/BackgroundAnimation"),
+);
 
 // Global in-flight reload promise so all simultaneously failing chunks wait together in Suspense
 let chunkReloadPromise: Promise<never> | null = null;
@@ -81,7 +85,15 @@ const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 const Privacy = lazyWithRetry(() => import("./pages/Privacy"));
 const Terms = lazyWithRetry(() => import("./pages/Terms"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute default freshness
+      gcTime: 5 * 60 * 1000, // 5 minutes cache retention
+      refetchOnWindowFocus: false, // Prevents unnecessary re-queries on tab toggles
+    },
+  },
+});
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background/60 backdrop-blur-sm">
@@ -119,7 +131,9 @@ const App = () => {
           <TooltipProvider>
           <div className="relative w-full min-h-screen">
             <div className="fixed inset-0 z-0 pointer-events-none">
-              <BackgroundAnimation />
+              <Suspense fallback={null}>
+                <BackgroundAnimation />
+              </Suspense>
             </div>
             <div className="relative z-10 flex flex-col w-full min-h-screen">
               <Toaster />

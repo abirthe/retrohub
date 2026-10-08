@@ -103,6 +103,10 @@ export const Footer: React.FC = () => {
               <img
                 src="/images/logo-monogram.jpg"
                 alt="RetroHub"
+                width="32"
+                height="32"
+                loading="lazy"
+                decoding="async"
                 className="h-8 w-8 rounded-lg object-cover ring-1 ring-primary/40 shadow-[0_0_12px_rgba(0,240,255,0.25)] transition-all duration-300 group-hover:scale-105"
               />
               <span className="font-display text-xl font-extrabold tracking-wider text-foreground">
