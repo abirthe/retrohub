@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import { AppErrorBoundary } from "@/components/ErrorBoundary";
 import BackgroundAnimation from "@/components/BackgroundAnimation";
@@ -113,8 +114,9 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <TooltipProvider>
+      <AuthProvider>
+        <CartProvider>
+          <TooltipProvider>
           <div className="relative w-full min-h-screen">
             <div className="fixed inset-0 z-0 pointer-events-none">
               <BackgroundAnimation />
@@ -187,6 +189,7 @@ const App = () => {
           </div>
         </TooltipProvider>
       </CartProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

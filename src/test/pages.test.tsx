@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import NotFound from "@/pages/NotFound";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -24,9 +25,11 @@ function renderWithProviders(ui: React.ReactElement, initialEntries = ["/"]) {
   const queryClient = createTestQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+        </CartProvider>
+      </AuthProvider>
     </QueryClientProvider>,
   );
 }
