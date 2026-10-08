@@ -149,6 +149,7 @@ desktop.ini
 .cursor/
 .claude/
 .gemini/
+.agents/
 *.suo
 *.ntvs*
 *.njsproj
