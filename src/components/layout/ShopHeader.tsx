@@ -12,11 +12,13 @@ import {
   Wrench,
   MessageSquare,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,16 +27,50 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { PendingPaymentBanner } from "@/components/orders/PendingPaymentBanner";
+import { isProtectedSignOutRoute } from "@/lib/authUtils";
 
 const ShopHeader = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const isAdminPage = location.pathname.startsWith("/admin");
   const { user, signOut } = useAuth();
   const { totalItems } = useCart();
   const { isAdmin } = useAdmin();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const closeMobile = () => setMobileOpen(false);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    closeMobile();
+    try {
+      await signOut();
+      queryClient.clear();
+      toast({
+        title: "Signed Out",
+        description: "You have been signed out successfully.",
+      });
+
+      // Redirect away from account-specific or protected pages to home
+      if (isProtectedSignOutRoute(location.pathname)) {
+        navigate("/", { replace: true });
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to sign out. Please try again.";
+      toast({
+        title: "Sign Out Error",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const handleHomeClick = () => {
     closeMobile();
@@ -176,11 +212,12 @@ const ShopHeader = () => {
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuItem
-                  onClick={signOut}
-                  className="text-destructive cursor-pointer"
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="text-destructive cursor-pointer focus:text-destructive"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {isSigningOut ? "Signing Out..." : "Sign Out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -345,14 +382,12 @@ const ShopHeader = () => {
                   {user.email}
                 </p>
                 <button
-                  onClick={() => {
-                    signOut();
-                    closeMobile();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide text-destructive hover:bg-destructive/10 transition-colors"
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {isSigningOut ? "Signing Out..." : "Sign Out"}
                 </button>
               </div>
             ) : (
