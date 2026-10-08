@@ -27,6 +27,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { ShopHeader } from "@/components/layout";
 import { useToast } from "@/hooks/use-toast";
@@ -60,7 +61,7 @@ const Payment = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { addToCart, clearCart } = useCart();
   const queryClient = useQueryClient();
 
@@ -117,7 +118,7 @@ const Payment = () => {
 
       return [];
     },
-    enabled: true,
+    enabled: !authLoading && (targetOrderIds.length > 0 || !!user),
   });
 
   const activeOrders = useMemo(() => {
@@ -534,6 +535,11 @@ const Payment = () => {
                       ) : (
                         <StripeCheckout orderIds={effectiveOrderIds} />
                       )
+                    ) : isFetchingOrders || authLoading ? (
+                      <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground text-sm">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <span>Loading order reservation...</span>
+                      </div>
                     ) : (
                       <div className="py-8 text-center text-muted-foreground text-sm">
                         No active order found. Please start from your cart.

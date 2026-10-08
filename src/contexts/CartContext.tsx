@@ -114,12 +114,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = (product: Product, quantity: number = 1) => {
     let result: "stock_error" | "updated" | "added" = "added";
     const availableStock = product.in_stock;
+    const hasLimitedStock =
+      product.in_stock !== null && product.in_stock !== undefined;
 
     setItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
         const newQuantity = existing.quantity + quantity;
-        if (newQuantity > product.in_stock) {
+        if (hasLimitedStock && newQuantity > (product.in_stock ?? 0)) {
           result = "stock_error";
           return prev;
         }
@@ -130,7 +132,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : item,
         );
       }
-      if (quantity > product.in_stock) {
+      if (hasLimitedStock && quantity > (product.in_stock ?? 0)) {
         result = "stock_error";
         return prev;
       }
@@ -176,12 +178,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     let stockError = false;
-    let availableStock = 0;
+    let availableStock: number | null = 0;
 
     setItems((prev) => {
       const item = prev.find((item) => item.product.id === productId);
       if (!item) return prev;
-      if (quantity > item.product.in_stock) {
+      const hasLimitedStock =
+        item.product.in_stock !== null && item.product.in_stock !== undefined;
+      if (hasLimitedStock && quantity > (item.product.in_stock ?? 0)) {
         stockError = true;
         availableStock = item.product.in_stock;
         return prev;

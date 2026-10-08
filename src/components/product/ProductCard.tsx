@@ -125,7 +125,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const handleBuy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (product.in_stock > 0) {
+    if (product.in_stock !== 0) {
       addToCart(product, 1);
     }
   };
