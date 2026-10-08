@@ -17,21 +17,24 @@ import {
   CreditCard,
   Send,
   Sparkles,
-  ShieldCheck,
-  Headphones,
   AlertTriangle,
 } from "lucide-react";
 import { ShopHeader } from "@/components/layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { MobileOrderCard, DesktopOrderTable, PaymentCountdownTimer } from "@/components/orders";
 import {
-  updateOrderTransactionId,
+  MobileOrderCard,
+  DesktopOrderTable,
+  ConsoleFeatureCards,
+  OrdersGuestBanner,
+  OrderFilterTabs,
+  type OrderFilterTab,
+} from "@/components/orders";
+import {
   cancelUnpaidOrder,
   expireStaleOrders,
-  type Order,
-  type Delivery,
-  type Product,
-} from "@/lib/shopApi";
+} from "@/lib/orderApi";
+import { updateOrderTransactionId } from "@/lib/paymentApi";
+import type { Order, Delivery, Product } from "@/lib/types";
 import { isOrderUnpaid, isOrderExpired } from "@/lib/orderPaymentWindow";
 
 const statusStyles: Record<
@@ -121,9 +124,7 @@ const Orders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [filterTab, setFilterTab] = useState<
-    "all" | "unpaid" | "fulfilled" | "active"
-  >("all");
+  const [filterTab, setFilterTab] = useState<OrderFilterTab>("all");
 
   const sessionId = searchParams.get("session_id");
   const orderIdsParam = searchParams.get("order_ids");
@@ -248,14 +249,17 @@ const Orders = () => {
     if (filterTab === "unpaid") {
       return isOrderUnpaid(order) && !isOrderExpired(order.created_at);
     }
-    if (filterTab === "fulfilled") return order.status === "fulfilled";
-    if (filterTab === "active")
+    if (filterTab === "fulfilled") {
+      return order.status === "fulfilled";
+    }
+    if (filterTab === "active") {
       return order.status !== "fulfilled" && order.status !== "cancelled";
+    }
     return true;
   });
 
   return (
-    <div className="min-h-screen selection:bg-primary/20 pb-16">
+    <div className="min-h-screen">
       <ShopHeader />
 
       <div className="container py-8 max-w-6xl">
@@ -298,50 +302,7 @@ const Orders = () => {
         </div>
 
         {/* Support Banner & Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-card/40 backdrop-blur-xl border-white/5 p-4 flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-              <Headphones className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-display text-xs font-bold text-foreground tracking-wide">
-                24/7 Live Triage
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Instant self-service on Telegram or human agent escalation
-              </p>
-            </div>
-          </Card>
-
-          <Card className="bg-card/40 backdrop-blur-xl border-white/5 p-4 flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center text-success shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-display text-xs font-bold text-foreground tracking-wide">
-                Verified Fulfillment
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Genuine global & regional licenses directly from authorized
-                distros
-              </p>
-            </div>
-          </Card>
-
-          <Card className="bg-card/40 backdrop-blur-xl border-white/5 p-4 flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
-              <Package className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-display text-xs font-bold text-foreground tracking-wide">
-                Instant Key Locker
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Permanent access to your redeemed credentials & activation keys
-              </p>
-            </div>
-          </Card>
-        </div>
+        <ConsoleFeatureCards />
 
         {/* Logged-In User Order History */}
         {user ? (
@@ -382,65 +343,20 @@ const Orders = () => {
             )}
 
             {/* Filter Tabs */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-2 overflow-x-auto">
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant={filterTab === "all" ? "default" : "ghost"}
-                  onClick={() => setFilterTab("all")}
-                  className={
-                    filterTab === "all"
-                      ? "gradient-primary text-xs"
-                      : "text-xs text-muted-foreground hover:text-white"
-                  }
-                >
-                  All ({orders?.length || 0})
-                </Button>
-                {unpaidActiveOrders.length > 0 && (
-                  <Button
-                    size="sm"
-                    variant={filterTab === "unpaid" ? "default" : "ghost"}
-                    onClick={() => setFilterTab("unpaid")}
-                    className={
-                      filterTab === "unpaid"
-                        ? "bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs"
-                        : "text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
-                    }
-                  >
-                    Awaiting Payment ({unpaidActiveOrders.length})
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant={filterTab === "active" ? "default" : "ghost"}
-                  onClick={() => setFilterTab("active")}
-                  className={
-                    filterTab === "active"
-                      ? "gradient-primary text-xs"
-                      : "text-xs text-muted-foreground hover:text-white"
-                  }
-                >
-                  In Progress (
-                  {orders?.filter(
-                    (o) => o.status !== "fulfilled" && o.status !== "cancelled",
-                  ).length || 0}
-                  )
-                </Button>
-                <Button
-                  size="sm"
-                  variant={filterTab === "fulfilled" ? "default" : "ghost"}
-                  onClick={() => setFilterTab("fulfilled")}
-                  className={
-                    filterTab === "fulfilled"
-                      ? "gradient-primary text-xs"
-                      : "text-xs text-muted-foreground hover:text-white"
-                  }
-                >
-                  Delivered (
-                  {orders?.filter((o) => o.status === "fulfilled").length || 0})
-                </Button>
-              </div>
-            </div>
+            <OrderFilterTabs
+              filterTab={filterTab}
+              onSelectTab={setFilterTab}
+              totalCount={orders?.length || 0}
+              unpaidCount={unpaidActiveOrders.length}
+              inProgressCount={
+                orders?.filter(
+                  (o) => o.status !== "fulfilled" && o.status !== "cancelled",
+                ).length || 0
+              }
+              fulfilledCount={
+                orders?.filter((o) => o.status === "fulfilled").length || 0
+              }
+            />
 
             {isLoading ? (
               <div className="space-y-3">
@@ -515,22 +431,9 @@ const Orders = () => {
             )}
           </div>
         ) : (
-          /* Non-logged in banner */
-          <Card className="bg-card/30 backdrop-blur border-white/5 p-8 text-center space-y-4">
-            <p className="font-display text-lg text-foreground tracking-wide">
-              Sign in to automatically sync and access all your past orders
-            </p>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Link your Google Account to manage purchases, get automatic
-              delivery updates, and open customer support tickets with one tap.
-            </p>
-            <Button
-              onClick={() => navigate("/auth", { state: { from: "/orders" } })}
-              className="gradient-primary font-display text-xs tracking-wider shadow-lg shadow-primary/20"
-            >
-              Sign In with Google
-            </Button>
-          </Card>
+          <OrdersGuestBanner
+            onSignIn={() => navigate("/auth", { state: { from: "/orders" } })}
+          />
         )}
       </div>
     </div>
