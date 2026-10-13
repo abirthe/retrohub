@@ -28,6 +28,29 @@ export const ProductFeatures = ({ product }: ProductFeaturesProps) => {
               return true;
             })
             .map((cleanLine, i) => {
+              // 0. Special Rental Trust Policy Banner
+              if (
+                cleanLine.toUpperCase().includes("FIRST LOGIN") &&
+                cleanLine.toUpperCase().includes("PAYMENT")
+              ) {
+                return (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3 my-2 shadow-lg backdrop-blur-sm"
+                  >
+                    <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-emerald-300 font-bold text-sm tracking-wide flex items-center gap-2">
+                        FIRST LOGIN, THEN PAYMENT POLICY
+                      </p>
+                      <p className="text-emerald-400/90 text-xs mt-0.5 leading-relaxed">
+                        You receive credentials first. Log in on your Xbox console, verify game library downloads, and then complete payment!
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
+
               // 1. Markdown Headings (e.g. ### ⚡ Title, #### 🛡️ Highlights)
               if (cleanLine.startsWith("#")) {
                 const headingText = cleanLine

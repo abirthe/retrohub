@@ -7,7 +7,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Versions fo
 
 ## [Unreleased]
 
----
+### Added
+
+- **Xbox Game Accounts for Rent Category (`rent`)**:
+  - Full support for console account rentals under the **Rent** category with dedicated emerald glow styling and `KeyRound` iconography.
+  - Initial catalog seeded with **6 Xbox Game Accounts** (including 15-day and 30-day rental tiers for Accounts 1 & 2, 30-day tiers for Accounts 3–6, including the 14-game pack and 44-game Ultimate Vault).
+  - Prominent **"\*FIRST LOGIN, THEN PAYMENT"** trust banner in `Index.tsx`, `ProductCard.tsx`, `ProductPurchaseCard.tsx`, and `ProductFeatures.tsx`, reassuring customers they can log into their console and test game downloads before payment.
+- **Admin Control & Future Rental Product Management**:
+  - **Inventory Tab**: Dedicated "Game Rent" category bucket with live product count, instant price editing, stock adjustments, and search filtering.
+  - **Add Product Dialog**: Added `rent` category selection and a 1-click **"✨ Insert Rental Template"** helper button that pre-populates standardized rental policy, game list structure, rental duration, and console instructions.
+  - **Edit Product Dialog**: Category selection updated with `rent` support for managing existing inventory.
+- **Automated Test Coverage**:
+  - Added `src/test/rentProducts.test.ts` with 5 unit tests validating category resolution, subcategory assignment, variant deduplication, and rental policy parsing. All 52 Vitest tests passing.
 
 ## [1.3.0] — 2026-09-28
 

@@ -17,7 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { Edit2, Save, X, Package, User, Search } from "lucide-react";
+import { Edit2, Save, X, Package, User, Search, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateProductPrice } from "@/lib/productApi";
 import type { Product } from "@/lib/types";
@@ -32,7 +32,7 @@ interface InventoryTabProps {
 const STANDARD_CATEGORIES: Array<{
   key: string;
   label: string;
-  iconType: "package" | "user";
+  iconType: "package" | "user" | "key";
 }> = [
   { key: "giftcard", label: "Giftcard", iconType: "package" },
   { key: "service", label: "Service", iconType: "package" },
@@ -42,6 +42,7 @@ const STANDARD_CATEGORIES: Array<{
   { key: "software", label: "Software", iconType: "package" },
   { key: "xbox_game", label: "Xbox Game", iconType: "package" },
   { key: "ps_game", label: "PS Game", iconType: "package" },
+  { key: "rent", label: "Game Rent", iconType: "key" },
   { key: "accounts", label: "Accounts", iconType: "user" },
 ];
 
@@ -52,6 +53,14 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
   const getLimit = (key: string) => limits[key] || 50;
   const loadMore = (key: string) =>
     setLimits((prev) => ({ ...prev, [key]: getLimit(key) + 50 }));
+  const isRentProduct = (p: Product): boolean => {
+    const rawCat = p.category?.toLowerCase() || "";
+    if (rawCat === "rent") return true;
+    const titleLower = (p.title || "").toLowerCase();
+    if (titleLower.includes("rent")) return true;
+    return getProductEffectiveCategory(p) === "rent";
+  };
+
   const isAccountProduct = (p: Product): boolean => {
     const rawCat = p.category?.toLowerCase() || "";
     if (rawCat === "accounts" || rawCat === "account") return true;
@@ -75,7 +84,9 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
   });
 
   filteredProducts.forEach((product) => {
-    if (isAccountProduct(product)) {
+    if (isRentProduct(product)) {
+      categoryBuckets["rent"].push(product);
+    } else if (isAccountProduct(product)) {
       categoryBuckets["accounts"].push(product);
     } else {
       const cat = product.category || "other";
@@ -97,7 +108,9 @@ const InventoryTab = ({ products }: InventoryTabProps) => {
       label,
       items: categoryBuckets[key] || [],
       icon:
-        iconType === "user" ? (
+        iconType === "key" ? (
+          <KeyRound className="h-5 w-5 text-emerald-400" />
+        ) : iconType === "user" ? (
           <User className="h-5 w-5 text-teal-400" />
         ) : (
           <Package className="h-5 w-5 text-primary" />

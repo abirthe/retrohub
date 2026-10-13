@@ -1,4 +1,4 @@
-import { ShoppingCart, Zap, Globe, Bot } from "lucide-react";
+import { ShoppingCart, Zap, Globe, Bot, ShieldCheck, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ export interface ProductPurchaseCardProps {
     delivery_type: string;
     in_stock: number;
     sale_price: number;
+    category?: string;
   };
   variants?: Array<{
     id: string;
@@ -48,6 +49,9 @@ export const ProductPurchaseCard = ({
   const baseName = product.title.includes(" | ")
     ? product.title.split(" | ")[0]
     : product.title;
+  const isRent =
+    product.category === "rent" ||
+    product.title.toLowerCase().includes("rent");
 
   return (
     <div className="bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 lg:p-8 shadow-2xl shadow-black/20 relative overflow-hidden">
@@ -84,7 +88,26 @@ export const ProductPurchaseCard = ({
           <span className="font-display text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
             {Number(product.sale_price).toFixed(2)}
           </span>
+          {isRent && (
+            <span className="text-xs uppercase tracking-wider text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              Rental Access
+            </span>
+          )}
         </div>
+
+        {isRent && (
+          <div className="flex items-start gap-2.5 bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl text-emerald-300 text-xs shadow-inner">
+            <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+            <div className="space-y-0.5">
+              <p className="font-bold text-emerald-300 tracking-wide">
+                *FIRST LOGIN, THEN PAYMENT
+              </p>
+              <p className="text-emerald-300/80 text-[11px] leading-relaxed">
+                Log in and verify the game access on your Xbox console first before completing payment.
+              </p>
+            </div>
+          </div>
+        )}
 
         <Separator className="bg-white/5" />
 
@@ -195,8 +218,17 @@ export const ProductPurchaseCard = ({
               className="w-full h-14 gradient-primary font-display text-base tracking-wider gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
               size="lg"
             >
-              <ShoppingCart className="h-5 w-5" />
-              {product.in_stock === 1 ? "Buy Now - Last One!" : "Add to Cart"}
+              {isRent ? (
+                <>
+                  <KeyRound className="h-5 w-5" />
+                  <span>Rent Account Now</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-5 w-5" />
+                  <span>{product.in_stock === 1 ? "Buy Now - Last One!" : "Add to Cart"}</span>
+                </>
+              )}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
               By purchasing, you agree to our Terms of Service.

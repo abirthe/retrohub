@@ -13,6 +13,8 @@ import {
   Repeat,
   Wrench,
   Gift,
+  KeyRound,
+  ShieldCheck,
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
@@ -97,6 +99,13 @@ const CATEGORY_META: Record<string, CategoryMeta> = {
     badge: "bg-pink-500/10 text-pink-400 border-pink-500/20",
     glow: "group-hover:shadow-[0_0_40px_-10px_rgba(236,72,153,0.4)]",
     imgBg: "from-pink-900/20",
+  },
+  rent: {
+    label: "Account Rent",
+    icon: KeyRound,
+    badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    glow: "group-hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.4)]",
+    imgBg: "from-emerald-950/40",
   },
 };
 
@@ -235,6 +244,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
               ? product.title.split(" | ")[0]
               : product.title}
           </h3>
+          {effectiveCat === "rent" && (
+            <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 w-fit">
+              <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span className="font-semibold tracking-wide">1st Login, Then Pay</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/5 gap-2">

@@ -174,6 +174,7 @@ export const EditProductDialog = ({
                   <SelectItem value="software">Software</SelectItem>
                   <SelectItem value="service">Service</SelectItem>
                   <SelectItem value="accounts">Accounts</SelectItem>
+                  <SelectItem value="rent">Game Rent / Rentals</SelectItem>
                 </SelectContent>
               </Select>
             </div>

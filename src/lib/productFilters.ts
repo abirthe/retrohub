@@ -91,6 +91,17 @@ export function getProductEffectiveCategory(p: Product): string {
     return "service";
   }
 
+  // 4b. Rent detection (Game Accounts for Rent)
+  if (
+    p.category === "rent" ||
+    titleLower.includes("for rent") ||
+    titleLower.includes("account rent") ||
+    titleLower.includes("rent account") ||
+    titleLower.includes("game account rent")
+  ) {
+    return "rent";
+  }
+
   // 5. Account detection (strictly game accounts; ignore keys/codes that mention "full access")
   // Note: uses regex word boundaries so "Turkey" does not match "key"
   const isKey =
@@ -243,6 +254,13 @@ export function getProductEffectiveSubcategory(
       return "sub_ea";
     }
     return "sub_others";
+  }
+
+  if (effCategory === "rent") {
+    if (platLower.includes("xbox") || titleLower.includes("xbox")) {
+      return "rent_xbox";
+    }
+    return "rent_all";
   }
 
   return null;

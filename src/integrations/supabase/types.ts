@@ -532,7 +532,8 @@ export type Database = {
         | "ps_game"
         | "software"
         | "service"
-        | "accounts";
+        | "accounts"
+        | "rent";
       region_tag:
         | "GLOBAL"
         | "US"
@@ -726,6 +727,7 @@ export const Constants = {
         "software",
         "service",
         "accounts",
+        "rent",
       ],
       region_tag: [
         "GLOBAL",

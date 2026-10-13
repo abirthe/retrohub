@@ -12,6 +12,8 @@ import { useProducts } from "@/hooks/useProducts";
 import { CATEGORIES } from "@/lib/constants";
 import type { SortValue } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -160,6 +162,31 @@ const Index = () => {
         {/* Products Grid */}
         <div className="space-y-4 min-h-[500px]">
           <FeaturedBanner />
+
+          {activeCategory === "rent" && (
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-950/60 via-card/90 to-emerald-950/60 border border-emerald-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md">
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-emerald-500 text-black font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5">
+                      Verified Trust Policy
+                    </Badge>
+                    <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      100% Risk-Free Guarantee
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-display font-bold text-white tracking-wide">
+                    XBOX GAME ACCOUNTS FOR RENT — FIRST LOGIN, THEN PAYMENT
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                    Log in on your Xbox console first, check the games and start downloads. Complete your payment only after you have confirmed access! Flexible 15-day and 30-day rental tiers available.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xl font-display font-bold tracking-wide text-white flex items-center gap-2">

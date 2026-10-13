@@ -144,10 +144,17 @@ export async function fetchStoreProducts({
         .not("title", "ilike", "%playstation plus%")
         .not("title", "ilike", "%ea play%");
     }
+  } else if (activeCategory === "rent") {
+    query = query.or("category.eq.rent,title.ilike.%rent%");
+    if (activeSubcategory === "rent_xbox") {
+      query = query.or("platform.ilike.%xbox%,title.ilike.%xbox%");
+    }
   } else if (activeCategory === "accounts") {
     query = query
-      .in("category", ["pc_game", "xbox_game", "ps_game"])
-      .ilike("title", "%account%");
+      .in("category", ["pc_game", "xbox_game", "ps_game", "accounts"])
+      .ilike("title", "%account%")
+      .not("category", "eq", "rent")
+      .not("title", "ilike", "%rent%");
   } else if (activeCategory === "topup") {
     query = query.eq("category", "topup");
   } else if (activeCategory === "service") {

@@ -8,6 +8,7 @@ import {
   Zap,
   Monitor,
   Wrench,
+  KeyRound,
 } from "lucide-react";
 
 export interface CategoryDef {
@@ -31,6 +32,16 @@ export const CATEGORIES: CategoryDef[] = [
       { label: "Steam", value: "games_steam" },
       { label: "GOG", value: "games_gog" },
       { label: "Others", value: "games_others" },
+    ],
+  },
+  {
+    label: "Rent",
+    value: "rent",
+    icon: KeyRound,
+    color: "text-emerald-400",
+    subcategories: [
+      { label: "All Rentals", value: "rent_all" },
+      { label: "Xbox", value: "rent_xbox" },
     ],
   },
   {

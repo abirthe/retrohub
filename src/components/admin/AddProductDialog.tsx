@@ -150,18 +150,36 @@ export const AddProductDialog = () => {
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label
-                htmlFor="new-description"
-                className="text-xs uppercase tracking-wider text-muted-foreground"
-              >
-                Description
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="new-description"
+                  className="text-xs uppercase tracking-wider text-muted-foreground"
+                >
+                  Description
+                </Label>
+                {category === "rent" && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-[11px] text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 px-2 py-0"
+                    onClick={() => {
+                      setDescription(
+                        `### 🛡️ RENTAL POLICY\n*FIRST LOGIN, THEN PAYMENT.\n✅ Verify credentials on your Xbox console first.\n✅ Test games and download before completing payment.\n\n### 🎮 INCLUDED GAMES\n1. Game Title Here\n\n### ⏱️ RENTAL DURATION\n- 30 Days Full Access\n\n### 📋 HOW IT WORKS\n1. Place order or request login credentials\n2. Sign in to your Xbox console\n3. Confirm everything works smoothly\n4. Complete payment to activate your rental period`
+                      );
+                      if (!platform) setPlatform("Xbox");
+                    }}
+                  >
+                    ✨ Insert Rental Template
+                  </Button>
+                )}
+              </div>
               <Textarea
                 id="new-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="bg-black/20 border-white/10"
-                rows={3}
+                rows={category === "rent" ? 6 : 3}
                 placeholder="Optional description..."
               />
             </div>
@@ -190,6 +208,7 @@ export const AddProductDialog = () => {
                   <SelectItem value="software">Software</SelectItem>
                   <SelectItem value="service">Service</SelectItem>
                   <SelectItem value="accounts">Accounts</SelectItem>
+                  <SelectItem value="rent">Game Rent / Rentals</SelectItem>
                 </SelectContent>
               </Select>
             </div>
