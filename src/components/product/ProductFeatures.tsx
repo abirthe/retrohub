@@ -1,4 +1,4 @@
-import { Zap, Clock, Star } from "lucide-react";
+import { ShieldCheck, Zap, Clock, Star } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export interface ProductFeaturesProps {
