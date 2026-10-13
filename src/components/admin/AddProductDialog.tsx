@@ -165,7 +165,7 @@ export const AddProductDialog = () => {
                     className="h-6 text-[11px] text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 px-2 py-0"
                     onClick={() => {
                       setDescription(
-                        `### 🛡️ RENTAL POLICY\n*FIRST LOGIN, THEN PAYMENT.\n✅ Verify credentials on your Xbox console first.\n✅ Test games and download before completing payment.\n\n### 🎮 INCLUDED GAMES\n1. Game Title Here\n\n### ⏱️ RENTAL DURATION\n- 30 Days Full Access\n\n### 📋 HOW IT WORKS\n1. Place order or request login credentials\n2. Sign in to your Xbox console\n3. Confirm everything works smoothly\n4. Complete payment to activate your rental period`
+                        `### 🎮 INCLUDED GAMES\n1. Game Title Here\n\n### ⏱️ RENTAL DURATION\n- 30 Days Full Access\n\n### 📋 HOW IT WORKS\n1. Complete your order\n2. Receive Xbox console account credentials\n3. Enjoy access during your rental period`
                       );
                       if (!platform) setPlatform("Xbox");
                     }}

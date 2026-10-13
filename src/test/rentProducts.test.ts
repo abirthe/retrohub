@@ -28,7 +28,7 @@ describe("Rent Category & Product Filter Logic", () => {
       region: "GLOBAL",
       in_stock: 10,
       is_active: true,
-      description: "*FIRST LOGIN, THEN PAYMENT.",
+      description: "Xbox Game Account Rental",
       image_url: null,
       created_at: null,
       updated_at: null,

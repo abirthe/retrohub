@@ -1,4 +1,4 @@
-import { ShoppingCart, Zap, Globe, Bot, ShieldCheck, KeyRound } from "lucide-react";
+import { ShoppingCart, Zap, Globe, Bot, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,20 +94,6 @@ export const ProductPurchaseCard = ({
             </span>
           )}
         </div>
-
-        {isRent && (
-          <div className="flex items-start gap-2.5 bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl text-emerald-300 text-xs shadow-inner">
-            <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
-            <div className="space-y-0.5">
-              <p className="font-bold text-emerald-300 tracking-wide">
-                *FIRST LOGIN, THEN PAYMENT
-              </p>
-              <p className="text-emerald-300/80 text-[11px] leading-relaxed">
-                Log in and verify the game access on your Xbox console first before completing payment.
-              </p>
-            </div>
-          </div>
-        )}
 
         <Separator className="bg-white/5" />
 
