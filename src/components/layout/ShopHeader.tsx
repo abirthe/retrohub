@@ -10,6 +10,7 @@ import {
   Sparkles,
   Zap,
   Wrench,
+  KeyRound,
   MessageSquare,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -136,6 +137,24 @@ const ShopHeader = () => {
             >
               <Zap className="h-3.5 w-3.5 mr-1.5 text-yellow-400" />
               Top-Up
+            </Button>
+          </Link>
+          <Link to="/?category=rent">
+            <Button
+              variant={
+                location.search.includes("category=rent")
+                  ? "default"
+                  : "ghost"
+              }
+              size="sm"
+              className={
+                location.search.includes("category=rent")
+                  ? "gradient-primary font-display text-xs tracking-wider"
+                  : "font-display text-xs tracking-wider text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+              }
+            >
+              <KeyRound className="h-3.5 w-3.5 mr-1.5 text-emerald-400" />
+              Game Rent
             </Button>
           </Link>
           <Link to="/?category=service">
@@ -321,6 +340,20 @@ const ShopHeader = () => {
           >
             <Zap className="h-4 w-4 text-yellow-400" />
             Top-Up
+          </Link>
+
+          <Link
+            to="/?category=rent"
+            onClick={closeMobile}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display tracking-wide transition-colors",
+              location.search.includes("category=rent")
+                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+            )}
+          >
+            <KeyRound className="h-4 w-4 text-emerald-400" />
+            Game Rent
           </Link>
 
           <Link

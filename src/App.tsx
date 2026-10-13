@@ -158,6 +158,14 @@ const App = () => {
                           element={<Navigate to="/" replace />}
                         />
                         <Route
+                          path="/rent"
+                          element={<Navigate to="/?category=rent" replace />}
+                        />
+                        <Route
+                          path="/rentals"
+                          element={<Navigate to="/?category=rent" replace />}
+                        />
+                        <Route
                           path="/cart"
                           element={<Navigate to="/checkout" replace />}
                         />

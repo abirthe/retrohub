@@ -150,6 +150,14 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
+                  to="/?category=rent"
+                  className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
+                >
+                  Game Rent (Xbox)
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/?category=topup"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
