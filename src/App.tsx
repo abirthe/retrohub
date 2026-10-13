@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,7 +21,7 @@ let chunkReloadPromise: Promise<never> | null = null;
 const handleChunkFailure = (error: unknown): Promise<never> => {
   const msg = error instanceof Error ? error.message : String(error);
   const isChunkError =
-    /failed to fetch dynamically imported module|importing a module script failed|Chunk loaded without default export|undefined \(reading 'default'\)|Cannot read properties of undefined/i.test(
+    /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module/i.test(
       msg,
     );
 
@@ -46,11 +46,8 @@ const handleChunkFailure = (error: unknown): Promise<never> => {
     return chunkReloadPromise;
   }
 
-  // If chunk error occurred right after reload, wait silently rather than flashing an error card
-  if (isChunkError) {
-    return new Promise(() => {});
-  }
-
+  // Never return an unresolved hanging promise that traps Suspense in an infinite loading spinner.
+  // Throwing allows AppErrorBoundary to catch the error and present a recovery UI.
   throw error;
 };
 
@@ -95,11 +92,35 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background/60 backdrop-blur-sm">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-  </div>
-);
+const PageLoader = () => {
+  const [showRecovery, setShowRecovery] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowRecovery(true), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm p-4 text-center gap-3">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      {showRecovery && (
+        <div className="space-y-2 animate-in fade-in duration-300">
+          <p className="text-xs text-muted-foreground">Loading is taking longer than usual...</p>
+          <button
+            type="button"
+            onClick={() => {
+              window.sessionStorage.clear();
+              window.location.reload();
+            }}
+            className="text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors font-medium cursor-pointer"
+          >
+            Refresh Page
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const App = () => {
   useEffect(() => {

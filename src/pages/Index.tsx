@@ -1,6 +1,6 @@
 import { useState, useEffect, startTransition } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ProductCard } from "@/components/product";
+import ProductCard from "@/components/product/ProductCard";
 import { ShopHeader } from "@/components/layout";
 import {
   HeroSection,
