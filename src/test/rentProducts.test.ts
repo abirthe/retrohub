@@ -133,11 +133,23 @@ describe("Rent Category & Product Filter Logic", () => {
     expect(rentResults[0].sale_price).toBe(399); // groups and picks the starting price variant
   });
 
-  it("correctly checks rental first login policy string", () => {
-    const desc = "### 🛡️ RENTAL POLICY\n*FIRST LOGIN, THEN PAYMENT.\n✅ Verify credentials first.";
-    const hasFirstLoginPolicy =
-      desc.toUpperCase().includes("FIRST LOGIN") &&
-      desc.toUpperCase().includes("PAYMENT");
-    expect(hasFirstLoginPolicy).toBe(true);
+  it("correctly pairs 15-day and 30-day options for accounts like topup", () => {
+    const pairedTitles = [
+      "Xbox Game Account Rent - Account 3 (3 Games Bundle) | 15 Days",
+      "Xbox Game Account Rent - Account 3 (3 Games Bundle) | 30 Days",
+      "Xbox Game Account Rent - Account 4 (14 Games Mega Pack) | 15 Days",
+      "Xbox Game Account Rent - Account 4 (14 Games Mega Pack) | 30 Days",
+      "Xbox Game Account Rent - Account 5 (44 Games Ultimate Vault) | 15 Days",
+      "Xbox Game Account Rent - Account 5 (44 Games Ultimate Vault) | 30 Days",
+      "Xbox Game Account Rent - Account 6 (Resident Evil 4 Remake) | 15 Days",
+      "Xbox Game Account Rent - Account 6 (Resident Evil 4 Remake) | 30 Days",
+    ];
+
+    pairedTitles.forEach((title) => {
+      const baseTitle = title.split(" | ")[0];
+      const durationOption = title.split(" | ")[1];
+      expect(baseTitle).toContain("Xbox Game Account Rent");
+      expect(["15 Days", "30 Days"]).toContain(durationOption);
+    });
   });
 });

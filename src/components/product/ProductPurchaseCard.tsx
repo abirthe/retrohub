@@ -114,8 +114,22 @@ export const ProductPurchaseCard = ({
         <div className="space-y-6">
           {hasVariants && (
             <div className="space-y-3">
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                Select Option
+              <Label
+                className={cn(
+                  "text-xs uppercase tracking-widest",
+                  isRent
+                    ? "text-emerald-400 font-bold flex items-center gap-1.5"
+                    : "text-muted-foreground",
+                )}
+              >
+                {isRent ? (
+                  <>
+                    <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Select Rental Duration</span>
+                  </>
+                ) : (
+                  "Select Option"
+                )}
               </Label>
               <div className="grid grid-cols-2 gap-2">
                 {variants.map((v) => {
@@ -136,8 +150,12 @@ export const ProductPurchaseCard = ({
                       className={cn(
                         "h-auto py-2.5 px-3 justify-start font-display text-sm whitespace-normal text-left h-full transition-all duration-300",
                         isSelected
-                          ? "bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
-                          : "border-white/10 text-muted-foreground hover:border-primary/50 hover:text-white bg-background/50 hover:bg-white/5",
+                          ? isRent
+                            ? "bg-emerald-500 text-black border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.35)] font-bold hover:bg-emerald-400"
+                            : "bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
+                          : isRent
+                            ? "border-emerald-500/20 text-emerald-300/80 hover:border-emerald-500/50 hover:text-emerald-200 bg-emerald-950/20 hover:bg-emerald-950/40"
+                            : "border-white/10 text-muted-foreground hover:border-primary/50 hover:text-white bg-background/50 hover:bg-white/5",
                       )}
                     >
                       <div className="flex flex-col items-start gap-1 w-full">
@@ -147,7 +165,11 @@ export const ProductPurchaseCard = ({
                         <span
                           className={cn(
                             "text-xs font-mono",
-                            isSelected ? "opacity-90" : "opacity-70",
+                            isSelected
+                              ? isRent
+                                ? "text-black/90 font-bold"
+                                : "opacity-90"
+                              : "opacity-70",
                           )}
                         >
                           ৳{Number(v.sale_price).toFixed(0)}
